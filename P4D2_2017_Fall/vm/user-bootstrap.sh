@@ -14,7 +14,7 @@ GRPC_COMMIT="tags/v1.3.0"
 NUM_CORES=`grep -c ^processor /proc/cpuinfo`
 
 # Mininet
-git clone git://github.com/mininet/mininet mininet
+git clone https://github.com/mininet/mininet.git
 cd mininet
 sudo ./util/install.sh -nwv
 cd ..
@@ -126,7 +126,7 @@ cd .vim
 mkdir ftdetect
 mkdir syntax
 echo "au BufRead,BufNewFile *.p4      set filetype=p4" >> ftdetect/p4.vim
-echo "set bg=dark" >> /home/p4/.vimrc
+echo "set bg=dark" | sudo tee --append /home/p4/.vimrc
 cp /home/vagrant/p4.vim syntax/p4.vim
 cd /home/vagrant
 sudo mv .vim /home/p4/.vim
