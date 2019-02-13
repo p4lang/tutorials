@@ -32,7 +32,7 @@ up a switch in Mininet to test its behavior.
 
 1. In your shell, run:
    ```bash
-   make run
+   make
    ```
    This will:
    * compile `basic.p4`, and
@@ -79,14 +79,14 @@ the control plane as part of the rule.
 
 In this exercise, we have already implemented the the control plane
 logic for you. As part of bringing up the Mininet instance, the
-`make run` command will install packet-processing rules in the tables of
+`make` command will install packet-processing rules in the tables of
 each switch. These are defined in the `sX-runtime.json` files, where
 `X` corresponds to the switch number.
 
 **Important:** We use P4Runtime to install the control plane rules. The
 content of files `sX-runtime.json` refer to specific names of tables, keys, and
 actions, as defined in the P4Info file produced by the compiler (look for the
-file `build/basic.p4info` after executing `make run`). Any changes in the P4
+file `build/basic.p4info` after executing `make`). Any changes in the P4
 program that add or rename tables, keys, or actions will need to be reflected in
 these `sX-runtime.json` files.
 
@@ -141,12 +141,12 @@ Other questions to consider:
 
 There are several problems that might manifest as you develop your program:
 
-1. `basic.p4` might fail to compile. In this case, `make run` will
+1. `basic.p4` might fail to compile. In this case, `make` will
 report the error emitted from the compiler and halt.
 
 2. `basic.p4` might compile but fail to support the control plane
 rules in the `s1-runtime.json` through `s3-runtime.json` files that
-`make run` tries to install using P4Runtime. In this case, `make run` will
+`make` tries to install using P4Runtime. In this case, `make` will
 report errors if control plane rules cannot be installed. Use these error
 messages to fix your `basic.p4` implementation.
 
@@ -158,7 +158,7 @@ detailed and can help pinpoint logic errors in your implementation.
 
 #### Cleaning up Mininet
 
-In the latter two cases above, `make run` may leave a Mininet instance
+In the latter two cases above, `make` may leave a Mininet instance
 running in the background. Use the following command to clean up
 these instances:
 
