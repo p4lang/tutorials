@@ -21,9 +21,8 @@ Vagrant.configure(2) do |config|
   end
   config.vm.synced_folder '.', '/vagrant', disabled: true  
   config.vm.hostname = "p4"
-  config.vm.provision "file", source: "p4-logo.png",   destination: "/home/vagrant/p4-logo.png"
-  config.vm.provision "file", source: "p4_16-mode.el", destination: "/home/vagrant/p4_16-mode.el"
-  config.vm.provision "file", source: "p4.vim",        destination: "/home/vagrant/p4.vim"
-  config.vm.provision "shell", path: "root-bootstrap.sh"
-  config.vm.provision "shell", privileged: false, path: "user-bootstrap.sh"
+  config.vm.provision "file", source: "p4-logo.png",   destination: "~/p4-logo.png"
+  config.vm.provision "file", source: "p4_16-mode.el", destination: "~/p4_16-mode.el"
+  config.vm.provision "file", source: "p4.vim",        destination: "~/p4.vim"
+  config.vm.provision "shell", path: "install.sh"
 end
