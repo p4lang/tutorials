@@ -27,7 +27,6 @@ from netstat import check_listening_on_port
 class P4RuntimeSwitch(P4Switch):
     "BMv2 switch with gRPC support"
     next_grpc_port = 50051
-    next_thrift_port = 9090
 
     def __init__(self, name, sw_path = None, json_path = None,
                  grpc_port = None,
@@ -63,8 +62,8 @@ class P4RuntimeSwitch(P4Switch):
         if thrift_port is not None:
             self.thrift_port = thrift_port
         else:
-            self.thrift_port = P4RuntimeSwitch.next_thrift_port
-            P4RuntimeSwitch.next_thrift_port += 1
+            self.thrift_port = P4Switch.next_thrift_port
+            P4Switch.next_thrift_port += 1
 
         if check_listening_on_port(self.grpc_port):
             error('%s cannot bind port %d because it is bound by another process\n' % (self.name, self.grpc_port))

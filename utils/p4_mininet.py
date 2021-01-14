@@ -57,6 +57,7 @@ class P4Host(Host):
 class P4Switch(Switch):
     """P4 virtual switch"""
     device_id = 0
+    next_thrift_port = 9090
 
     def __init__(self, name, sw_path = None, json_path = None,
                  thrift_port = None,
@@ -81,7 +82,13 @@ class P4Switch(Switch):
         self.verbose = verbose
         logfile = "/tmp/p4s.{}.log".format(self.name)
         self.output = open(logfile, 'w')
-        self.thrift_port = thrift_port
+
+        if thrift_port is not None:
+            self.thrift_port = thrift_port
+        else:
+            self.thrift_port = P4Switch.next_thrift_port
+            P4Switch.next_thrift_port += 1
+
         if check_listening_on_port(self.thrift_port):
             error('%s cannot bind port %d because it is bound by another process\n' % (self.name, self.grpc_port))
             exit(1)

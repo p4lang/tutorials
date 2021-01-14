@@ -46,16 +46,14 @@ def configureP4Switch(**switch_args):
 
             def describe(self):
                 print "%s -> gRPC port: %d" % (self.name, self.grpc_port)
+                print "%s -> Thrift port: %d" % (self.name, self.thrift_port)
 
         return ConfiguredP4RuntimeSwitch
     else:
         class ConfiguredP4Switch(P4Switch):
-            next_thrift_port = 9090
             def __init__(self, *opts, **kwargs):
                 global next_thrift_port
                 kwargs.update(switch_args)
-                kwargs['thrift_port'] = ConfiguredP4Switch.next_thrift_port
-                ConfiguredP4Switch.next_thrift_port += 1
                 P4Switch.__init__(self, *opts, **kwargs)
 
             def describe(self):
