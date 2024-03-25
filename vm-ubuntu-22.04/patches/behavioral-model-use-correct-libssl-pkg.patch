@@ -1,0 +1,18 @@
+diff --git a/install_deps.sh b/install_deps.sh
+index 7acf14d..bdd1d03 100755
+--- a/install_deps.sh
++++ b/install_deps.sh
+@@ -1,7 +1,10 @@
+ #!/bin/bash
+ set -e
+ ubuntu_release=`lsb_release -s -r`
+-if [[ "${ubuntu_release}" > "18" ]]
++if [[ "${ubuntu_release}" > "19" ]]
++then
++    LIBSSL_DEV="libssl-dev"
++elif [[ "${ubuntu_release}" > "18" ]]
+ then
+     # This older package libssl1.0-dev enables compiling Thrift 0.9.2
+     # on Ubuntu 18.04.  Package libssl-dev exists, but Thrift 0.9.2
+diff --git a/travis/install-thrift.sh b/travis/install-thrift.sh
+index 2ea4177..c17de69 100644

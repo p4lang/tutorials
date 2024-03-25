@@ -1,0 +1,54 @@
+diff --git a/util/install.sh b/util/install.sh
+index 04f85b0..6cd4221 100755
+--- a/util/install.sh
++++ b/util/install.sh
+@@ -5,6 +5,7 @@
+ 
+ # Fail on error
+ set -e
++set -x
+ 
+ # Fail on unset var usage
+ set -o nounset
+@@ -165,7 +166,7 @@ function mn_deps {
+         $install gcc make socat psmisc xterm openssh-clients iperf \
+             iproute telnet python-setuptools libcgroup-tools \
+             ethtool help2man net-tools
+-        $install ${PYPKG}-pyflakes pylint ${PYPKG}-pep8-naming
++        $install ${PYPKG}-pyflakes pylint ${PYPKG}-pep8-naming \
+             ${PYPKG}-pexpect
+     elif [ "$DIST" = "SUSE LINUX"  ]; then
+ 		$install gcc make socat psmisc xterm openssh iperf \
+@@ -175,6 +176,7 @@ function mn_deps {
+     else  # Debian/Ubuntu
+         pf=pyflakes
+         pep8=pep8
++        pylint=pylint
+         # Starting around 20.04, installing pyflakes instead of pyflakes3
+         # causes Python 2 to be installed, which is exactly NOT what we want.
+         if [ "$DIST" = "Ubuntu" -a `expr $RELEASE '>=' 20.04` = "1" ]; then
+@@ -187,10 +189,14 @@ function mn_deps {
+                 pf=pyflakes3
+                 pep8=python3-pep8
+         fi
++        if [ "$DIST" = "Ubuntu" -a `expr $RELEASE '<=' 20.04` = "1" ]; then
++                pylint=pylint3
++        fi
+ 
+         $install gcc make socat psmisc xterm ssh iperf telnet \
+-                 ethtool help2man $pf pylint $pep8 \
++                 ethtool help2man $pylint \
+                  net-tools ${PYPKG}-tk
++        $install --no-install-recommends $pf $pep8
+ 
+         # Install pip
+         $install ${PYPKG}-pip || $install ${PYPKG}-pip-whl
+@@ -303,7 +309,7 @@ function install_wireshark {
+     if ! which wireshark; then
+         echo "Installing Wireshark"
+         if [ "$DIST" = "Fedora" -o "$DIST" = "RedHatEnterpriseServer" ]; then
+-            $install wireshark wireshark-gnome
++            $install wireshark
+ 		elif [ "$DIST" = "SUSE LINUX"  ]; then
+ 			$install wireshark
+         else
