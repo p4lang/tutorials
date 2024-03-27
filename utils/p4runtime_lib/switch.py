@@ -98,6 +98,33 @@ class SwitchConnection(object):
             print("P4Runtime Write:", request)
         else:
             self.client_stub.Write(request)
+    # Modify 
+    def ModifyTableEntry(self, table_entry, dry_run=False):
+        request = p4runtime_pb2.WriteRequest()
+        request.device_id = self.device_id
+        request.election_id.low = 1
+        update = request.updates.add()
+        # Assign Modify Type for it
+        update.type = p4runtime_pb2.Update.MODIFY
+        update.entity.table_entry.CopyFrom(table_entry)
+        if dry_run:
+            print "P4Runtime Modify: ", request
+        else:
+            self.client_stub.Write(request)
+
+    # Delete 
+    def DeleteTableEntry(self, table_entry, dry_run=False):
+        request = p4runtime_pb2.WriteRequest()
+        request.device_id = self.device_id
+        request.election_id.low = 1
+        update = request.updates.add()
+        # Assign DELETE Type for it
+        update.type = p4runtime_pb2.Update.DELETE
+        update.entity.table_entry.CopyFrom(table_entry)
+        if dry_run:
+            print "P4Runtime Delete: ", request
+        else:
+            self.client_stub.Write(request)
 
     def ReadTableEntries(self, table_id=None, dry_run=False):
         request = p4runtime_pb2.ReadRequest()
