@@ -12,7 +12,7 @@
     {
       "table": "MyIngress.ecmp_group",
       "match": {
-        "hdr.ipv4.dstAddr": ["10.0.0.1", 32]
+        "hdr.ipv4.dstAddr": ["10.0.1.1", 32]
       },
       "action_name": "MyIngress.set_ecmp_select",
       "action_params": {
