@@ -1,0 +1,39 @@
+// https://containers.dev/implementors/json_reference/
+{
+    "name": "P4 Tutorials",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "privileged": true,
+    "runArgs": [
+        "--network=host"
+    ],
+
+    // Forward ports for VNC
+    "forwardPorts": [
+        5901,
+        6080
+    ],
+
+    "features": {
+        // Enable remote desktop through VNC
+        // https://github.com/devcontainers/features/tree/main/src/desktop-lite
+        "ghcr.io/devcontainers/features/desktop-lite:1": {
+            "password": "vscode",
+            "webPort": 6080,
+            "vncPort": 5901
+        }
+    },
+
+    "customizations": {
+        // Customize VS Code
+        // https://containers.dev/supporting#visual-studio-code
+        "vscode": {
+            "extensions": [
+                "fattaholmanan.p4-vscode-extension",
+                "ms-azuretools.vscode-docker"
+            ]
+        }
+    }
+}

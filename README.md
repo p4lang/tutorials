@@ -79,6 +79,14 @@ All excercises in this repository use the v1model architecture, the documentatio
 
 ## Obtaining required software
 
+### Dev container
+
+If you use VS Code and Docker, install the [dev containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers), and you can set up a Docker environment to complete all the exercises with one VS Code command: `Dev Containers: Rebuild and Reopen in Container`.
+
+Some of the exercises require a GUI (Mininet `xterm` command for example). The [`desktop-lite`](https://github.com/devcontainers/features/tree/main/src/desktop-lite) feature is configured to provide a remote desktop through VNC. After the container started, to connect to the desktop, either open http://localhost:6080 in a web browser, or use a [VNC viewer](https://www.realvnc.com/en/connect/download/viewer/) to connect to `localhost:5901`. The password is `vscode` for both. All these are configurable in [`devcontainer.json`](.devcontainer/devcontainer.json).
+
+### Virtual machine
+
 If you are starting this tutorial at one of the proctored tutorial events,
 then we've already provided you with a virtual machine that has all of
 the required software installed. Ask an instructor for a USB stick with
