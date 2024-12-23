@@ -66,7 +66,7 @@ make -j2 check |& tee out1.txt
 
 # The above fails about 500 tests that require root.  Re-run those tests
 # as root using the next command.
-sudo PATH=${PATH} VIRTUAL_ENV=${VIRTUAL_ENV} ${P4GUIDE_SUDO_OPTS} make -j2 recheck |& tee out2.txt
+sudo PATH=${PATH} VIRTUAL_ENV=${VIRTUAL_ENV} ${P4_EXTRA_SUDO_OPTS} make -j2 recheck |& tee out2.txt
 ```
 
 As of 2024-08-01, the p4c compiler passes all but about 15 of its

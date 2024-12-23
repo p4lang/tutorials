@@ -3,31 +3,14 @@
 
 Vagrant.configure(2) do |config|
   config.vm.box = "bento/ubuntu-24.04"
-
   config.vm.synced_folder '.', '/vagrant', disabled: true
   config.vm.hostname = "p4"
-  config.vm.provision "file", source: "p4-logo.png",   destination: "/home/vagrant/p4-logo.png"
-  config.vm.provision "file", source: "p4_16-mode.el", destination: "/home/vagrant/p4_16-mode.el"
-  config.vm.provision "file", source: "p4.vim",        destination: "/home/vagrant/p4.vim"
-
-  config.vm.define "dev", autostart: false do |dev|
+  config.vm.define "dev", primary: true do |dev|
     dev.vm.provider "virtualbox" do |v|
       v.name = "P4 Tutorial Development" + Time.now.strftime(" %Y-%m-%d")
     end
-    dev.vm.provision "file", source: "patches/behavioral-model-support-venv.patch", destination: "/home/vagrant/patches/behavioral-model-support-venv.patch"
-    dev.vm.provision "file", source: "patches/mininet-patch-for-2023-jun-enable-venv.patch", destination: "/home/vagrant/patches/mininet-patch-for-2023-jun-enable-venv.patch"
-    dev.vm.provision "file", source: "patches/tutorials-support-venv.patch", destination: "/home/vagrant/patches/tutorials-support-venv.patch"
-    dev.vm.provision "file", source: "patches/p4runtime-shell-2023-changes.patch", destination: "/home/vagrant/patches/p4runtime-shell-2023-changes.patch"
-    dev.vm.provision "file", source: "clean.sh", destination: "/home/vagrant/clean.sh"
-    dev.vm.provision "shell", inline: "chmod 755 /home/vagrant/clean.sh"
-    dev.vm.provision "shell", path: "root-dev-bootstrap.sh"
-    dev.vm.provision "shell", path: "root-common-bootstrap.sh"
-    dev.vm.provision "shell", privileged: false, path: "user-dev-bootstrap.sh"
-    dev.vm.provision "shell", privileged: false, path: "user-common-bootstrap.sh"
-    # Install p4 logo as wallpaper
-    dev.vm.provision "shell", inline: "mv /home/vagrant/p4-logo.png /usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png"
+    dev.vm.provision "shell", path: "root-bootstrap.sh"
   end
-
   config.vm.provider "virtualbox" do |vb|
     vb.gui = true
     # Larger memory and vcpus helps build p4c from source
@@ -46,5 +29,4 @@ Vagrant.configure(2) do |config|
     ]
     vb.customize ["modifyvm", :id, "--vram", "64"]
   end
-
 end

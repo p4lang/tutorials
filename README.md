@@ -107,38 +107,13 @@ machine to those on your system.
 
 ### To build a virtual machine with the P4 development tools.
 
-#### Requirements
-
-- [Vagrant](https://vagrantup.com)
-- [VirtualBox](https://virtualbox.org)
-- At least 12 GB of free disk space, otherwise the installation can fail in unpredictable ways.
-
-#### Installation Steps
-
-1. Install Vagrant and VirtualBox on your system.
-2. Clone the repository
-   ```
-   git clone https://github.com/p4lang/tutorials.git
-   ```
-3. Navigate to the cloned directory :
-   ```
-   cd vm-ubuntu-24.04
-   ```
-4. Start the virtual machine using Vagrant:
-   ```
-   vagrant up dev
-   ```
-   *Note* : The time for this step depends on your computer and Internet speed. On a 2019 Intel MacBook Pro with a 1 Gbps download speed, it took approximately 2 hours. Ensure a stable Internet connection throughout the process.
+See the instructions [here](vm-ubuntu-24.04/README.md).
 
 ### Accessing the VM
 
-- There are two user accounts:
-  - Username: vagrant | Password: vagrant (This is the default account)
-  - Username: p4 | Password: p4 (Usage of this account is expected)
-
-*Note*: Before running the `vagrant up` command, make sure you have enabled virtualization in your environment; otherwise you may get a "VT-x is disabled in the BIOS for both all CPU modes" error. Check [this](https://stackoverflow.com/questions/33304393/vt-x-is-disabled-in-the-bios-for-both-all-cpu-modes-verr-vmx-msr-all-vmx-disabl) for enabling it in virtualbox and/or BIOS for different system configurations.
-
-You will need the script to execute to completion before you can see the `p4` login on your virtual machine's GUI. In some cases, the `vagrant up` command brings up only the default `vagrant` login with the password `vagrant`. Dependencies may or may not have been installed for you to proceed with running P4 programs. Please refer the [existing issues](https://github.com/p4lang/tutorials/issues) to help fix your problem or create a new one if your specific problem isn't addressed there.
++ There are two user accounts:
+  + Username: p4 | Password: p4 (Usage of this account is expected)
+  + Username: vagrant | Password: vagrant (There is no need to use this account)
 
 ### To install P4 development tools on an existing system
 
