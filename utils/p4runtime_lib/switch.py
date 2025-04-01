@@ -132,7 +132,6 @@ class SwitchConnection(object):
             for response in self.client_stub.Read(request):
                 yield response
 
-
     def WritePREEntry(self, pre_entry, dry_run=False):
         request = p4runtime_pb2.WriteRequest()
         request.device_id = self.device_id
@@ -144,6 +143,38 @@ class SwitchConnection(object):
             print("P4Runtime Write:", request)
         else:
             self.client_stub.Write(request)
+
+    def PacketIn(self, dry_run=False):
+        request = p4runtime_pb2.StreamMessageRequest()
+        if dry_run:
+            print("P4 Runtime PacketIn: ", request)
+        else:
+            self.requests_stream.put(request)
+            for item in self.stream_msg_resp:
+                print(item)
+                return item
+
+    def PacketOut(self, payload, metadatas):
+        packet_out = p4runtime_pb2.PacketOut()
+        packet_out.payload = payload
+
+        metadata_list = []
+        i = 1
+        for meta in metadatas:
+            item = p4runtime_pb2.PacketMetadata()
+            item.metadata_id = i
+            item.value = meta["value"].to_bytes(meta["bitwidth"], 'big')
+            metadata_list.append(item)
+            i +=1
+        packet_out.metadata.extend(metadata_list)
+
+        request = p4runtime_pb2.StreamMessageRequest()
+        request.packet.CopyFrom(packet_out)
+        self.requests_stream.put(request)
+
+    def IdleTimeoutNotification(self):
+        msg = p4runtime_pb2.IdleTimeoutNotification()
+        return msg
 
 class GrpcRequestLogger(grpc.UnaryUnaryClientInterceptor,
                         grpc.UnaryStreamClientInterceptor):

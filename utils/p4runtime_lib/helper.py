@@ -166,12 +166,16 @@ class P4InfoHelper(object):
                         default_action=False,
                         action_name=None,
                         action_params=None,
+                        idle_timeout_ns=None,
                         priority=None):
         table_entry = p4runtime_pb2.TableEntry()
         table_entry.table_id = self.get_tables_id(table_name)
 
         if priority is not None:
             table_entry.priority = priority
+
+        if idle_timeout_ns is not None:
+            table_entry.idle_timeout_ns = idle_timeout_ns
 
         if match_fields:
             table_entry.match.extend([
@@ -213,3 +217,4 @@ class P4InfoHelper(object):
             r.instance = replica['instance']
             clone_entry.clone_session_entry.replicas.extend([r])
         return clone_entry
+
