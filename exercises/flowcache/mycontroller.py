@@ -138,13 +138,13 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
         x = 0
 
     table_entry = global_data['p4info_helper'].buildTableEntry(
-        table_name="ingressImpl.flow_cache",
+        table_name="MyIngress.flow_cache",
         match_fields={
             "hdr.ipv4.protocol": protocol,
-            "hdr.ipv4.src_addr": src_ip_addr,
-            "hdr.ipv4.dst_addr": dst_ip_addr
+            "hdr.ipv4.srcAddr": src_ip_addr,
+            "hdr.ipv4.dstAddr": dst_ip_addr
         },
-        action_name="ingressImpl.cached_action",
+        action_name="MyIngress.cached_action",
         action_params={
             "port":           port,
             "decrement_ttl":  x,

@@ -1,58 +1,54 @@
-/*
-Copyright 2024 Andy Fingerhut (andy.fingerhut@gmail.com)
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-License-Identifier: Apache-2.0
+/* -*- P4_16 -*- */
 
 #include <core.p4>
-#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 
-typedef bit<48>  EthernetAddress;
-typedef bit<32>  IPv4Address;
-typedef bit<16>  etype_t;
-typedef bit<8>   ipproto_t;
+typedef bit<9>  egressSpec_t;
+typedef bit<9>  PortId_t;
+typedef bit<48> macAddr_t;
+typedef bit<32> ip4Addr_t;
 
-const etype_t ETYPE_IPV4      = 0x0800; /* IPv4 */
+const bit<16> TYPE_IPV4 = 0x800;
 
-// https://en.wikipedia.org/wiki/Ethernet_frame
-header ethernet_h {
-    EthernetAddress dst_addr;
-    EthernetAddress src_addr;
-    etype_t ether_type;
-}
 
-// RFC 791
-// https://en.wikipedia.org/wiki/IPv4
-// https://tools.ietf.org/html/rfc791
-header ipv4_h {
-    bit<4>  version;            // always 4 for IPv4
-    bit<4>  ihl;                // Internet header length
-    bit<8>  diffserv;           // 6 bits of DSCP followed by 2-bit ECN
-    bit<16> total_len;          // in bytes, including IPv4 header
-    bit<16> identification;
-    bit<3>  flags;              // rsvd:1, DF (don't fragment):1,
-                                // MF (more fragments):1
-    bit<13> frag_offset;
-    bit<8>  ttl;                // time to live
-    ipproto_t protocol;
-    bit<16> hdr_checksum;
-    IPv4Address src_addr;
-    IPv4Address dst_addr;
-}
+typedef bit<16> PortIdToController_t;
+
+// There is nothing magic about the clone session id value of 57 to
+// BMv2.  I simply picked a constant value somewhat arbitrarily. Many
+// other values would also work, as long as the controller configures
+// the clone session id to send a copy of the packet to the CPU_PORT.
+const int CPU_PORT_CLONE_SESSION_ID = 57;
+
+const int FL_PACKET_IN = 1;
 
 #define CPU_PORT 510
+
+/*************************************************************************
+*********************** H E A D E R S  ***********************************
+*************************************************************************/
+
+header ethernet_h {
+    macAddr_t dstAddr;
+    macAddr_t srcAddr;
+    bit<16>   etherType;
+}
+
+header ipv4_h {
+    bit<4>    version;
+    bit<4>    ihl;
+    bit<8>    diffserv;
+    bit<16>   totalLen;
+    bit<16>   identification;
+    bit<3>    flags;
+    bit<13>   fragOffset;
+    bit<8>    ttl;
+    bit<8>    protocol;
+    bit<16>   hdrChecksum;
+    ip4Addr_t srcAddr;
+    ip4Addr_t dstAddr;
+}
 
 // Note on the names of the controller_header header types:
 
@@ -69,11 +65,7 @@ header ipv4_h {
 
 // When running with simple_switch_grpc, you must provide the
 // following command line option to enable the ability for the
-// software switch to receive and send such messages:
-//
-//     --cpu-port 510
-
-typedef bit<16> PortIdToController_t;
+// software switch to receive and send such messages: --cpu-port 510
 
 enum bit<8> ControllerOpcode_t {
     NO_OP                    = 0,
@@ -99,30 +91,6 @@ header packet_in_header_h {
     ControllerOpcode_t   opcode;
 }
 
-bool MulticastMACAddress (in bit<48> macAddr) {
-    if (macAddr[40:40] == 1) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-// There is nothing magic about the multicast group id value of 42 to
-// BMv2.  I simply picked a constant value somewhat arbitrarily.  Many
-// other values would also work, as long as the controller configures
-// this multicast group id so that packets using it are replicated to
-// all regular output ports.
-typedef bit<16> McastGrpId_t;
-const McastGrpId_t FLOOD_MCAST_GROUP = 42;
-
-// There is nothing magic about the clone session id value of 57 to
-// BMv2.  I simply picked a constant value somewhat arbitrarily.  Many
-// other values would also work, as long as the controller configures
-// the clone session id to send a copy of the packet to the CPU_PORT.
-const int CPU_PORT_CLONE_SESSION_ID = 57;
-
-const int FL_PACKET_IN = 1;
-
 struct metadata_t {
     @field_list(FL_PACKET_IN)
     PortId_t             ingress_port;
@@ -139,16 +107,20 @@ struct headers_t {
     ipv4_h     ipv4;
 }
 
-parser parserImpl(packet_in packet,
+/*************************************************************************
+*********************** P A R S E R  ***********************************
+*************************************************************************/
+
+parser MyParser(packet_in packet,
                   out headers_t hdr,
                   inout metadata_t meta,
-                  inout standard_metadata_t stdmeta)
+                  inout standard_metadata_t standard_metadata)
 {
     state start {
         transition check_for_cpu_port;
     }
     state check_for_cpu_port {
-        transition select (stdmeta.ingress_port) {
+        transition select (standard_metadata.ingress_port) {
             CPU_PORT: parse_controller_packet_out_header;
             default: parse_ethernet;
         }
@@ -159,8 +131,8 @@ parser parserImpl(packet_in packet,
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select (hdr.ethernet.ether_type) {
-            ETYPE_IPV4: parse_ipv4;
+        transition select (hdr.ethernet.etherType) {
+            TYPE_IPV4: parse_ipv4;
             default: accept;
         }
     }
@@ -170,16 +142,40 @@ parser parserImpl(packet_in packet,
     }
 }
 
-control ingressImpl(inout headers_t hdr,
-                    inout metadata_t meta,
-                    inout standard_metadata_t stdmeta)
-{
+/*************************************************************************
+************   C H E C K S U M    V E R I F I C A T I O N   *************
+*************************************************************************/
+control MyVerifyChecksum(inout headers_t hdr, inout metadata_t meta) {
+    apply {
+        verify_checksum(hdr.ipv4.isValid() && hdr.ipv4.ihl == 5,
+            { hdr.ipv4.version,
+                hdr.ipv4.ihl,
+                hdr.ipv4.diffserv,
+                hdr.ipv4.totalLen,
+                hdr.ipv4.identification,
+                hdr.ipv4.flags,
+                hdr.ipv4.fragOffset,
+                hdr.ipv4.ttl,
+                hdr.ipv4.protocol,
+                hdr.ipv4.srcAddr,
+                hdr.ipv4.dstAddr },
+            hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+    }
+}
+
+/*************************************************************************
+**************  I N G R E S S   P R O C E S S I N G   *******************
+*************************************************************************/
+
+control MyIngress(inout headers_t hdr,
+                  inout metadata_t meta,
+                  inout standard_metadata_t standard_metadata){
     action send_to_controller_with_details(
         PuntReason_t       punt_reason,
         ControllerOpcode_t opcode)
     {
-        stdmeta.egress_spec = CPU_PORT;
-        meta.ingress_port = stdmeta.ingress_port;
+        standard_metadata.egress_spec = CPU_PORT;
+        meta.ingress_port = standard_metadata.ingress_port;
         meta.punt_reason = punt_reason;
         meta.opcode = opcode;
     }
@@ -188,19 +184,19 @@ control ingressImpl(inout headers_t hdr,
         ControllerOpcode_t opcode)
     {
         clone_preserving_field_list(CloneType.I2E, CPU_PORT_CLONE_SESSION_ID, FL_PACKET_IN);
-        meta.ingress_port = stdmeta.ingress_port;
+        meta.ingress_port = standard_metadata.ingress_port;
         meta.punt_reason = punt_reason;
         meta.opcode = opcode;
     }
     action drop_packet() {
-        mark_to_drop(stdmeta);
+        mark_to_drop(standard_metadata);
     }
     action cached_action (
         PortId_t port,
         bit<1> decrement_ttl,
         bit<6> new_dscp)
     {
-        stdmeta.egress_spec = port;
+        standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = (decrement_ttl == 1) ? (hdr.ipv4.ttl |-| 1) : hdr.ipv4.ttl;
         hdr.ipv4.diffserv[7:2] = new_dscp;
     }
@@ -214,8 +210,8 @@ control ingressImpl(inout headers_t hdr,
     table flow_cache {
         key = {
             hdr.ipv4.protocol : exact;
-            hdr.ipv4.src_addr : exact;
-            hdr.ipv4.dst_addr : exact;
+            hdr.ipv4.srcAddr : exact;
+            hdr.ipv4.dstAddr : exact;
         }
         actions = {
             cached_action;
@@ -243,7 +239,7 @@ control ingressImpl(inout headers_t hdr,
             dbgPacketOutHdr.apply();
             switch (hdr.packet_out.opcode) {
                 ControllerOpcode_t.SEND_TO_PORT_IN_OPERAND0: {
-                    stdmeta.egress_spec = (PortId_t) hdr.packet_out.operand0;
+                    standard_metadata.egress_spec = (PortId_t) hdr.packet_out.operand0;
                     hdr.packet_out.setInvalid();
                 }
                 default: {
@@ -264,35 +260,38 @@ control ingressImpl(inout headers_t hdr,
     }
 }
 
-control egressImpl(inout headers_t hdr,
-                   inout metadata_t meta,
-                   inout standard_metadata_t stdmeta)
-{
-    table debug_egress_stdmeta {
+/*************************************************************************
+****************  E G R E S S   P R O C E S S I N G   *******************
+*************************************************************************/
+
+control MyEgress(inout headers_t hdr,
+                 inout metadata_t meta,
+                 inout standard_metadata_t standard_metadata){
+    table debug_egress_standard_metadata {
         key = {
-            stdmeta.ingress_port : exact;
-            stdmeta.egress_spec : exact;
-            stdmeta.egress_port : exact;
-            stdmeta.instance_type : exact;
-            stdmeta.packet_length : exact;
-            //stdmeta.enq_timestamp : exact;
-            //stdmeta.enq_qdepth : exact;
-            //stdmeta.deq_timedelta : exact;
-            //stdmeta.deq_qdepth : exact;
-            //stdmeta.ingress_global_timestamp : exact;
-            //stdmeta.egress_global_timestamp : exact;
-            //stdmeta.mcast_grp : exact;
-            //stdmeta.egress_rid : exact;
-            //stdmeta.checksum_error : exact;
-            //stdmeta.parser_error : exact;
-            //stdmeta.priority : exact;
+            standard_metadata.ingress_port : exact;
+            standard_metadata.egress_spec : exact;
+            standard_metadata.egress_port : exact;
+            standard_metadata.instance_type : exact;
+            standard_metadata.packet_length : exact;
+            //standard_metadata.enq_timestamp : exact;
+            //standard_metadata.enq_qdepth : exact;
+            //standard_metadata.deq_timedelta : exact;
+            //standard_metadata.deq_qdepth : exact;
+            //standard_metadata.ingress_global_timestamp : exact;
+            //standard_metadata.egress_global_timestamp : exact;
+            //standard_metadata.mcast_grp : exact;
+            //standard_metadata.egress_rid : exact;
+            //standard_metadata.checksum_error : exact;
+            //standard_metadata.parser_error : exact;
+            //standard_metadata.priority : exact;
         }
         actions = { NoAction; }
         const default_action = NoAction();
         size = 0;
     }
     action drop_packet() {
-        mark_to_drop(stdmeta);
+        mark_to_drop(standard_metadata);
     }
     action prepend_packet_in_hdr (
         PuntReason_t punt_reason,
@@ -304,8 +303,8 @@ control egressImpl(inout headers_t hdr,
         hdr.packet_in.opcode = ControllerOpcode_t.NO_OP;
     }
     apply {
-        debug_egress_stdmeta.apply();
-        if (stdmeta.egress_port == CPU_PORT) {
+        debug_egress_standard_metadata.apply();
+        if (standard_metadata.egress_port == CPU_PORT) {
             prepend_packet_in_hdr(meta.punt_reason, meta.ingress_port);
         } else {
             // Allow the packet to go out without further processing.
@@ -313,9 +312,35 @@ control egressImpl(inout headers_t hdr,
     }
 }
 
-control deparserImpl(packet_out packet,
-                     in headers_t hdr)
-{
+/*************************************************************************
+*************   C H E C K S U M    C O M P U T A T I O N   **************
+*************************************************************************/
+
+control MyComputeChecksum(inout headers_t hdr, inout metadata_t meta) {
+     apply {
+        update_checksum(
+        hdr.ipv4.isValid(),
+            { hdr.ipv4.version,
+              hdr.ipv4.ihl,
+              hdr.ipv4.diffserv,
+              hdr.ipv4.totalLen,
+              hdr.ipv4.identification,
+              hdr.ipv4.flags,
+              hdr.ipv4.fragOffset,
+              hdr.ipv4.ttl,
+              hdr.ipv4.protocol,
+              hdr.ipv4.srcAddr,
+              hdr.ipv4.dstAddr },
+            hdr.ipv4.hdrChecksum,
+            HashAlgorithm.csum16);
+    }
+}
+
+/*************************************************************************
+***********************  D E P A R S E R  *******************************
+*************************************************************************/
+
+control MyDeparser(packet_out packet, in headers_t hdr) {
     apply {
         packet.emit(hdr.packet_in);
         packet.emit(hdr.ethernet);
@@ -323,45 +348,15 @@ control deparserImpl(packet_out packet,
     }
 }
 
-control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply {
-        verify_checksum(hdr.ipv4.isValid() && hdr.ipv4.ihl == 5,
-            { hdr.ipv4.version,
-                hdr.ipv4.ihl,
-                hdr.ipv4.diffserv,
-                hdr.ipv4.total_len,
-                hdr.ipv4.identification,
-                hdr.ipv4.flags,
-                hdr.ipv4.frag_offset,
-                hdr.ipv4.ttl,
-                hdr.ipv4.protocol,
-                hdr.ipv4.src_addr,
-                hdr.ipv4.dst_addr },
-            hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
-    }
-}
+/*************************************************************************
+***********************  S W I T C H  *******************************
+*************************************************************************/
 
-control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
-    apply {
-        update_checksum(hdr.ipv4.isValid() && hdr.ipv4.ihl == 5,
-            { hdr.ipv4.version,
-                hdr.ipv4.ihl,
-                hdr.ipv4.diffserv,
-                hdr.ipv4.total_len,
-                hdr.ipv4.identification,
-                hdr.ipv4.flags,
-                hdr.ipv4.frag_offset,
-                hdr.ipv4.ttl,
-                hdr.ipv4.protocol,
-                hdr.ipv4.src_addr,
-                hdr.ipv4.dst_addr },
-            hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
-    }
-}
-
-V1Switch(parserImpl(),
-         verifyChecksum(),
-         ingressImpl(),
-         egressImpl(),
-         updateChecksum(),
-         deparserImpl()) main;
+V1Switch(
+MyParser(),
+MyVerifyChecksum(),
+MyIngress(),
+MyEgress(),
+MyComputeChecksum(),
+MyDeparser()
+) main;

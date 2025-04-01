@@ -34,6 +34,9 @@ you get started with P4 programming, organized into several modules:
    - [P4Runtime](./exercises/p4runtime)<br>
      <small>This exercise involves implementing a control plane using P4Runtime to send flow entries to switches for tunneling traffic between hosts. Students modify the provided P4 program and controller script to establish connections, push P4 programs, install tunnel ingress rules, and read tunnel counters, enhancing their understanding of P4Runtime and network forwarding logic.</small>
 
+   - [Flowcache](./exercises/flowcache)<br>
+     <small> This exercise implements a program named flowcache.p4, which handles the PacketIn and PacketOut mechanisms, along with an idle timeout mechanism for table entries. In the data plane, packets are sent to the P4Runtime controller using the PacketIn. Upon receiving these packets, the controller adds an entry to the flow table. While the controller computes and installs the flow rule, PacketOut are sent to forward the packets to its destination. Once a flow entry is installed and no packets match it, the idle timeout start. Once a flow entry is installed and no packets match it, the idle timeout starts. When the timer expires, an IdleTimeoutNotification message is sent to the controller, which is responsible for reinstalling the expired flow entry.</small>
+
 3. Monitoring and Debugging
    - [Explicit Congestion Notification](./exercises/ecn)<br>
      <small>In this tutorial, you'll enhance a basic L3 forwarding P4 program with Explicit Congestion Notification (ECN) support, enabling end-to-end notification of network congestion without packet drops. By modifying the `ecn.p4` file, you'll implement ECN logic such as updating the ECN flag based on queue length thresholds and configuring static rules for proper ECN handling, followed by testing the solution in Mininet to verify packet forwarding and ECN flag manipulation.</small>

@@ -8,7 +8,7 @@
 In this exercise, we will be using P4Runtime to send flow entries to the
 switch instead of using the switch's CLI. We will be building on the same P4
 program that you used in the [basic_tunnel](../basic_tunnel) exercise. The
-P4 program has been renamed to `advanced_tunnel.p4` and has been augmented
+P4 program has been renamed to `flowcache.p4` and has been augmented
 with two counters (`ingressTunnelCounter`, `egressTunnelCounter`) and
 two new actions (`myTunnel_ingress`, `myTunnel_egress`).
 
