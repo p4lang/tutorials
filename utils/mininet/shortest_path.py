@@ -1,4 +1,8 @@
+
+# SPDX-FileCopyrightText: 2018 Contributors to the P4 Project
+#
 # SPDX-License-Identifier: Apache-2.0
+
 class ShortestPath:
 
     def __init__(self, edges=[]):
