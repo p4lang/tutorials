@@ -103,6 +103,16 @@ def encode(x, bitwidth):
     assert(len(encoded_bytes) == byte_len)
     return encoded_bytes
 
+
+def decode(enc_val):
+    decode_functions = [decodeIPv4, decodeMac, decodeNum]
+    for func in decode_functions:
+        try:
+            return func(enc_val)
+        except:
+            pass
+    raise Exception("Encoded value format not compatible")
+
 if __name__ == '__main__':
     # TODO These tests should be moved out of main eventually
 
