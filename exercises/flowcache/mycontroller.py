@@ -31,6 +31,7 @@ global_data = {}
 global_data['CPU_PORT'] = 510
 global_data['CPU_PORT_CLONE_SESSION_ID'] = 57
 global_data['NUM_PORTS'] = 3
+global_data['index'] = 0
 
 def ipv4_to_int(addr):
     """Take an argument 'addr' containing an IPv4 address written as a
@@ -138,13 +139,13 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
         x = 0
 
     table_entry = global_data['p4info_helper'].buildTableEntry(
-        table_name="ingressImpl.flow_cache",
+        table_name="MyIngress.flow_cache",
         match_fields={
             "hdr.ipv4.protocol": protocol,
-            "hdr.ipv4.src_addr": src_ip_addr,
-            "hdr.ipv4.dst_addr": dst_ip_addr
+            "hdr.ipv4.srcAddr": src_ip_addr,
+            "hdr.ipv4.dstAddr": dst_ip_addr
         },
-        action_name="ingressImpl.cached_action",
+        action_name="MyIngress.cached_action",
         action_params={
             "port":           port,
             "decrement_ttl":  x,
@@ -156,7 +157,53 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
     print("Installed ingress tunnel rule on %s" % ingress_sw.name)
 
 def sendPacketOut(sw ,payload, metadatas):
-        sw.PacketOut(payload, metadatas)
+    #TODO remove for exercise
+    sw.PacketOut(payload, metadatas)
+
+async def readTableRules(p4info_helper, sw):
+    """
+    Reads the table entries from all tables on the switch.
+
+    :param p4info_helper: the P4Info helper
+    :param sw: the switch connection
+    """
+    print('\n----- Reading tables rules for %s -----' % sw.name)
+    for response in sw.ReadTableEntries():
+        for entity in response.entities:
+            entry = entity.table_entry
+            # TODO For extra credit, you can use the p4info_helper to translate
+            #      the IDs in the entry to names
+            table_name = p4info_helper.get_tables_name(entry.table_id)
+            print('%s: ' % table_name, end=' ')
+            for m in entry.match:
+                print(p4info_helper.get_match_field_name(table_name, m.field_id), end=' ')
+                print('%r' % (p4info_helper.get_match_field_value(m),), end=' ')
+            action = entry.action.action
+            action_name = p4info_helper.get_actions_name(action.action_id)
+            print('->', action_name, end=' ')
+            for p in action.params:
+                print(p4info_helper.get_action_param_name(action_name, p.param_id), end=' ')
+                print('%r' % p.value, end=' ')
+            print()
+
+async def printCounter(p4info_helper, sw, counter_name, index):
+    """
+    Reads the specified counter at the given index from the switch. In our
+    program, the index is derived from the first 6 bits of the IP destination address.
+    If the index is 0, it will return all values from the counter.
+
+    :param p4info_helper: the P4Info helper
+    :param sw:  the switch connection
+    :param counter_name: the name of the counter from the P4 program
+    :param index: the counter index (in our case, first 6 bits of the IP)
+    """
+    for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
+        for entity in response.entities:
+            counter = entity.counter_entry
+            print("%s %s %d: %d packets (%d bytes)" % (
+                sw.name, counter_name, index,
+                counter.data.packet_count, counter.data.byte_count
+            ))
 
 async def process_packet(message):
         payload = message["packet-in"].packet.payload
@@ -194,6 +241,7 @@ async def process_packet(message):
                 print(dest_port_int)
                 decrement_ttl_bool = True
                 new_dscp_int = 5
+                global_data['index'] = int(pkt[IP].dst.split('.')[3])
                 metadatas = [{ "value": 0, "bitwidth": 8 }, { "value": 3, "bitwidth": 32}]
                 sendPacketOut(message["sw"], payload, metadatas)
                 addFlowRule(message["sw"],
@@ -216,67 +264,26 @@ async def process_notif(notif_queue):
 
             if notif["type"] == "packet-in":
                 await process_packet(notif)
-
+                await printCounter(global_data ['p4info_helper'], notif["sw"], 'MyIngress.ingressPktOutCounter', global_data['index'])
+                await printCounter(global_data ['p4info_helper'], notif["sw"], 'MyEgress.egressPktInCounter', global_data['index'])
+                await readTableRules(global_data ['p4info_helper'], notif["sw"])
             elif notif["type"] == "idle-notif":
                 print(notif["idle"])
 
             notif_queue.task_done()
 
 async def packet_in_handler(notif_queue,sw):
+    #TODO remove for exercise
     packet_in = await asyncio.to_thread(sw.PacketIn)
     print(f"Received packet: {packet_in.packet}")
     message = {"type": "packet-in", "sw": sw, "packet-in": packet_in}
     await notif_queue.put(message)
 
 async def idle_time_handler(notif_queue,sw):
+    #TODO remove for exercise
     idle_notif = await asyncio.to_thread(sw.IdleTimeoutNotification)
     message = {"type": "idle-notif", "sw": sw, "idle": idle_notif}
     await notif_queue.put(message)
-
-def readTableRules(p4info_helper, sw):
-    """
-    Reads the table entries from all tables on the switch.
-
-    :param p4info_helper: the P4Info helper
-    :param sw: the switch connection
-    """
-    print('\n----- Reading tables rules for %s -----' % sw.name)
-    for response in sw.ReadTableEntries():
-        for entity in response.entities:
-            entry = entity.table_entry
-            # TODO For extra credit, you can use the p4info_helper to translate
-            #      the IDs in the entry to names
-            table_name = p4info_helper.get_tables_name(entry.table_id)
-            print('%s: ' % table_name, end=' ')
-            for m in entry.match:
-                print(p4info_helper.get_match_field_name(table_name, m.field_id), end=' ')
-                print('%r' % (p4info_helper.get_match_field_value(m),), end=' ')
-            action = entry.action.action
-            action_name = p4info_helper.get_actions_name(action.action_id)
-            print('->', action_name, end=' ')
-            for p in action.params:
-                print(p4info_helper.get_action_param_name(action_name, p.param_id), end=' ')
-                print('%r' % p.value, end=' ')
-            print()
-
-def printCounter(p4info_helper, sw, counter_name, index):
-    """
-    Reads the specified counter at the specified index from the switch. In our
-    program, the index is the tunnel ID. If the index is 0, it will return all
-    values from the counter.
-
-    :param p4info_helper: the P4Info helper
-    :param sw:  the switch connection
-    :param counter_name: the name of the counter from the P4 program
-    :param index: the counter index (in our case, the tunnel ID)
-    """
-    for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
-        for entity in response.entities:
-            counter = entity.counter_entry
-            print("%s %s %d: %d packets (%d bytes)" % (
-                sw.name, counter_name, index,
-                counter.data.packet_count, counter.data.byte_count
-            ))
 
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=' ')
