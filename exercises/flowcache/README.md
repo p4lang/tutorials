@@ -1,20 +1,19 @@
 
 [comment]: # (SPDX-License-Identifier:  Apache-2.0)
 
-# WORK IN PROGRESS
-
 ## Introduction
 
-In this exercise, we will be using P4Runtime to send flow entries to the
-switch instead of using the switch's CLI. We will be building on the same P4
-program that you used in the [basic_tunnel](../basic_tunnel) exercise. The
-P4 program has been renamed to `advanced_tunnel.p4` and has been augmented
-with two counters (`ingressTunnelCounter`, `egressTunnelCounter`) and
-two new actions (`myTunnel_ingress`, `myTunnel_egress`).
+The goal of this exercise is to write a P4 program that implements the `PacketIn` and `PacketOut` mechanisms, along with an idle timeout mechanism for table entries. The control plane uses P4Runtime to configure and manage the data plane. The P4 program `flowcache.p4` contains one ingress table (`flow_cache`) and two counters (`ingressPktOutCounter`, `egressPktInCounter`).
+
+The action `flow_unknown` in the `flow_cache` table triggers the generation of a PacketIn when no flow rules match the packet. The PacketIn is then forwarded to the controller via P4Runtime. Upon receiving these packets, the controller adds an entry to the flow table with action `cached_action`. While the controller computes and installs the flow rule, PacketOut messages are sent via P4Runtime to the data plane in order to forward the packets to their destination.
+
+Once a flow entry is installed and no packets match it, the idle timeout start. Once a flow entry is installed and no packets match it, the idle timeout starts. When the timer expires, an IdleTimeoutNotification message is sent to the controller.
+
+The Counters `ingressPktOutCounter` and `egressPktInCounter` are used to verify whether `PacketIn` and `PacketOut` messages are sent or received.
 
 You will use the starter program, `mycontroller.py`, and a few helper
 libraries in the `p4runtime_lib` directory to create the table entries
-necessary to tunnel traffic between host 1 and 2.
+necessary to forward traffic between hosts.
 
 > **Spoiler alert:** There is a reference solution in the `solution`
 > sub-directory. Feel free to compare your implementation to the
@@ -22,20 +21,16 @@ necessary to tunnel traffic between host 1 and 2.
 
 ## Step 1: Run the (incomplete) starter code
 
-The starter code for this assignment is in a file called `mycontroller.py`,
-and it will install only some of the rules that you need to tunnel traffic between
-two hosts.
+The starter code for this assignment is in files called `flowcache.p4` and `mycontroller.py`. Your job will be to finalize the P4 program to properly implement the `PacketIn` and `PacketOut` idle timeout mechanismes.
 
-Let's first compile the new P4 program, start the network, use `mycontroller.py`
-to install a few rules, and look at the `ingressTunnelCounter` to see that things
-are working as expected.
+Let's first compile the new P4 program, start the network, and use `mycontroller.py` to install the flowcache pipeline in the data plane.
 
 1. In your shell, run:
    ```bash
    make
    ```
    This will:
-   * compile `advanced_tunnel.p4`,
+   * compile `flowcache.p4`,
    * start a Mininet instance with three switches (`s1`, `s2`, `s3`)
      configured in a triangle, each connected to one host (`h1`, `h2`, `h3`), and
    * assign IPs of `10.0.1.1`, `10.0.2.2`, `10.0.3.3` to the respective hosts.
@@ -49,23 +44,13 @@ are working as expected.
 
 3. Open another shell and run the starter code:
    ```bash
-   cd ~/tutorials/exercises/p4runtime
+   cd ~/tutorials/exercises/flowcache
    ./mycontroller.py
    ```
-   This will install the `advanced_tunnel.p4` program on the switches and push the
-   tunnel ingress rules.
-   The program prints the tunnel ingress and egress counters every 2 seconds.
-   You should see the ingress tunnel counter for s1 increasing:
-   ```
-    s1 ingressTunnelCounter 100: 2 packets
-   ```
-   The other counters should remain at zero.
-
+   This will install the `flowcache.p4`  program on the switches, and it will wait for notifications from the data plane.
 4. Press `Ctrl-C` to the second shell to stop `mycontroller.py`
 
-Each switch is currently mapping traffic into tunnels based on the destination IP
-address. Your job is to write the rules that forward the traffic between the switches
-based on the tunnel ID.
+Each switch currently has no flow rules. So, as soon as a packet is received, it will be sent to the control plane within a PacketIn. Your job is to write the functions that handle PacketIn, PacketOut, and idle timeout mechanisms. Then, you can verify that PacketIn and PacketOut are working by reading the counters.
 
 ### Potential Issues
 
@@ -73,7 +58,7 @@ If you see the following error message when running `mycontroller.py`, then
 the gRPC server is not running on one or more switches.
 
 ```
-p4@p4:~/tutorials/exercises/p4runtime$ ./mycontroller.py
+p4@p4:~/tutorials/exercises/flowcache$ ./mycontroller.py
 ...
 grpc._channel._Rendezvous: <_Rendezvous of RPC that terminated with (StatusCode.UNAVAILABLE, Connect Failed)>
 ```
@@ -95,7 +80,7 @@ table entries like we have in the previous exercises.
 
 **Important:** A P4 program also defines the interface between the
 switch pipeline and control plane. This interface is defined in the
-`advanced_tunnel.p4info` file. The table entries that you build in `mycontroller.py`
+`flow_cache.p4info` file. The table entries that you build in `mycontroller.py`
 refer to specific tables, keys, and actions by name, and we use a P4Info helper
 to convert the names into the IDs that are required for P4Runtime. Any changes
 in the P4 program that add or rename tables, keys, or actions will need to be
@@ -126,19 +111,20 @@ CPU port for your P4 program to process.  The controller metadata
 header, if any, will always be the _first_ header of the packet as
 seen by your P4 parser.
 
-## Step 2: Implement Tunnel Forwarding
+## Step 2: Implement flowcache control messages handling
 
 The `mycontroller.py` file is a basic controller plane that does the following:
 1. Establishes a gRPC connection to the switches for the P4Runtime service.
 2. Pushes the P4 program to each switch.
-3. Writes tunnel ingress and tunnel egress rules for two tunnels between h1 and h2.
-4. Reads tunnel ingress and egress counters every 2 seconds.
+3. Receives `PacketIn` messages and generates flow rules to provide connectivity among all hosts.
+4. Sends `PacketOut` messages to forward the packets to their destination while the corresponding flow rules are not yet installed.
+5. Handles the `IdleTimeoutNotification`.
+6. Reads `PacketIn` and `PacketOut` ingress and egress counters periodically.
 
 It also contains comments marked with `TODO` which indicate the functionality
 that you need to implement.
 
-Your job will be to write the tunnel transit rule in the `writeTunnelRules` function
-that will match on tunnel ID and forward packets to the next hop.
+Your job will be to write functions that will handle the `PacketIn`, `PacketOut` and idle timeout mechanismes.
 
 ![topology](../basic_tunnel/topo.png)
 
@@ -179,14 +165,6 @@ You might notice that the rules that are printed by `mycontroller.py` contain th
 IDs rather than the table names. You can use the P4Info helper to translate these IDs
 into entry names.
 
-Also, you may want to think about the following:
-- What assumptions about the topology are baked into your implementation? How would you
-need to change it for a more realistic network?
-
-- Why are the byte counters different between the ingress and egress counters?
-
-- What is the TTL in the ICMP replies? Why is it the value that it is?
-Hint: The default TTL is 64 for packets sent by the hosts.
 
 If you are interested, you can find the protocol buffer and gRPC definitions here:
 - [P4Runtime](https://github.com/p4lang/p4runtime/blob/main/proto/p4/v1/p4runtime.proto)
@@ -208,12 +186,10 @@ To run the reference solution, you should run the following command from the
 solution/mycontroller.py
 ```
 
-
 ## Next Steps
 
 Congratulations, your implementation works! Move onto the next assignment
 [Explicit Congestion Notification](../ecn)
-
 
 ## Relevant Documentation
 
