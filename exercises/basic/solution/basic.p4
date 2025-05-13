@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: Apache-2.0
 /* -*- P4_16 -*- */
 #include <core.p4>
 #include <v1model.p4>
@@ -22,7 +21,7 @@ header ethernet_t {
 header ipv4_t {
     bit<4>    version;
     bit<4>    ihl;
-    bit<8>    diffserv;
+    bit<8>    tos;
     bit<16>   totalLen;
     bit<16>   identification;
     bit<3>    flags;
@@ -34,13 +33,41 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 
+header tcp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<32> seqNo;
+    bit<32> ackNo;
+    bit<4>  dataOffset;
+    bit<3>  res;
+    bit<3>  ecn;
+    bit<6>  ctrl;
+    bit<16> window;
+    bit<16> checksum;
+    bit<16> urgentPtr;
+}
+
 struct metadata {
-    /* empty */
+    bit<32> rank;
+    bit<32> queue_index;
+    bit<32> tree_node_lower;
+    bit<32> tree_node_upper;
+    bit<32> left_child_lower;
+    bit<32> left_child_upper;
+    bit<32> right_child_lower;
+    bit<32> right_child_upper;
+    bit<32> avg_bound;
+    bit<32> level1_avg;
+    bit<32> level2_avg;
+    bit<32> level3_avg;
+    bit<32> avg_left;
+    bit<32> avg_right;
 }
 
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
+    tcp_t        tcp;
 }
 
 /*************************************************************************
@@ -66,19 +93,17 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition accept;
+        transition select(hdr.ipv4.protocol) {
+            0x06: parse_tcp;
+            default: accept;
+        }
     }
 
+    state parse_tcp {
+        packet.extract(hdr.tcp);
+        transition accept;
+    }
 }
-
-/*************************************************************************
-************   C H E C K S U M    V E R I F I C A T I O N   *************
-*************************************************************************/
-
-control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {  }
-}
-
 
 /*************************************************************************
 **************  I N G R E S S   P R O C E S S I N G   *******************
@@ -87,10 +112,12 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
+
+    
     action drop() {
         mark_to_drop(standard_metadata);
     }
-
+    
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         standard_metadata.egress_spec = port;
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
@@ -108,11 +135,29 @@ control MyIngress(inout headers hdr,
             NoAction;
         }
         size = 1024;
-        default_action = drop();
+        default_action = NoAction();
     }
-
+    
     apply {
+
+        // meta.rank = (bit<32>) hdr.ipv4.tos;
+
         if (hdr.ipv4.isValid()) {
+            // if (meta.rank == 8) {
+            //     standard_metadata.priority = (bit<3>)0;
+            // }
+            // else if (meta.rank == 4) {
+            //     standard_metadata.priority = (bit<3>)0;
+            // }
+            // else if (meta.rank == 2) {
+            //     standard_metadata.priority = (bit<3>)0;
+            // }
+            // else if (meta.rank == 0) {
+            //     standard_metadata.priority = (bit<3>)0;
+            // }
+
+            // // standard_metadata.priority = (bit<3>)0;
+            
             ipv4_lpm.apply();
         }
     }
@@ -125,20 +170,24 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply { }
 }
 
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
 *************************************************************************/
 
-control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
+control MyVerifyChecksum(inout headers hdr, inout metadata meta) {   
+    apply { }
+}
+
+control MyComputeChecksum(inout headers hdr, inout metadata meta) {
      apply {
         update_checksum(
-        hdr.ipv4.isValid(),
+            hdr.ipv4.isValid(),
             { hdr.ipv4.version,
               hdr.ipv4.ihl,
-              hdr.ipv4.diffserv,
+              hdr.ipv4.tos,
               hdr.ipv4.totalLen,
               hdr.ipv4.identification,
               hdr.ipv4.flags,
@@ -160,6 +209,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
+        packet.emit(hdr.tcp);
     }
 }
 

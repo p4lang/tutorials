@@ -13,14 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from p4.tmp import p4config_pb2
+# Instead of using the protocol buffer class, we'll use a simple class that provides the same interface
+class SimpleP4DeviceConfig(object):
+    def __init__(self):
+        self.reassign = False
+        self.device_data = b''
+    
+    def SerializeToString(self):
+        """
+        Emulates the Protocol Buffer's SerializeToString method.
+        Just returns the device_data as binary string.
+        """
+        return self.device_data
 
 from .switch import SwitchConnection
 
 
 def buildDeviceConfig(bmv2_json_file_path=None):
     "Builds the device config for BMv2"
-    device_config = p4config_pb2.P4DeviceConfig()
+    device_config = SimpleP4DeviceConfig()
     device_config.reassign = True
     with open(bmv2_json_file_path) as f:
         device_config.device_data = f.read().encode('utf-8')
