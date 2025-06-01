@@ -3,7 +3,12 @@
 import argparse
 import os
 import sys
-from time import sleep
+import asyncio
+import traceback
+import time
+
+from collections import Counter
+from scapy.all import *
 
 import grpc
 
@@ -15,91 +20,183 @@ sys.path.append(
 import p4runtime_lib.bmv2
 import p4runtime_lib.helper
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
+import p4runtime_sh.p4runtime as shp4rt
 
-SWITCH_TO_HOST_PORT = 1
-SWITCH_TO_SWITCH_PORT = 2
+NSEC_PER_SEC = 1000 * 1000 * 1000
 
+global_data = {}
 
-def writeTunnelRules(p4info_helper, ingress_sw, egress_sw, tunnel_id,
-                     dst_eth_addr, dst_ip_addr):
+global_data['CPU_PORT'] = 510
+global_data['CPU_PORT_CLONE_SESSION_ID'] = 57
+global_data['NUM_PORTS'] = 3
+global_data['index'] = 0
+global_data["10.0.1.1"] = "08:00:00:00:01:11"
+global_data["10.0.2.2"] = "08:00:00:00:02:22"
+global_data["10.0.3.3"] = "08:00:00:00:03:33"
+
+# The lookup table is defined to simplify reachability and provide connectivity
+# among hosts.  In a real-world scenario, however, you should use an algorithm
+# to solve this problem more effectively.
+
+lookup_table = {
+    "s1": {
+        "10.0.1.1": 1,
+        "10.0.2.2": 2,
+        "10.0.3.3": 3
+    },
+    "s2": {
+        "10.0.2.2": 1,
+        "10.0.1.1": 2,
+        "10.0.3.3": 3
+    },
+    "s3": {
+        "10.0.3.3": 1,
+        "10.0.1.1": 2,
+        "10.0.2.2": 3
+    }
+}
+
+def ipv4ToInt(addr):
+    """Take an argument 'addr' containing an IPv4 address written as a
+    string in dotted decimal notation, e.g. '10.1.2.3', and convert it
+    to an integer."""
+    bytes_ = [int(b, 10) for b in addr.split('.')]
+    assert len(bytes_) == 4
+    # Note: The bytes() call below will throw exception if any
+    # elements of bytes_ is outside of the range [0, 255]], so no need
+    # to add a separate check for that here.
+    return int.from_bytes(bytes(bytes_), byteorder='big')
+
+def decodePacketInMetadata(pktin_info, packet):
+    pktin_field_to_val = {}
+    for md in packet.metadata:
+        md_id_int = md.metadata_id
+        md_val_int = int.from_bytes(md.value, byteorder='big')
+        assert md_id_int in pktin_info
+        md_field_info = pktin_info[md_id_int]
+        pktin_field_to_val[md_field_info['name']] = md_val_int
+    ret = {'metadata': pktin_field_to_val,
+           'payload': packet.payload}
+    print("decodePacketInMetadata: ret=%s" % (ret))
+    return ret
+
+def serializableEnumDict(p4info_data, name):
+    type_info = p4info_data.type_info
+    name_to_int = {}
+    int_to_name = {}
+    for member in type_info.serializable_enums[name].members:
+        name = member.name
+        int_val = int.from_bytes(member.value, byteorder='big')
+        name_to_int[name] = int_val
+        int_to_name[int_val] = name
+    print("serializableEnumDict: name='%s' name_to_int=%s int_to_name=%s"
+                  "" % (name, name_to_int, int_to_name))
+    return name_to_int, int_to_name
+
+def decodePacketInMetadata(pktin_info, packet):
+    pktin_field_to_val = {}
+    for md in packet.metadata:
+        md_id_int = md.metadata_id
+        md_val_int = int.from_bytes(md.value, byteorder='big')
+        assert md_id_int in pktin_info
+        md_field_info = pktin_info[md_id_int]
+        pktin_field_to_val[md_field_info['name']] = md_val_int
+    ret = {'metadata': pktin_field_to_val,
+           'payload': packet.payload}
+    print("decodePacketInMetadata: ret=%s" % (ret))
+    return ret
+
+def getObj(p4info_obj_map, obj_type, name):
+    key = (obj_type, name)
+    return p4info_obj_map.get(key, None)
+
+def controllerPacketMetadataDictKeyId(p4info_obj_map, name):
+    cpm_info = getObj(p4info_obj_map, "controller_packet_metadata", name)
+    assert cpm_info != None
+    ret = {}
+    for md in cpm_info.metadata:
+        id = md.id
+        ret[md.id] = {'id': md.id, 'name': md.name, 'bitwidth': md.bitwidth}
+    return ret
+
+def makeP4infoObjMap(p4info_data):
+    p4info_obj_map = {}
+    suffix_count = Counter()
+    for obj_type in ["tables", "action_profiles", "actions", "counters",
+                     "direct_counters", "controller_packet_metadata"]:
+        for obj in getattr(p4info_data, obj_type):
+            pre = obj.preamble
+            suffix = None
+            for s in reversed(pre.name.split(".")):
+                suffix = s if suffix is None else s + "." + suffix
+                key = (obj_type, suffix)
+                p4info_obj_map[key] = obj
+                suffix_count[key] += 1
+    for key, c in list(suffix_count.items()):
+        if c > 1:
+            del p4info_obj_map[key]
+    return p4info_obj_map
+
+def writeCloneSession(sw, clone_session_id, replicas):
+    # Size 0 bmv2 does not support truncation for clones, issue behavioral-model #996
+    clone_entry = global_data['p4info_helper'].buildCloneSessionEntry(clone_session_id, replicas, 0)
+    sw.WritePREEntry(clone_entry)
+
+def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp, decrement_ttl_bool, dst_eth_addr):
     """
-    Installs three rules:
-    1) An tunnel ingress rule on the ingress switch in the ipv4_lpm table that
-       encapsulates traffic into a tunnel with the specified ID
-    2) A transit rule on the ingress switch that forwards traffic based on
-       the specified ID
-    3) An tunnel egress rule on the egress switch that decapsulates traffic
-       with the specified ID and sends it to the host
+    Install flow rule in flow cache table
 
-    :param p4info_helper: the P4Info helper
-    :param ingress_sw: the ingress switch connection
-    :param egress_sw: the egress switch connection
-    :param tunnel_id: the specified tunnel ID
-    :param dst_eth_addr: the destination IP to match in the ingress rule
-    :param dst_ip_addr: the destination Ethernet address to write in the
-                        egress rule
+    :param ingress_sw: The ingress switch connection.
+    :param protocol: The IP protocol to match in the ingress rule.
+    :param src_ip_addr: The source IP address to match in the ingress rule.
+    :param dst_ip_addr: The destination IP address to match in the ingress rule.
+    :param port: The output port to which the packet will be forwarded.
+    :param decrement_ttl: The updated TTL value for the IP.
+    :param new_dscp: The new DSCP value for the IP.
+    :param dst_eth_addr: the destination Ethernet address to write in the rule
     """
-    # 1) Tunnel Ingress Rule
-    table_entry = p4info_helper.buildTableEntry(
-        table_name="MyIngress.ipv4_lpm",
+
+    if decrement_ttl_bool:
+        x = 1
+    else:
+        x = 0
+
+    table_entry = global_data['p4info_helper'].buildTableEntry(
+        table_name="MyIngress.flow_cache",
         match_fields={
-            "hdr.ipv4.dstAddr": (dst_ip_addr, 32)
+            "hdr.ipv4.protocol": protocol,
+            "hdr.ipv4.srcAddr": src_ip_addr,
+            "hdr.ipv4.dstAddr": dst_ip_addr
         },
-        action_name="MyIngress.myTunnel_ingress",
+        action_name="MyIngress.cached_action",
         action_params={
-            "dst_id": tunnel_id,
-        })
+            "port":           port,
+            "decrement_ttl":  x,
+            "new_dscp":       new_dscp,
+            "dst_eth_addr":   dst_eth_addr
+        },
+        # TODO: Add idle timeout
+        idle_timeout_ns = 3 * NSEC_PER_SEC
+        )
     ingress_sw.WriteTableEntry(table_entry)
-    print("Installed ingress tunnel rule on %s" % ingress_sw.name)
+    print("Installed ingress rule on %s" % ingress_sw.name)
 
-    # 2) Tunnel Transit Rule
-    # The rule will need to be added to the myTunnel_exact table and match on
-    # the tunnel ID (hdr.myTunnel.dst_id). Traffic will need to be forwarded
-    # using the myTunnel_forward action on the port connected to the next switch.
-    #
-    # For our simple topology, switch 1 and switch 2 are connected using a
-    # link attached to port 2 on both switches. We have defined a variable at
-    # the top of the file, SWITCH_TO_SWITCH_PORT, that you can use as the output
-    # port for this action.
-    #
-    # We will only need a transit rule on the ingress switch because we are
-    # using a simple topology. In general, you'll need on transit rule for
-    # each switch in the path (except the last switch, which has the egress rule),
-    # and you will need to select the port dynamically for each switch based on
-    # your topology.
+def deleteFlowRule(notif):
+    notif["sw"].DeleteTableEntry(notif["idle"].table_entry[0])
+    print("Deleted ingress rule on %s" % notif["sw"].name)
 
-    # TODO build the transit rule
-    # TODO install the transit rule on the ingress switch
-    table_entry = p4info_helper.buildTableEntry(
-        table_name="MyIngress.myTunnel_exact",
-        match_fields={
-            "hdr.myTunnel.dst_id": tunnel_id
-        },
-        action_name="MyIngress.myTunnel_forward",
-        action_params={
-            "port": SWITCH_TO_SWITCH_PORT
-        })
-    ingress_sw.WriteTableEntry(table_entry)
-    print("Installed transit tunnel rule on %s" % ingress_sw.name)
+def packetOutMetadataList(opcode, reserved1, operand0):
+    # This function does not use the generated contents of the P4Info
+    # file to map PacketOut metadata fields to indices.  If you change
+    # the PacketOut metadata format in the P4 program, this code must
+    # be manually updated to match.
+    return [{"value": opcode, "bitwidth": 8},
+            {"value": reserved1, "bitwidth": 8},
+            {"value": operand0, "bitwidth": 32}]
 
-    # 3) Tunnel Egress Rule
-    # For our simple topology, the host will always be located on the
-    # SWITCH_TO_HOST_PORT (port 1).
-    # In general, you will need to keep track of which port the host is
-    # connected to.
-    table_entry = p4info_helper.buildTableEntry(
-        table_name="MyIngress.myTunnel_exact",
-        match_fields={
-            "hdr.myTunnel.dst_id": tunnel_id
-        },
-        action_name="MyIngress.myTunnel_egress",
-        action_params={
-            "dstAddr": dst_eth_addr,
-            "port": SWITCH_TO_HOST_PORT
-        })
-    egress_sw.WriteTableEntry(table_entry)
-    print("Installed egress tunnel rule on %s" % egress_sw.name)
-
+def sendPacketOut(sw ,payload, metadatas):
+    # TODO: Implement the function logic to send a packet-out message
+    sw.PacketOut(payload, metadatas)
 
 def readTableRules(p4info_helper, sw):
     """
@@ -114,37 +211,140 @@ def readTableRules(p4info_helper, sw):
             entry = entity.table_entry
             # TODO For extra credit, you can use the p4info_helper to translate
             #      the IDs in the entry to names
-            table_name = p4info_helper.get_tables_name(entry.table_id)
-            print('%s: ' % table_name, end=' ')
-            for m in entry.match:
-                print(p4info_helper.get_match_field_name(table_name, m.field_id), end=' ')
-                print('%r' % (p4info_helper.get_match_field_value(m),), end=' ')
-            action = entry.action.action
-            action_name = p4info_helper.get_actions_name(action.action_id)
-            print('->', action_name, end=' ')
-            for p in action.params:
-                print(p4info_helper.get_action_param_name(action_name, p.param_id), end=' ')
-                print('%r' % p.value, end=' ')
-            print()
+            print(entry)
+            print('-----')
 
 def printCounter(p4info_helper, sw, counter_name, index):
     """
-    Reads the specified counter at the specified index from the switch. In our
-    program, the index is the tunnel ID. If the index is 0, it will return all
-    values from the counter.
+    Reads the specified counter at the given index from the switch. In our
+    program, the index is derived from the first 6 bits of the IP destination address.
+    If the index is 0, it will return all values from the counter.
 
     :param p4info_helper: the P4Info helper
     :param sw:  the switch connection
     :param counter_name: the name of the counter from the P4 program
-    :param index: the counter index (in our case, the tunnel ID)
+    :param index: the counter index (in our case, first 6 bits of the IP)
     """
-    for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
-        for entity in response.entities:
-            counter = entity.counter_entry
-            print("%s %s %d: %d packets (%d bytes)" % (
-                sw.name, counter_name, index,
-                counter.data.packet_count, counter.data.byte_count
-            ))
+    try:
+        for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
+            for entity in response.entities:
+                counter = entity.counter_entry
+                print("%s %s %d: %d packets (%d bytes)" % (
+                    sw.name, counter_name, index,
+                    counter.data.packet_count, counter.data.byte_count
+                ))
+    except grpc.RpcError as e:
+           print(f"[gRPC Error in printCounter for {sw.name}]")
+           printGrpcError(e)
+
+           if e.code() == grpc.StatusCode.UNKNOWN:
+            print(f"Unknown gRPC error from {sw.name}. Retrying...")
+            time.sleep(2)
+
+    except Exception as e:
+           print(f"[Unexpected Error in printCounter for {sw.name}]: {e}")
+           traceback.print_exc()
+           time.sleep(2)
+
+def processPacket(message):
+        payload = message["packet-in"].payload
+        packet = message["packet-in"]
+        print("Received PacketIn message of length %d bytes from switch %s"
+              "" % (len(payload), message["sw"].name))
+        if len(payload) > 0:
+            i = 0
+            pkt = Ether(payload)
+            ip_proto = pkt[IP].proto
+            ip_sa_str = pkt[IP].src
+            src_ip_addr = ipv4ToInt(ip_sa_str)
+            ip_da_str = pkt[IP].dst
+            dst_ip_addr = ipv4ToInt(ip_da_str)
+            pktinfo = decodePacketInMetadata(global_data['cpm_packetin_id2data'], packet)
+            debug_packetin = False
+            if debug_packetin:
+                i += 1
+                print("")
+                print("pktin %d of %d" % (i, len(payload)))
+                print("type(pktin.packet.payload)=%s"
+                      "" % (type(payload)))
+                print(payload)
+                print(pktinfo)
+                print("Scapy decode:")
+                print(pkt)
+                print("IPv4 proto %d (type %s)"
+                      "" % (ip_proto, type(ip_proto)))
+                print("IPv4 SA %08x (type %s)"
+                      "" % (src_ip_addr, type(src_ip_addr)))
+                print("IPv4 DA %08x (type %s)"
+                      "" % (dst_ip_addr, type(dst_ip_addr)))
+            if pktinfo['metadata']['punt_reason'] == global_data['punt_reason_name2int']['FLOW_UNKNOWN']:
+                dest_port_int = lookup_table[message["sw"].name][ip_da_str]
+                decrement_ttl_bool = True
+                new_dscp_int = 5
+                global_data['index'] = int(pkt[IP].dst.split('.')[3])
+                dst_eth_addr = global_data[ip_da_str]
+                metadatas = packetOutMetadataList(
+                    global_data['controller_opcode_name2int']['SEND_TO_PORT_IN_OPERAND0'],
+                    0, dest_port_int)
+                sendPacketOut(message["sw"], payload, metadatas)
+                addFlowRule(message["sw"],
+                            src_ip_addr,
+                            dst_ip_addr,
+                            ip_proto,
+                            dest_port_int,
+                            new_dscp_int,
+                            decrement_ttl_bool,
+                            dst_eth_addr)
+
+                print("For flow (SA=%s, DA=%s, proto=%d)"
+                            " added table entry to send packets"
+                            " to port %d with new DSCP %d"
+                            "" % (ip_sa_str, ip_da_str, ip_proto,
+                                  dest_port_int, new_dscp_int))
+
+async def processNotif(notif_queue):
+        while True:
+            notif = await notif_queue.get()
+            print(notif)
+            if notif["type"] == "packet-in":
+                processPacket(notif)
+                printCounter(global_data ['p4info_helper'], notif["sw"], 'MyIngress.ingressPktOutCounter', global_data ['index'])
+                printCounter(global_data ['p4info_helper'], notif["sw"], 'MyEgress.egressPktInCounter', global_data ['index'])
+                readTableRules(global_data ['p4info_helper'], notif["sw"])
+            elif notif["type"] == "idle-notif":
+                deleteFlowRule(notif)
+
+            notif_queue.task_done()
+
+async def packetInHandler(notif_queue,sw):
+    # TODO: Implement the function logic to handle a packet-in message
+    while True:
+        try:
+            packet_in = await asyncio.to_thread(sw.PacketIn)
+            print(f"Received packet: {packet_in}")
+            message = {"type": "packet-in", "sw": sw, "packet-in": packet_in}
+            await notif_queue.put(message)
+
+        except grpc.RpcError as e:
+            print(f"[gRPC Error in packetInHandler for {sw.name}]")
+            printGrpcError(e)
+
+            if e.code() == grpc.StatusCode.UNKNOWN:
+                print(f"Unknown gRPC error from {sw.name}. Retrying...")
+            await asyncio.sleep(2)
+
+        except Exception as e:
+            print(f"[Unexpected Error in packetInHandler for {sw.name}]: {e}")
+            traceback.print_exc()
+            await asyncio.sleep(2)
+
+async def idleTimeHandler(notif_queue,sw):
+    # TODO: Implement the function logic to handle idle timeout notification
+    while True:
+        idle_notif = await asyncio.to_thread(sw.IdleTimeoutNotification)
+        message = {"type": "idle-notif", "sw": sw, "idle": idle_notif}
+        await notif_queue.put(message)
+        await asyncio.sleep(5)
 
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=' ')
@@ -153,12 +353,13 @@ def printGrpcError(e):
     traceback = sys.exc_info()[2]
     print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno))
 
-def main(p4info_file_path, bmv2_file_path):
+async def main(p4info_file_path, bmv2_file_path):
     # Instantiate a P4Runtime helper from the p4info file
-    p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
+    global_data ['p4info_helper'] = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
+    p4info_helper = global_data ['p4info_helper']
 
     try:
-        # Create a switch connection object for s1 and s2;
+        # Create a switch connection object for s1,s2,s3;
         # this is backed by a P4Runtime gRPC connection.
         # Also, dump all P4Runtime messages sent to switch to given txt files.
         s1 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
@@ -171,11 +372,17 @@ def main(p4info_file_path, bmv2_file_path):
             address='127.0.0.1:50052',
             device_id=1,
             proto_dump_file='logs/s2-p4runtime-requests.txt')
+        s3 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
+            name='s3',
+            address='127.0.0.1:50053',
+            device_id=2,
+            proto_dump_file='logs/s3-p4runtime-requests.txt')
 
         # Send master arbitration update message to establish this controller as
         # master (required by P4Runtime before performing any other write operation)
         s1.MasterArbitrationUpdate()
         s2.MasterArbitrationUpdate()
+        s3.MasterArbitrationUpdate()
 
         # Install the P4 program on the switches
         s1.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
@@ -184,27 +391,45 @@ def main(p4info_file_path, bmv2_file_path):
         s2.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
                                        bmv2_json_file_path=bmv2_file_path)
         print("Installed P4 Program using SetForwardingPipelineConfig on s2")
+        s3.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
+                                       bmv2_json_file_path=bmv2_file_path)
+        print("Installed P4 Program using SetForwardingPipelineConfig on s3")
 
-        # Write the rules that tunnel traffic from h1 to h2
-        writeTunnelRules(p4info_helper, ingress_sw=s1, egress_sw=s2, tunnel_id=100,
-                         dst_eth_addr="08:00:00:00:02:22", dst_ip_addr="10.0.2.2")
+        global_data['p4info_obj_map'] = makeP4infoObjMap(p4info_helper.p4info)
+        global_data['cpm_packetin_id2data'] = \
+        controllerPacketMetadataDictKeyId(global_data['p4info_obj_map'],
+                                                   "packet_in")
 
-        # Write the rules that tunnel traffic from h2 to h1
-        writeTunnelRules(p4info_helper, ingress_sw=s2, egress_sw=s1, tunnel_id=200,
-                         dst_eth_addr="08:00:00:00:01:11", dst_ip_addr="10.0.1.1")
+        global_data['punt_reason_name2int'], global_data['punt_reason_int2name'] = \
+                serializableEnumDict(p4info_helper.p4info, 'PuntReason_t')
+        global_data['controller_opcode_name2int'], global_data['controller_opcode_int2name'] = \
+                serializableEnumDict(p4info_helper.p4info, 'ControllerOpcode_t')
 
-        # TODO Uncomment the following two lines to read table entries from s1 and s2
-        readTableRules(p4info_helper, s1)
-        readTableRules(p4info_helper, s2)
+        try:
+            replicas = [{ "egress_port": global_data['CPU_PORT'], "instance": 1 }]
+            writeCloneSession(s1, global_data['CPU_PORT_CLONE_SESSION_ID'], replicas)
+            writeCloneSession(s2, global_data['CPU_PORT_CLONE_SESSION_ID'], replicas)
+            writeCloneSession(s3, global_data['CPU_PORT_CLONE_SESSION_ID'], replicas)
 
-        # Print the tunnel counters every 2 seconds
-        while True:
-            sleep(2)
-            print('\n----- Reading tunnel counters -----')
-            printCounter(p4info_helper, s1, "MyIngress.ingressTunnelCounter", 100)
-            printCounter(p4info_helper, s2, "MyIngress.egressTunnelCounter", 100)
-            printCounter(p4info_helper, s2, "MyIngress.ingressTunnelCounter", 200)
-            printCounter(p4info_helper, s1, "MyIngress.egressTunnelCounter", 200)
+        except shp4rt.P4RuntimeWriteException as e:
+               print("Got exception trying to configure clone session %d."
+                        "  Assuming it was initialized already in an earlier"
+                        " run of the controller."
+                        "" % (global_data['CPU_PORT_CLONE_SESSION_ID']))
+
+        notif_queue = asyncio.Queue()
+
+        pkt_s1 = asyncio.create_task(packetInHandler(notif_queue, s1))
+        pkt_s2 = asyncio.create_task(packetInHandler(notif_queue, s2))
+        pkt_s3 = asyncio.create_task(packetInHandler(notif_queue, s3))
+
+        idle_notif_s1 = asyncio.create_task(idleTimeHandler(notif_queue, s1))
+        idle_notif_s2 = asyncio.create_task(idleTimeHandler(notif_queue, s2))
+        idle_notif_s3 = asyncio.create_task(idleTimeHandler(notif_queue, s3))
+
+        proc_notif = asyncio.create_task(processNotif(notif_queue))
+
+        await asyncio.gather(pkt_s1,pkt_s2,pkt_s3,idle_notif_s1, idle_notif_s2, idle_notif_s3, proc_notif)
 
     except KeyboardInterrupt:
         print(" Shutting down.")
@@ -231,4 +456,4 @@ if __name__ == '__main__':
         parser.print_help()
         print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % args.bmv2_json)
         parser.exit(1)
-    main(args.p4info, args.bmv2_json)
+    asyncio.run(main(args.p4info, args.bmv2_json))
