@@ -6,6 +6,7 @@ import sys
 import asyncio
 import traceback
 import time
+import ipaddress
 
 from collections import Counter
 from scapy.all import *
@@ -182,7 +183,15 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
     print("Installed ingress rule on %s" % ingress_sw.name)
 
 def deleteFlowRule(notif):
-    notif["sw"].DeleteTableEntry(notif["idle"].table_entry[0])
+    table_entry = global_data['p4info_helper'].buildTableEntry(
+        table_name="MyIngress.flow_cache",
+        match_fields={
+            "hdr.ipv4.protocol": int.from_bytes(notif["idle"].table_entry[0].match[0].exact.value,byteorder='big'),
+            "hdr.ipv4.srcAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[2].exact.value)),
+            "hdr.ipv4.dstAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[1].exact.value))
+        },
+    )
+    notif["sw"].DeleteTableEntry(table_entry)
     print("Deleted ingress rule on %s" % notif["sw"].name)
 
 def packetOutMetadataList(opcode, reserved1, operand0):
@@ -310,10 +319,9 @@ async def processNotif(notif_queue):
                 processPacket(notif)
                 printCounter(global_data ['p4info_helper'], notif["sw"], 'MyIngress.ingressPktOutCounter', global_data ['index'])
                 printCounter(global_data ['p4info_helper'], notif["sw"], 'MyEgress.egressPktInCounter', global_data ['index'])
-                readTableRules(global_data ['p4info_helper'], notif["sw"])
+                #readTableRules(global_data ['p4info_helper'], notif["sw"])
             elif notif["type"] == "idle-notif":
                 deleteFlowRule(notif)
-
             notif_queue.task_done()
 
 async def packetInHandler(notif_queue,sw):
@@ -434,7 +442,9 @@ async def main(p4info_file_path, bmv2_file_path):
     except KeyboardInterrupt:
         print(" Shutting down.")
     except grpc.RpcError as e:
-        printGrpcError(e)
+        print(f"gRPC error occurred: {e}")
+        print(f"Status code: {e.code()}")  # e.g., StatusCode.UNAVAILABLE or StatusCode.INVALID_ARGUMENT
+        print(f"Details: {e.details()}")
 
     ShutdownAllSwitchConnections()
 

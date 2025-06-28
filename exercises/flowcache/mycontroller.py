@@ -6,6 +6,7 @@ import sys
 import asyncio
 import traceback
 import time
+import ipaddress
 
 from collections import Counter
 from scapy.all import *
@@ -180,8 +181,17 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
     ingress_sw.WriteTableEntry(table_entry)
     print("Installed ingress rule on %s" % ingress_sw.name)
 
+
 def deleteFlowRule(notif):
-    notif["sw"].DeleteTableEntry(notif["idle"].table_entry[0])
+    table_entry = global_data['p4info_helper'].buildTableEntry(
+        table_name="MyIngress.flow_cache",
+        match_fields={
+            "hdr.ipv4.protocol": int.from_bytes(notif["idle"].table_entry[0].match[0].exact.value,byteorder='big'),
+            "hdr.ipv4.srcAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[2].exact.value)),
+            "hdr.ipv4.dstAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[1].exact.value))
+        },
+    )
+    notif["sw"].DeleteTableEntry(table_entry)
     print("Deleted ingress rule on %s" % notif["sw"].name)
 
 def packetOutMetadataList(opcode, reserved1, operand0):
