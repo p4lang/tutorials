@@ -8,10 +8,10 @@ index 558d2a0..b7d0d76 100644
 -sudo pip3 install nnpy cffi
 +pip3 install nnpy cffi
 diff --git a/ci/install-thrift.sh b/ci/install-thrift.sh
-index c3f7a2e..1805da3 100644
+index 1316476..ea6203c 100644
 --- a/ci/install-thrift.sh
 +++ b/ci/install-thrift.sh
-@@ -3,17 +3,13 @@
+@@ -3,22 +3,18 @@
  THIS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
  source $THIS_DIR/common.sh
  
@@ -27,9 +27,14 @@ index c3f7a2e..1805da3 100644
 +git clone -b 0.16.0 https://github.com/apache/thrift.git thrift-0.16.0
 +cd thrift-0.16.0
  ./bootstrap.sh
--./configure --with-cpp=yes --with-c_glib=no --with-java=no --with-ruby=no --with-erlang=no --with-go=no --with-nodejs=no
-+./configure --with-cpp=yes --with-c_glib=no --with-java=no --with-ruby=no --with-erlang=no --with-go=no --with-nodejs=no --with-python=no
- make -j2 && sudo make install
+ ./configure --with-as3=no --with-c_glib=no --with-csharp=no --with-cpp=yes \
+     --with-cl=no --with-d=no --with-dart=no --with-dotnetcore=no \
+     --with-erlang=no --with-go=no --with-haskell=no --with-haxe=no \
+     --with-java=no --with-lua=no --with-nodejs=no --with-nodets=no \
+-    --with-perl=no --with-php=no --with-python=yes --with-py3=no \
++    --with-perl=no --with-php=no --with-python=no --with-py3=no \
+     --with-qt5=no --with-ruby=no --with-rs=no --with-swift=no
+ make -j4 && sudo make install
 -cd lib/py
 -sudo python3 setup.py install
 -cd ../../..
