@@ -7,8 +7,10 @@ import asyncio
 import traceback
 import time
 import ipaddress
+import pprint
 
 from collections import Counter
+from datetime import datetime, timedelta
 from scapy.all import *
 
 import grpc
@@ -35,8 +37,11 @@ global_data["10.0.1.1"] = "08:00:00:00:01:11"
 global_data["10.0.2.2"] = "08:00:00:00:02:22"
 global_data["10.0.3.3"] = "08:00:00:00:03:33"
 
+## The notification database keeps track of the received idle notifications and triggers the deletion of stale flow rules.
+notif_db = {}
+
 # The lookup table is defined to simplify reachability and provide connectivity
-# among hosts.  In a real-world scenario, however, you should use an algorithm
+# among hosts. In a real-world scenario, however, you should use an algorithm
 # to solve this problem more effectively.
 
 lookup_table = {
@@ -120,6 +125,7 @@ def controllerPacketMetadataDictKeyId(p4info_obj_map, name):
         ret[md.id] = {'id': md.id, 'name': md.name, 'bitwidth': md.bitwidth}
     return ret
 
+
 def makeP4infoObjMap(p4info_data):
     p4info_obj_map = {}
     suffix_count = Counter()
@@ -181,18 +187,54 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
     ingress_sw.WriteTableEntry(table_entry)
     print("Installed ingress rule on %s" % ingress_sw.name)
 
-
-def deleteFlowRule(notif):
+def createFlowRule(notif):
     table_entry = global_data['p4info_helper'].buildTableEntry(
         table_name="MyIngress.flow_cache",
         match_fields={
             "hdr.ipv4.protocol": int.from_bytes(notif["idle"].table_entry[0].match[0].exact.value,byteorder='big'),
-            "hdr.ipv4.srcAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[2].exact.value)),
-            "hdr.ipv4.dstAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[1].exact.value))
+            "hdr.ipv4.srcAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[1].exact.value)),
+            "hdr.ipv4.dstAddr": int(ipaddress.IPv4Address(notif["idle"].table_entry[0].match[2].exact.value))
         },
     )
-    notif["sw"].DeleteTableEntry(table_entry)
-    print("Deleted ingress rule on %s" % notif["sw"].name)
+    return table_entry
+
+def deleteFlowRule(sw, table_entry):
+    sw.DeleteTableEntry(table_entry)
+    print("Deleted ingress rule on %s" % sw.name)
+
+def addNotification(sw_name, flow_rule):
+    # Add notification to notification DB
+    notification = {
+        "timestamp": datetime.now(),
+        "flow_rule": flow_rule,
+    }
+    notif_db[sw_name].append(notification)
+
+def checkFlowRule(sw_name, flow_rule):
+    # Checks if a flow rule is already in the notification DB
+    # to avoid storing multiple notifications for the same flow rule
+    if sw_name not in notif_db:
+        return False
+
+    for notif in notif_db[sw_name]:
+        if notif["flow_rule"] == flow_rule:
+            return True
+        
+    return False
+
+def isExpired(timestamp, timeout):
+    return datetime.now() - timestamp > timedelta(seconds=timeout)
+
+def cleanExpiredNotifiction(sw_name, timeout=5):
+    # Removes expired notifications 
+    if sw_name not in notif_db:
+        return False
+    # Filter the notifications to remove expired ones
+    notif_db[sw_name] = [
+        notif for notif in notif_db[sw_name]
+        if not isExpired(notif["timestamp"], timeout)
+    ]
+    return True
 
 def packetOutMetadataList(opcode, reserved1, operand0):
     # This function does not use the generated contents of the P4Info
@@ -205,7 +247,6 @@ def packetOutMetadataList(opcode, reserved1, operand0):
 
 def sendPacketOut(sw ,payload, metadatas):
     # TODO: Implement the function logic to send a packet-out message
-    sw.PacketOut(payload, metadatas)
 
 def readTableRules(p4info_helper, sw):
     """
@@ -314,15 +355,33 @@ def processPacket(message):
 async def processNotif(notif_queue):
         while True:
             notif = await notif_queue.get()
-            print(notif)
+            debug_notif = False
+            if debug_notif:
+                print(notif)
+                pprint.pprint(notif_db)
             if notif["type"] == "packet-in":
                 processPacket(notif)
                 printCounter(global_data ['p4info_helper'], notif["sw"], 'MyIngress.ingressPktOutCounter', global_data ['index'])
                 printCounter(global_data ['p4info_helper'], notif["sw"], 'MyEgress.egressPktInCounter', global_data ['index'])
-                readTableRules(global_data ['p4info_helper'], notif["sw"])
+                if debug_notif:
+                    readTableRules(global_data ['p4info_helper'], notif["sw"])
             elif notif["type"] == "idle-notif":
-                deleteFlowRule(notif)
+                # TODO: For extra credit, you can experiment with adjusting the stale time for notifications (e.g., 10 seconds)
+                # and optimize the behavior of the notification database (notif_db).
+                if notif["sw"].name not in notif_db:
+                    notif_db[notif["sw"].name] = []
+                else:
+                    # Check if a notification is older than 10 seconds
+                    cleanExpiredNotifiction(notif["sw"].name, 10)
 
+                table_entry = createFlowRule(notif)
+
+                if len(notif_db.get(notif["sw"].name, [])) == 0: 
+                    addNotification(notif["sw"].name, table_entry)
+                    deleteFlowRule(notif["sw"], table_entry)
+                if not checkFlowRule(notif["sw"].name, table_entry):
+                    addNotification(notif["sw"].name, table_entry)
+                    deleteFlowRule(notif["sw"], table_entry)
             notif_queue.task_done()
 
 async def packetInHandler(notif_queue,sw):
@@ -436,7 +495,9 @@ async def main(p4info_file_path, bmv2_file_path):
     except KeyboardInterrupt:
         print(" Shutting down.")
     except grpc.RpcError as e:
-        printGrpcError(e)
+        print(f"gRPC error occurred: {e}")
+        print(f"Status code: {e.code()}")  # e.g., StatusCode.UNAVAILABLE or StatusCode.INVALID_ARGUMENT
+        print(f"Details: {e.details()}")
 
     ShutdownAllSwitchConnections()
 
