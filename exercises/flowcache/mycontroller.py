@@ -73,6 +73,23 @@ def ipv4ToInt(addr):
     # to add a separate check for that here.
     return int.from_bytes(bytes(bytes_), byteorder='big')
 
+def intToIpv4(n):
+    """Take an argument 'n' containing a 32-bit IPv4 address as an
+    integer in the range [0, 2^32-1], and return a string in dotted
+    decimal notation."""
+    return "%d.%d.%d.%d" % ((n >> 24) & 0xff,
+                            (n >> 16) & 0xff,
+                            (n >> 8) & 0xff,
+                            n & 0xff)
+
+def flowCacheEntryToDebugStr(table_entry, include_action=False):
+    # TODO: The match fields are hardcoded to specific indices to retrieve specific parameters, such as hdr.ipv4.srcAddr and its value.
+    src_ip = intToIpv4(int.from_bytes(table_entry.match[1].exact.value, byteorder='big'))
+    dst_ip = intToIpv4(int.from_bytes(table_entry.match[2].exact.value, byteorder='big'))
+    proto = int.from_bytes(table_entry.match[0].exact.value, byteorder='big')
+    return ("(SA=%s, DA=%s, proto=%d)"
+            "" % (src_ip, dst_ip, proto))
+
 def decodePacketInMetadata(pktin_info, packet):
     pktin_field_to_val = {}
     for md in packet.metadata:
@@ -185,9 +202,11 @@ def addFlowRule( ingress_sw, src_ip_addr, dst_ip_addr, protocol, port, new_dscp,
         # TODO: Add idle timeout
         )
     ingress_sw.WriteTableEntry(table_entry)
-    print("Installed ingress rule on %s" % ingress_sw.name)
 
 def createFlowRule(notif):
+    # TODO: This function generates a flow entry to trigger deletion. 
+    # The match fields are populated using values retrieved from the IDLE notification.
+    # Hardcoded values are configured to extract specific parameters, such as hdr.ipv4.protocol, from the IDLE notification.
     table_entry = global_data['p4info_helper'].buildTableEntry(
         table_name="MyIngress.flow_cache",
         match_fields={
@@ -200,7 +219,8 @@ def createFlowRule(notif):
 
 def deleteFlowRule(sw, table_entry):
     sw.DeleteTableEntry(table_entry)
-    print("Deleted ingress rule on %s" % sw.name)
+    print("Deleted flow_cache entry on %s. %s"
+          "" % (sw.name, flowCacheEntryToDebugStr(table_entry)))
 
 def addNotification(sw_name, flow_rule):
     # Add notification to notification DB
@@ -346,11 +366,11 @@ def processPacket(message):
                             decrement_ttl_bool,
                             dst_eth_addr)
 
-                print("For flow (SA=%s, DA=%s, proto=%d)"
+                print("For switch %s flow (SA=%s, DA=%s, proto=%d)"
                             " added table entry to send packets"
                             " to port %d with new DSCP %d"
-                            "" % (ip_sa_str, ip_da_str, ip_proto,
-                                  dest_port_int, new_dscp_int))
+                            "" % (message["sw"].name, ip_sa_str, ip_da_str,
+                                  ip_proto, dest_port_int, new_dscp_int))
 
 async def processNotif(notif_queue):
         while True:
@@ -376,18 +396,24 @@ async def processNotif(notif_queue):
 
                 table_entry = createFlowRule(notif)
 
-                if len(notif_db.get(notif["sw"].name, [])) == 0: 
-                    addNotification(notif["sw"].name, table_entry)
-                    deleteFlowRule(notif["sw"], table_entry)
                 if not checkFlowRule(notif["sw"].name, table_entry):
                     addNotification(notif["sw"].name, table_entry)
                     deleteFlowRule(notif["sw"], table_entry)
+                else:
+                    print("Received idle timeout notification for switch=%s %s"
+                          "  It is duplicate of recently processed notification, so ignoring it."
+                          "" % (notif["sw"].name,
+                                flowCacheEntryToDebugStr(table_entry)))
             notif_queue.task_done()
 
 async def packetInHandler(notif_queue,sw):
     # TODO: Implement the function logic to handle a packet-in message
     while True:
         try:
+            packet_in = await asyncio.to_thread(sw.PacketIn)
+            #print(f"Received packet: {packet_in}")
+            message = {"type": "packet-in", "sw": sw, "packet-in": packet_in}
+            await notif_queue.put(message)
 
         except grpc.RpcError as e:
             print(f"[gRPC Error in packetInHandler for {sw.name}]")
@@ -405,7 +431,10 @@ async def packetInHandler(notif_queue,sw):
 async def idleTimeHandler(notif_queue,sw):
     # TODO: Implement the function logic to handle idle timeout notification
     while True:
-
+        idle_notif = await asyncio.to_thread(sw.IdleTimeoutNotification)
+        message = {"type": "idle-notif", "sw": sw, "idle": idle_notif}
+        await notif_queue.put(message)
+        await asyncio.sleep(5)
 
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=' ')

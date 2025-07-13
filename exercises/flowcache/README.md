@@ -165,6 +165,13 @@ You might notice that the rules that are printed by `mycontroller.py` contain th
 IDs rather than the table names. You can use the P4Info helper to translate these IDs
 into entry names.
 
+The current mechanism for triggering the deletion of a stale flow rule can be improved. 
+As shown in the code of `mycontroller.py`, a notification database is maintained to track 
+the flow rules. Thanks to this, the deletion of a single flow rule is performed only once. 
+However, there is a need for a mechanism to ensure that the deletion is triggered only once. 
+Without this safeguard, errors may occur when attempting to delete the same flow rule multiple 
+times or when trying to delete a flow rule that no longer exists. To address this issue, 
+you can provide and experiment with different approaches.
 
 If you are interested, you can find the protocol buffer and gRPC definitions here:
 - [P4Runtime](https://github.com/p4lang/p4runtime/blob/main/proto/p4/v1/p4runtime.proto)
