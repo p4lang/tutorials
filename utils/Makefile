@@ -41,7 +41,7 @@ stop:
 build: dirs $(compiled_json)
 
 %.json: %.p4
-	$(P4C) --p4v 16 $(P4C_ARGS) -o $(BUILD_DIR)/$@ $<
+	$(P4C) --p4v 16 $(P4C_ARGS) -o $(BUILD_DIR)/$@ $< --emit-externs
 
 dirs:
 	mkdir -p $(BUILD_DIR) $(PCAP_DIR) $(LOG_DIR)
