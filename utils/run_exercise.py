@@ -33,6 +33,8 @@ from mininet.net import Mininet
 from mininet.topo import Topo
 from p4_mininet import P4Host, P4Switch
 from p4runtime_switch import P4RuntimeSwitch
+from run_sim import sending_function
+# from run_sim_ex import sending_function
 
 
 def configureP4Switch(**switch_args):
@@ -362,6 +364,10 @@ class ExerciseRunner:
             print('corresponding txt file in %s:' % self.log_dir)
             print(' for example run:  cat %s/s1-p4runtime-requests.txt' % self.log_dir)
             print('')
+
+        # calling the function to generate the iperf traffic.
+        sending_function(self)
+    
 
         CLI(self.net)
 
