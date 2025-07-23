@@ -18,6 +18,8 @@
 # Print commands and exit on errors
 set -xe
 
+export DEBIAN_FRONTEND=noninteractive
+
 apt-get update
 apt-get -y upgrade
 apt-get install -y \
