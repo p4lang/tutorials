@@ -1,25 +1,14 @@
-// SPDX-License-Identifier: Apache-2.0
 /* -*- P4_16 -*- */
 #include <core.p4>
 #include <v1model.p4>
 
-const bit<16> TYPE_IPV4 = 0x800;
+extern pifo_scheduler<T1,T2> {
+    pifo_scheduler(bit<1> verbose); 
+void my_scheduler(in T1 in_flow_id, in T1 idle_time, in T2 in_enq, in T1 in_pkt_ptr, in T2 reset_time);
+void pass_rank_values ( in T1 rank_value, in T1 level_id);
+}
 
-/* IP protocols */
-const bit<8> IP_PROTOCOLS_ICMP       =   1;
-const bit<8> IP_PROTOCOLS_IGMP       =   2;
-const bit<8> IP_PROTOCOLS_IPV4       =   4;
-const bit<8> IP_PROTOCOLS_TCP        =   6;
-const bit<8> IP_PROTOCOLS_UDP        =  17;
-const bit<8> IP_PROTOCOLS_IPV6       =  41;
-const bit<8> IP_PROTOCOLS_GRE        =  47;
-const bit<8> IP_PROTOCOLS_IPSEC_ESP  =  50;
-const bit<8> IP_PROTOCOLS_IPSEC_AH   =  51;
-const bit<8> IP_PROTOCOLS_ICMPV6     =  58;
-const bit<8> IP_PROTOCOLS_EIGRP      =  88;
-const bit<8> IP_PROTOCOLS_OSPF       =  89;
-const bit<8> IP_PROTOCOLS_PIM        = 103;
-const bit<8> IP_PROTOCOLS_VRRP       = 112;
+const bit<16> TYPE_IPV4 = 0x800;
 
 
 /*************************************************************************
@@ -36,13 +25,11 @@ header ethernet_t {
     bit<16>   etherType;
 }
 
-/*
- * TODO: split tos to two fields 6 bit diffserv and 2 bit ecn
- */
 header ipv4_t {
     bit<4>    version;
     bit<4>    ihl;
-    bit<8>    tos;
+    bit<6>    diffserv;
+    bit<2>    ecn;
     bit<16>   totalLen;
     bit<16>   identification;
     bit<3>    flags;
@@ -52,8 +39,15 @@ header ipv4_t {
     bit<16>   hdrChecksum;
     ip4Addr_t srcAddr;
     ip4Addr_t dstAddr;
+    bit<32>  options;
 }
 
+header ipv4_option_t {
+    bit<1> copyFlag;
+    bit<2> optClass;
+    bit<5> option;
+    bit<8> optionLength;
+}
 
 struct metadata {
 }
@@ -118,8 +112,6 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-/* TODO: Implement actions for different traffic classes */
-
 
     table ipv4_lpm {
         key = {
@@ -134,10 +126,62 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
-/* TODO: set hdr.ipv4.diffserv on the basis of protocol */
+
+    @userextern @name("my_pifo")
+    pifo_scheduler<bit<48>,bit<1>>(1) my_pifo;
+
+    bit <48> rank;
+    bit <48> in_idle_time = 15000;
+    bit <48> in_pkt_ptr;
+    bit <1> in_enq = 1;
+    bit <1> reset_time = 0;
+    bit <48> in_flow_id = 0;
+
+    register<bit<48>>(1) register_last_ptr;
+
+    action assign_flow_id(bit <48> flow_id) {
+        in_flow_id = flow_id;
+    }
+
+
+    table lookup_flow_id {
+        key = {
+            hdr.ipv4.srcAddr: lpm;
+        }
+        actions = {
+            assign_flow_id;
+            NoAction;
+        }
+        size = 1024;
+        default_action = NoAction();
+    }
+
+
     apply {
-        if (hdr.ipv4.isValid()) {
-            ipv4_lpm.apply();
+
+        lookup_flow_id.apply();
+
+        register_last_ptr.read(in_pkt_ptr,0);
+        in_pkt_ptr = in_pkt_ptr + (bit<48>)(1);
+        register_last_ptr.write(0,in_pkt_ptr);
+
+        rank = (bit<48>)(hdr.ipv4.options);    
+
+        reset_time = 0;
+
+        my_pifo.pass_rank_values(rank,0);
+
+        if(hdr.ipv4.dstAddr == 0)
+        {
+            drop();        
+        }
+        else
+        {
+            my_pifo.my_scheduler(in_flow_id, in_idle_time, in_enq, in_pkt_ptr, reset_time);
+        }
+        
+        if (hdr.ipv4.isValid()) {   
+           ipv4_lpm.apply();
         }
     }
 }
@@ -152,19 +196,18 @@ control MyEgress(inout headers hdr,
     apply {  }
 }
 
-
 /*************************************************************************
 *************   C H E C K S U M    C O M P U T A T I O N   **************
 *************************************************************************/
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
-    apply {
-        /* TODO: replace tos with diffserv and ecn */
-        update_checksum(
-            hdr.ipv4.isValid(),
+     apply {
+	update_checksum(
+	    hdr.ipv4.isValid(),
             { hdr.ipv4.version,
-              hdr.ipv4.ihl,
-              hdr.ipv4.tos,
+	      hdr.ipv4.ihl,
+	      hdr.ipv4.diffserv,
+	      hdr.ipv4.ecn,
               hdr.ipv4.totalLen,
               hdr.ipv4.identification,
               hdr.ipv4.flags,

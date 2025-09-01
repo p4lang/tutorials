@@ -129,8 +129,16 @@ class P4RuntimeSwitch(P4Switch):
             args.append("-- --grpc-server-addr 0.0.0.0:" + str(self.grpc_port))
         if self.cpu_port:
             args.append("--cpu-port " + str(self.cpu_port))
+
+        # env_vars = "LD_PRELOAD=/home/nwlab/p4/tutorials/utils/user_externs_pifo/pifo.so "
+        # env_vars = "LD_PRELOAD=/home/pralhad/tutorials/utils/user_externs_pifo1/pifo.so "
+        # env_vars = "LD_PRELOAD=/home/pralhad/tutorials/utils/user_externs_sp_pifo/sp_pifo.so "
+        # env_vars = "LD_PRELOAD=/home/pralhad/tutorials/utils/user_externs_pieo/pieo.so "
+        # env_vars = "LD_PRELOAD=/home/pralhad/tutorials/utils/user_externs_pFabric/pFabric.so "
         cmd = ' '.join(args)
+        # print("Command to start the switch: \n", cmd)
         info(cmd + "\n")
+        # info(cmd + "\n")
         print(cmd + "\n")
 
 

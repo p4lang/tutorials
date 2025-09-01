@@ -23,6 +23,46 @@
                 "route add default gw 10.0.3.30 dev eth0",
                 "arp -i eth0 -s 10.0.3.30 08:00:00:00:03:00"
             ]
+        },
+        "h4": {
+            "ip": "10.0.4.4/24",
+            "mac": "08:00:00:00:04:44",
+            "commands": [
+                "route add default gw 10.0.4.40 dev eth0",
+                "arp -i eth0 -s 10.0.4.40 08:00:00:00:04:00"
+            ]
+        },
+        "h5": {
+            "ip": "10.0.5.5/24",
+            "mac": "08:00:00:00:05:55",
+            "commands": [
+                "route add default gw 10.0.5.50 dev eth0",
+                "arp -i eth0 -s 10.0.5.50 08:00:00:00:05:00"
+            ]
+        },
+        "h6": {
+            "ip": "10.0.6.6/24",
+            "mac": "08:00:00:00:06:66",
+            "commands": [
+                "route add default gw 10.0.6.60 dev eth0",
+                "arp -i eth0 -s 10.0.6.60 08:00:00:00:06:00"
+            ]
+        },
+        "h7": {
+            "ip": "10.0.7.7/24",
+            "mac": "08:00:00:00:07:77",
+            "commands": [
+                "route add default gw 10.0.7.70 dev eth0",
+                "arp -i eth0 -s 10.0.7.70 08:00:00:00:07:00"
+            ]
+        },
+        "h8": {
+            "ip": "10.0.8.8/24",
+            "mac": "08:00:00:00:08:88",
+            "commands": [
+                "route add default gw 10.0.8.80 dev eth0",
+                "arp -i eth0 -s 10.0.8.80 08:00:00:00:08:00"
+            ]
         }
     },
     "switches": {
@@ -31,35 +71,46 @@
         },
         "s2": {
             "runtime_json": "triangle-topo/s2-runtime.json"
-        },
-        "s3": {
-            "runtime_json": "triangle-topo/s3-runtime.json"
         }
     },
     "links": [
         [
             "h1",
-            "s1-p1"
+            "s1-p1", "0ms", 100
         ],
-        [
-            "s1-p2",
-            "s2-p2"
-        ],
-        [
-            "s1-p3",
-            "s3-p2"
-        ],
-        [
-            "s3-p3",
-            "s2-p3"
-        ],
+
         [
             "h2",
-            "s2-p1"
+            "s1-p2", "0ms", 100
         ],
         [
             "h3",
-            "s3-p1"
+            "s1-p3", "0ms", 100
+        ],
+        [
+            "h4",
+            "s1-p4", "0ms", 100
+        ],
+        [
+            "s1-p5",
+            "s2-p1", "0ms", 10
+        ],
+        [
+            "h5",
+            "s2-p2", "0ms", 100
+        ],
+        [
+            "h6",
+            "s2-p3", "0ms", 100
+        ],
+        [
+            "h7",
+            "s2-p4", "0ms", 100
+        ],
+        [
+            "h8",
+            "s2-p5", "0ms", 100
         ]
+        
     ]
 }

@@ -33,19 +33,19 @@ header ipv4_t {
     ip4Addr_t dstAddr;
 }
 
-header tcp_t {
-    bit<16> srcPort;
-    bit<16> dstPort;
-    bit<32> seqNo;
-    bit<32> ackNo;
-    bit<4>  dataOffset;
-    bit<3>  res;
-    bit<3>  ecn;
-    bit<6>  ctrl;
-    bit<16> window;
-    bit<16> checksum;
-    bit<16> urgentPtr;
-}
+// header tcp_t {
+//     bit<16> srcPort;
+//     bit<16> dstPort;
+//     bit<32> seqNo;
+//     bit<32> ackNo;
+//     bit<4>  dataOffset;
+//     bit<3>  res;
+//     bit<3>  ecn;
+//     bit<6>  ctrl;
+//     bit<16> window;
+//     bit<16> checksum;
+//     bit<16> urgentPtr;
+// }
 
 struct metadata {
     bit<32> rank;
@@ -66,7 +66,6 @@ struct metadata {
 struct headers {
     ethernet_t   ethernet;
     ipv4_t       ipv4;
-    tcp_t        tcp;
 }
 
 /*************************************************************************
@@ -92,14 +91,6 @@ parser MyParser(packet_in packet,
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            0x06: parse_tcp;
-            default: accept;
-        }
-    }
-
-    state parse_tcp {
-        packet.extract(hdr.tcp);
         transition accept;
     }
 }
@@ -115,9 +106,6 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
 
-    bit<48> in_flow_id = 0;
-    bit<32> in_flow_size = 0;
-
     action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -129,22 +117,12 @@ control MyIngress(inout headers hdr,
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
     }
 
-    // beta
     action congruity_metric(bit<32> left_bound, bit<32> right_bound) {
-        meta.cm = left_bound;
-        // meta.cm = (left_bound >> 1) + (left_bound >> 3) + (right_bound >> 2) + (right_bound >> 3);
-        // meta.cm = (left_bound >> 1) + (left_bound >> 3) + (right_bound >> 2) + (right_bound >> 3);
+        meta.cm = (left_bound >> 1) + (left_bound >> 3) + (right_bound >> 2) + (right_bound >> 3);
     }
 
-    // alpha
     action threshold(bit<32> left_bound, bit<32> right_bound) {
-         meta.t = right_bound;
-        // meta.t = (left_bound >> 2) + (left_bound >> 3) + (right_bound >> 1) + (right_bound >> 3);
-    }
-
-    action assign_flow_id(bit<48> flow_id, bit<32> flow_size) {
-        in_flow_id = flow_id;
-        in_flow_size = flow_size;  // Store flow size in metadata
+        meta.t = (left_bound >> 2) + (left_bound >> 3) + (right_bound >> 1) + (right_bound >> 3);
     }
 
     table ipv4_lpm {
@@ -160,46 +138,13 @@ control MyIngress(inout headers hdr,
         default_action = NoAction();
     }
 
-    table lookup_flow_id {
-        key = {
-            hdr.ipv4.srcAddr: lpm;
-        }
-        actions = {
-            assign_flow_id;
-            NoAction;
-        }
-        size = 1024;
-        default_action = NoAction();
-    }
-
     apply {
-
-        lookup_flow_id.apply();
         if (hdr.ipv4.isValid()) {
-            // meta.rank = (bit<32>)hdr.ipv4.tos << 4;
-            // log_msg("Rank of the packet is: {}", {meta.rank});
+            meta.rank = (bit<32>)hdr.ipv4.tos << 4;
+            log_msg("Rank of the packet is: {}", {meta.rank});
 
             bit<32> cml_val;
             bit<32> cmr_val;
-
-            
-
-            if (hdr.tcp.isValid()) {
-                if (in_flow_size > 0) {
-                    if (in_flow_size - (bit<32>)hdr.tcp.seqNo > 0) {
-                        meta.rank = in_flow_size - (bit<32>)hdr.tcp.seqNo;
-                    } else {
-                        meta.rank = 0;
-                    }
-                }else {
-                    meta.rank = 0;
-                }
-            }
-            else {
-                meta.rank = 0;
-            }
-
-            // log_msg("Rank of the packet is: {}", {meta.rank});
 
             cml_registers.read(cml_val, 0);
             cmr_registers.read(cmr_val, 0);
@@ -335,7 +280,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
-        packet.emit(hdr.tcp);
+        // packet.emit(hdr.tcp);
     }
 }
 
