@@ -114,26 +114,12 @@ control MyIngress(inout headers hdr,
      *   table_add ipv4_lpm ipv4_forward 10.0.1.1/32 => 00:00:00:00:01:00 1
      * which passes MAC=00:00:00:00:01:00 and PORT=1 as action parameters
      * into ipv4_forward(dstAddr, port).
-     *
-     * The exercise keeps the actual logic as a TODO so learners implement it:
-     *   - set standard_metadata.egress_spec = port;
-     *   - set hdr.ethernet.dstAddr = dstAddr;
-     *   - set hdr.ethernet.srcAddr = <your switch port MAC> (often provided)
-     *   - decrement IPv4 TTL and handle checksum (see checksum controls)
      *********************************************************************/
     action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         /*
             Action function for forwarding IPv4 packets.
 
-            This function is responsible for forwarding IPv4 packets to the specified
-            destination MAC address and egress port.
-
-            Parameters:
-            - dstAddr: Destination MAC address of the next hop (action data).
-            - port: Egress port where the packet should be forwarded (action data).
-
-            TODO: Implement the logic for forwarding the IPv4 packet based on the
-            destination MAC address and egress port, e.g.:
+            TODO: Implement the forwarding steps, for example:
               - standard_metadata.egress_spec = port;
               - hdr.ethernet.dstAddr = dstAddr;
               - (optionally) set hdr.ethernet.srcAddr to the switch MAC for 'port'
@@ -146,9 +132,6 @@ control MyIngress(inout headers hdr,
      *   - Matches on hdr.ipv4.dstAddr using longest-prefix match (lpm)
      *   - On hit, calls ipv4_forward with *action data* populated by the
      *     control plane when it installs the table entry.
-     *
-     * Control-plane example:
-     *   table_add ipv4_lpm ipv4_forward 10.0.0.0/24 => 00:aa:bb:cc:dd:ee 2
      *********************************************************************/
     table ipv4_lpm {
         key = {
@@ -213,19 +196,15 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 /*************************************************************************
 ***********************  D E P A R S E R  *******************************
 * The deparser serializes headers back onto the packet in order.         *
-* Typical order here is Ethernet, then IPv4 if valid.                    *
 *************************************************************************/
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         /*
-        Control function for deparser.
-
         Typical implementation (left as a TODO for learners):
             packet.emit(hdr.ethernet);
-            if (hdr.ipv4.isValid()) {
-                packet.emit(hdr.ipv4);
-            }
+            packet.emit(hdr.ipv4);   // per P4_16 spec, emit appends a header
+                                     // only if it is valid; no 'if' needed.
         */
     }
 }
