@@ -117,6 +117,17 @@ class SwitchConnection(object):
         else:
             self.client_stub.SetForwardingPipelineConfig(request)
 
+    def GetForwardingPipelineConfig(self):
+        try:
+            request = p4runtime_pb2.GetForwardingPipelineConfigRequest()
+            request.device_id = self.device_id
+            response = self.client_stub.GetForwardingPipelineConfig(request)
+            return response.config.p4info
+        except grpc._channel._InactiveRpcError as e:
+            if(e.code() == grpc.StatusCode.FAILED_PRECONDITION):
+                print(e.debug_error_string())
+            return None
+
     def WriteTableEntry(self, table_entry, dry_run=False):
         request = p4runtime_pb2.WriteRequest()
         request.device_id = self.device_id
