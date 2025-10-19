@@ -23,7 +23,9 @@ necessary to forward traffic between hosts.
 
 The starter code for this assignment is in files called `flowcache.p4` and `mycontroller.py`. Your job will be to finalize the P4 program to properly implement the `PacketIn` and `PacketOut` idle timeout mechanismes.
 
-Let's first compile the new P4 program, start the network, and use `mycontroller.py` to install the flowcache pipeline in the data plane.
+First, you need to define the fields in the `packet_in` and `packet_out` headers; otherwise, you’ll get compilation errors. The `packet_in` header should contain three fields: `input_port`, `punt_reason`, and `opcode`. The `packet_out` header should include: `opcode`, `reserved1`, and `operand0` (which represents the egress port in this case). You can see how these header fields are configured and used in the P4 code. More details about `packet_in` and `packet_out` are available in Section 6.4.6 of the [P4Runtime Spec](https://p4.org/specifications/).
+
+After defining the `packet_in` and `packet_out` headers, compile the new P4 program, start the network, and use `mycontroller.py` to install the flowcache pipeline in the data plane.
 
 1. In your shell, run:
    ```bash
