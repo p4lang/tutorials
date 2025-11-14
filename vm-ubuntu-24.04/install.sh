@@ -26,6 +26,7 @@ print_usage() {
     1>&2 echo "usage: $0 [ latest | <date> ]"
     1>&2 echo ""
     1>&2 echo "Dates supported:"
+    1>&2 echo "    2025-Nov-01"
     1>&2 echo "    2025-Oct-01"
     1>&2 echo "    2025-Sep-01"
     1>&2 echo "    2025-Aug-01"
@@ -44,6 +45,12 @@ else
 fi
 
 case ${VERSION} in
+    2025-Nov-01)
+	export INSTALL_BEHAVIORAL_MODEL_SOURCE_VERSION="2bdd0b7b2b2ae89faf2720f2158e9842bc6d2dd2"
+	export INSTALL_PI_SOURCE_VERSION="5689c91a8a7423781267b27d8b166c49a53904ff"
+	export INSTALL_P4C_SOURCE_VERSION="a97290474ce3d183b1f6bc4ca4959ebbcdb09b3b"
+	export INSTALL_PTF_SOURCE_VERSION=""
+	;;
     2025-Oct-01)
 	export INSTALL_BEHAVIORAL_MODEL_SOURCE_VERSION="68f4a978f465fd76e98fcdecb762981843fb7310"
 	export INSTALL_PI_SOURCE_VERSION="5689c91a8a7423781267b27d8b166c49a53904ff"
