@@ -2,25 +2,25 @@
 
 ### Index
 
-- ⭐ [Local Deployment (ns-3.39)](#local-deployment-ns339)
+- [Local Deployment (ns-3.39)](#local-deployment-ns339)
 - Virtual Machine as Virtual Env
   - [ns-3 Version 3.x – 3.35](#setup-ns335)
-  - ⭐ [ns-3 Version 3.36 – 3.39](#setup-ns339)
+  -  [ns-3 Version 3.36 – 3.39](#setup-ns339)
 - [Appendix](#appendix)
 
 ## Installation & Usage Guide
 
 It is recommended to use a **virtual machine** with Vagrant to simplify the installation and ensure compatibility. 
 
-## <a name="local-deployment-ns339"></a> Local Deployment (ns-3.39) [⤴️](#index)
+## <a name="local-deployment-ns339"></a> Local Deployment (ns-3.39)
 
 This guide walks you through setting up a local environment to run the P4Sim integrated with `ns-3.39` on Ubuntu 24.04. The full setup includes installing the behavioral model (`bmv2`), setting up SSH for remote access, and building the ns-3 project with P4Sim support. This is tested with `Ubuntu 24.04 LTS Desktop`. 
 
-> ⚠️ Note: The bmv2 and P4 software installation step will take **~3 hours** and consume up to **15GB** of disk space.
+> Note: The bmv2 and P4 software installation step will take **~3 hours** and consume up to **15GB** of disk space.
 
 ---
 
-## 📁 1. Initialize the Working Directory
+## 1. Initialize the Working Directory
 
 Create a workspace and install basic development tools.
 
@@ -33,7 +33,7 @@ sudo apt install git vim cmake
 
 ---
 
-## 🛠️ 2. Install P4 Behavioral Model (bmv2) and Dependencies
+##  2. Install P4 Behavioral Model (bmv2) and Dependencies
 
 > This installs all necessary libraries and tools for P4 development (via the official `p4lang/tutorials` repo).
 
@@ -53,7 +53,7 @@ simple_switch
 
 ---
 
-## 🧪 3. Clone and Build ns-3.39 with P4Simulator
+## 3. Clone and Build ns-3.39 with P4Simulator
 
 ### Step 3.1: Clone ns-3.39
 
@@ -83,7 +83,7 @@ cd ../..
 
 ---
 
-## ▶️ 4. Run an Example
+##  4. Run an Example
 
 You can run a built-in example using:
 
@@ -93,7 +93,7 @@ You can run a built-in example using:
 
 ---
 
-## 🔧 5. Configure P4 Files in Your Simulation
+## 5. Configure P4 Files in Your Simulation
 
 You may need to **manually update file paths** for P4 artifacts in your simulation code.
 
@@ -110,17 +110,17 @@ Make sure these paths match your actual working directory and files.
 
 ---
 
-## ✅ Done!
+## Done!
 
 You now have a working ns-3.39 simulator with P4 integration ready for your experiments.
 
 ---
 
-## 📬 Feedback or Issues?
+## Feedback or Issues?
 
 If you encounter problems or have suggestions, feel free to open an issue or contact the maintainer.
 
-✉️ **Contact:** mingyu.ma@tu-dresden.de
+**Contact:** mingyu.ma@tu-dresden.de
 
 
 
@@ -141,7 +141,7 @@ Notes:
 
 ---
 
-## <a name="setup-ns335"></a>  Setup Instructions for ns-3 version 3.x - 3.35 (Build with `waf`) [⤴️](#index)
+## <a name="setup-ns335"></a>  Setup Instructions for ns-3 version 3.x - 3.35 (Build with `waf`)
 
 This has been tested with ns-3 repo Tag `ns-3.35`.
 
@@ -214,7 +214,7 @@ git apply ./contrib/p4sim/doc/changes.patch
 
 ---
 
-## ⭐  <a name='setup-ns339'></a> Setup Instructions for ns-3 version 3.36 - 3.39 (Build with `Cmake`) [⤴️](#index) 
+##  <a name='setup-ns339'></a> Setup Instructions for ns-3 version 3.36 - 3.39 (Build with `Cmake`)
 
 This has been tested with ns-3 repo Tag `ns-3.39`. Because the virtual machine will build BMv2 and libs with **C++17**, and ns-3 p4simulator using the external inlucde file and libs, therefore the ns-3 also need to build with **C++17**.
 The include file is: `/usr/local/include/bm`, the libs is `/usr/local/lib/libbmall.so`.
@@ -301,7 +301,7 @@ Not been tested yet.
 
 [2] [P4Lang Tutorials repository](https://github.com/p4lang/tutorials/tree/master)
 
-#  <a name='appendix'></a> Appendix [⤴️](#index) 
+#  <a name='appendix'></a> Appendix 
 
 After `Install P4 Behavioral Model (bmv2) and Dependencies`, you should have that:
 
