@@ -35,7 +35,7 @@ print_usage() {
 
 if [ $# -eq 0 ]
 then
-    VERSION="2025-Oct-01"
+    VERSION="2026-Jan-01"
     echo "No version specified.  Defaulting to ${VERSION}"
 elif [ $# -eq 1 ]
 then
