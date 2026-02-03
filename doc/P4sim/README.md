@@ -82,18 +82,7 @@ cd ../..
 ```
 
 ---
-
-##  4. Run an Example
-
-You can run a built-in example using:
-
-```bash
-./ns3 run "exampleA"  # This will run exampleA (name).
-```
-
----
-
-## 5. Configure P4 Files in Your Simulation
+## 4. Configure P4 Files in Your Simulation
 
 You may need to **manually update file paths** for P4 artifacts in your simulation code.
 
@@ -108,6 +97,13 @@ std::string topoInput = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/
 
 Make sure these paths match your actual working directory and files.
 
+---
+##  5. Run an Example
+Before running the example you need to **copy and paste** that particular example inside `ns3's scratch` folder then you can run a built-in example using:
+
+```bash
+./ns3 run scratch/"exampleA"  # You should be in the ns-3 directory before running this command.This will run exampleA (name).
+```
 ---
 
 ## Done!
