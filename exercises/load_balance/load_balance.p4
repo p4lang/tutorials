@@ -136,8 +136,9 @@ control MyIngress(inout headers hdr,
         /* TODO: apply ecmp_group table and ecmp_nhop table if IPv4 header is
          * valid and TTL hasn't reached zero
          */
-        ecmp_group.apply();
-        ecmp_nhop.apply();
+        if (ecmp_group.apply().hit) { 
+            ecmp_nhop.apply(); 
+        }
     }
 }
 

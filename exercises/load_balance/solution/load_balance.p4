@@ -141,8 +141,9 @@ control MyIngress(inout headers hdr,
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
-            ecmp_group.apply();
-            ecmp_nhop.apply();
+            if (ecmp_group.apply().hit) { 
+                ecmp_nhop.apply(); 
+            }
         }
     }
 }
