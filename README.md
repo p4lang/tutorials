@@ -6,9 +6,10 @@
 * [Introduction](#introduction)
 * [Presentation](#presentation)
 * [P4 Documentation](#p4-documentation)
+* [P4sim](#p4sim--a-simple-p4-behavioral-simulator)
 * [Obtaining required software](#obtaining-required-software)
-     * [To build the virtual machine](#to-build-the-virtual-machine)
-     * [Accessing the VM](#accessing-the-vm)
+     * [To build the virtual machine](#to-build-a-virtual-machine-with-the-p4-development-tools)
+     * [Accessing the VM](#download-a-virtual-machine-with-the-p4-development-tools-already-installed)
      * [To install P4 development tools on an existing system](#to-install-p4-development-tools-on-an-existing-system)
 * [How to Contribute](#how-to-contribute)
 * [Older tutorials](#older-tutorials)
@@ -82,6 +83,23 @@ The documentation for P4_16 and P4Runtime is available [here](https://p4.org/spe
 All exercises in this repository use the v1model architecture, the documentation for which is available at:
 1. The BMv2 Simple Switch target document accessible [here](https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md) talks mainly about the v1model architecture.
 2. The include file `v1model.p4` has extensive comments and can be accessed [here](https://github.com/p4lang/p4c/blob/master/p4include/v1model.p4).
+
+## P4sim – A Simple P4 Behavioral Simulator
+
+**P4sim** is a lightweight, dependency-free P4 packet-processing simulator designed for learning and experimentation.
+Unlike BMv2 or P4-DPDK, P4sim does **not** emulate a full switch pipeline. Instead, it provides a minimal execution environment that evaluates P4 parser, control, and deparser logic on user-provided packets.
+
+P4sim is intended for:
+
+* Running P4 programs without installing large data plane frameworks
+* Quickly testing parser and control-flow behavior
+* Understanding how P4 programs process packets step-by-step
+
+P4sim is **not** a performance model and does not aim to replicate full-featured switch behavior (such as multitable pipelines, extern objects, or architecture-specific metadata).
+It is mainly a **teaching and debugging tool**.
+
+To learn more or try P4sim examples, see:
+[`P4sim/README.md`](./doc/P4sim/README.md)
 
 ## Obtaining required software
 
