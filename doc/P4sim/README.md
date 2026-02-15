@@ -82,27 +82,26 @@ cd ../..
 ```
 
 ---
-## 4. Configure P4 Files in Your Simulation
+## 4. Running an example 
 
-You may need to **manually update file paths** for P4 artifacts in your simulation code.
-
-Example path updates:
+Choose any example you want to run from `p4sim/examples` directory. Let's say you want to run `p4-basic-controller.cc` then inside the file's code change these paths according to your folder structure:
 
 ```cpp
 // p4 is the username 
-std::string p4JsonPath = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/test_simple.json";
-std::string flowTablePath = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/flowtable_0.txt";
-std::string topoInput = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/topo.txt";
+  std::string p4JsonPath = "/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/p4_basic.json";
+  std::string flowTableDirPath ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/";// path to flow table folder where all flow tables are located.
+  std::string topoInput ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/topo.txt";//path to topo file that the example uses
+  // This is for p4-basic-controller.cc file
 ```
 
 Make sure these paths match your actual working directory and files.
 
 ---
 ##  5. Run an Example
-Before running the example you need to **copy and paste** that particular example inside `ns3's scratch` folder then you can run a built-in example using:
+Before running the example you need to **copy and paste** that particular example inside `ns3's scratch` folder then you can run a example using:
 
 ```bash
-./ns3 run scratch/"exampleA"  # You should be in the ns-3 directory before running this command.This will run exampleA (name).
+./ns3 run scratch/p4-basic-controller.cc  # You should be in the ns-3 directory before running this command. This will run p4-basic-controller.cc.
 ```
 ---
 
