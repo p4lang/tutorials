@@ -82,26 +82,54 @@ cd ../..
 ```
 
 ---
-## 4. Running an example 
+## 4. Prepare an Example
 
-Choose any example you want to run from `p4sim/examples` directory. Let's say you want to run `p4-basic-controller.cc` then inside the file's code change these paths according to your folder structure:
+You can run any example from the `p4sim/examples` directory. In this guide, we use `p4-basic-controller.cc` as a demonstration, but the steps apply to any example file (with appropriate path adjustments).
 
+To run `p4-basic-controller.cc`, you must ensure the file paths inside the code match your local directory structure.
+
+The original file uses placeholder paths:
 ```cpp
-// p4 is the username 
   std::string p4JsonPath = "/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/p4_basic.json";
-  std::string flowTableDirPath ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/";// path to flow table folder where all flow tables are located.
-  std::string topoInput ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/topo.txt";//path to topo file that the example uses
-  // This is for p4-basic-controller.cc file
+  std::string flowTableDirPath ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/";
+  std::string topoInput ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/topo.txt";
 ```
 
-Make sure these paths match your actual working directory and files.
-
----
-##  5. Run an Example
-Before running the example you need to **copy and paste** that particular example inside `ns3's scratch` folder then you can run a example using:
+You can automatically copy the example to the `scratch` directory and update these paths using the commands below:
 
 ```bash
-./ns3 run scratch/p4-basic-controller.cc  # You should be in the ns-3 directory before running this command. This will run p4-basic-controller.cc.
+# Ensure you are in the ns-3 root directory
+# Define the example you want to run (change this for other examples)
+EXAMPLE_NAME="p4-basic-controller.cc"
+
+# Ensure you are in the ns-3 root directory
+cd ~/workdir/ns3.39
+
+# 1. Copy the example to the scratch directory
+cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
+
+# 2. Update the hardcoded paths to match your current location
+# Get the absolute path to the examples directory
+P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
+
+# Use sed to replace the placeholder path with your actual path in the copied file
+sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
+
+# Notes: 
+# - The sed command assumes the example uses the specific placeholder path:
+#   "/home/p4/workdir/ns3.39/contrib/p4sim/examples/"
+# - If your example uses different paths, you may need to adjust the sed command or edit the file manually.
+```
+
+---
+## 5. Run the Example
+
+With the file configured in the `scratch` folder, execute it using:
+
+```bash
+# Run the example using the variable defined above, or type the name directly
+./ns3 run scratch/$EXAMPLE_NAME
+
 ```
 ---
 
