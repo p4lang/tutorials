@@ -82,28 +82,20 @@ cd ../..
 ```
 
 ---
-## 4. Prepare an Example
+## 4. Run a Simulation Example
 
 You can run any example from the `p4sim/examples` directory. In this guide, we use `p4-basic-controller.cc` as a demonstration, but the steps apply to any example file (with appropriate path adjustments).
 
-To run `p4-basic-controller.cc`, you must ensure the file paths inside the code match your local directory structure.
+To run `p4-basic-controller.cc`, you must first ensure the file paths inside the code match your local directory structure. The original file uses placeholder paths, which we will update automatically. We will also copy the example to the `scratch` directory to avoid modifying the source directly.
 
-The original file uses placeholder paths:
-```cpp
-  std::string p4JsonPath = "/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/p4_basic.json";
-  std::string flowTableDirPath ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/";
-  std::string topoInput ="/home/p4/workdir/ns3.39/contrib/p4sim/examples/p4src/p4_basic/topo.txt";
-```
-
-You can automatically copy the example to the `scratch` directory and update these paths using the commands below:
+Run the following commands to prepare and run the example:
 
 ```bash
 # Ensure you are in the ns-3 root directory
+cd ~/workdir/ns3.39
+
 # Define the example you want to run (change this for other examples)
 EXAMPLE_NAME="p4-basic-controller.cc"
-
-# Ensure you are in the ns-3 root directory
-cd ~/workdir/ns3.39
 
 # 1. Copy the example to the scratch directory
 cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
@@ -113,23 +105,12 @@ cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
 P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
 
 # Use sed to replace the placeholder path with your actual path in the copied file
+# Note: This command targets the specific placeholder path used in the example:
+# "/home/p4/workdir/ns3.39/contrib/p4sim/examples/"
 sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
 
-# Notes: 
-# - The sed command assumes the example uses the specific placeholder path:
-#   "/home/p4/workdir/ns3.39/contrib/p4sim/examples/"
-# - If your example uses different paths, you may need to adjust the sed command or edit the file manually.
-```
-
----
-## 5. Run the Example
-
-With the file configured in the `scratch` folder, execute it using:
-
-```bash
-# Run the example using the variable defined above, or type the name directly
+# 3. Run the example
 ./ns3 run scratch/$EXAMPLE_NAME
-
 ```
 ---
 
