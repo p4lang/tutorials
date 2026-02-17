@@ -222,17 +222,24 @@ git apply ./contrib/p4sim/doc/changes.patch
 ./ns3 build
 ```
 
-### 7. Run a Simulation Example  
-```bash
-./ns3 run "exampleA" # This will run exampleA (name).
+### 7. Run a Simulation Example
 
-# In the p4sim example, you may need to adjust the path of p4 and other files.
-# For example:
-# std::string p4JsonPath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/test_simple.json";
-#   std::string flowTablePath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/flowtable_0.txt";
-#   std::string topoInput = "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/topo.txt";
+Instead of modifying the source files directly, it is recommended to copy the example to the `scratch` directory. We can then use a command to automatically update the hardcoded paths to match your environment.
+
+```bash
+# Ensure you are in the ns-3 root directory
+EXAMPLE_NAME="p4-basic-controller.cc"
+P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
+
+# 1. Copy the example to the scratch directory
+cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
+
+# 2. Update the paths automatically
+# Note: This command replaces the default placeholder path with your actual path
+sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
+
+# 3. Run the example
+./ns3 run scratch/$EXAMPLE_NAME
 ```
 
 ---
@@ -299,17 +306,24 @@ sudo ./set_pkg_config_env.sh
 ./ns3 build
 ```
 
-### 7. Run a Simulation Example  
-```bash
-./ns3 run "exampleA" # This will run exampleA (name).
+### 7. Run a Simulation Example
 
-# In the p4sim example, you may need to adjust the path of p4 and other files.
-# For example:
-# std::string p4JsonPath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/test_simple.json";
-#   std::string flowTablePath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/flowtable_0.txt";
-#   std::string topoInput = "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/topo.txt";
+Instead of modifying the source files directly, it is recommended to copy the example to the `scratch` directory. We can then use a command to automatically update the hardcoded paths to match your environment.
+
+```bash
+# Ensure you are in the ns-3 root directory
+EXAMPLE_NAME="p4-basic-controller.cc"
+P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
+
+# 1. Copy the example to the scratch directory
+cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
+
+# 2. Update the paths automatically
+# Note: This command replaces the default placeholder path with your actual path
+sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
+
+# 3. Run the example
+./ns3 run scratch/$EXAMPLE_NAME
 ```
 
 ---
