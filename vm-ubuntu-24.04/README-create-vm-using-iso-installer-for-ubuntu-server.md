@@ -1,5 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2024 Contributors to the P4 Project
 
-[comment]: # (SPDX-License-Identifier:  Apache-2.0)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # Creating a VM using VirtualBox and an ISO disk image with an Ubuntu Server Linux 24.04 installer
 

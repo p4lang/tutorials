@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2019 Contributors to the P4 Project
+#
 # SPDX-License-Identifier: GPL-2.0-only
 # Reason-GPL: import-scapy via probe_hdrs
+
 import sys
 import time
 

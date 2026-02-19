@@ -1,0 +1,446 @@
+version = 1
+
+[[annotations]]
+path = "exercises/basic_tunnel/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic_tunnel/s2-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic_tunnel/s3-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic_tunnel/s1-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/link_monitor/pod-topo/topology.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/link_monitor/pod-topo/s2-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/link_monitor/pod-topo/s4-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/link_monitor/pod-topo/s3-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/link_monitor/pod-topo/s1-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/load_balance/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/load_balance/s2-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/load_balance/s3-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/load_balance/s1-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/calc/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/calc/s1-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/p4runtime/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/mri/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/mri/s2-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/mri/s3-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/mri/s1-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/firewall/pod-topo/topology.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/firewall/pod-topo/s2-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/firewall/pod-topo/s4-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/firewall/pod-topo/s3-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/firewall/pod-topo/s1-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/qos/topology.json"
+SPDX-FileCopyrightText = "2020 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/qos/s2-runtime.json"
+SPDX-FileCopyrightText = "2020 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/qos/s3-runtime.json"
+SPDX-FileCopyrightText = "2020 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/qos/s1-runtime.json"
+SPDX-FileCopyrightText = "2020 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/ecn/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/ecn/s2-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/ecn/s3-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/ecn/s1-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/triangle-topo/topology.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/triangle-topo/s2-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/triangle-topo/s3-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/triangle-topo/s1-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/pod-topo/topology.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/pod-topo/s2-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/pod-topo/s4-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/pod-topo/s3-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/pod-topo/s1-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/source_routing/topology.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/source_routing/s2-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/source_routing/s3-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/source_routing/s1-runtime.json"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/multicast/solution/s1-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/multicast/sig-topo/topology.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/multicast/sig-topo/s1-runtime.json"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "tmp2.txt"
+SPDX-FileCopyrightText = " Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "p4-cheat-sheet.pdf"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/v1model_std_metadata.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/header_stack.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/architecture.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/expressions.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/tables.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/parsers.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/deparsing.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/control_flow.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/data_types.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/adv_parsing.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/counters.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/cheat_sheet_src/src/actions.txt"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/img/TopoExample.png"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/img/summary.png"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "utils/img/minipython.png"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-24.04/p4-logo.png"
+SPDX-FileCopyrightText = "2017 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-24.04/patches/mininet-patch-for-2024-sep-enable-venv.patch"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-24.04/patches/p4runtime-shell-2023-changes.patch"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-24.04/patches/behavioral-model-support-fedora.patch"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-24.04/patches/behavioral-model-support-venv.patch"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "LICENSES/GPL-2.0-only.txt"
+SPDX-FileCopyrightText = "2025 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "LICENSES/Apache-2.0.txt"
+SPDX-FileCopyrightText = "2025 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-20.04/p4-logo.png"
+SPDX-FileCopyrightText = "2017 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-20.04/patches/behavioral-model-use-correct-libssl-pkg.patch"
+SPDX-FileCopyrightText = "2021 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm-ubuntu-20.04/patches/mininet-patch-for-2023-jun.patch"
+SPDX-FileCopyrightText = "2023 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic_tunnel/topo.png"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic_tunnel/topo.pdf"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/link_monitor/link-monitor-topo.png"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/mri/setup.png"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/firewall/firewall-topo.png"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/qos/setup.png"
+SPDX-FileCopyrightText = "2020 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/ecn/setup.png"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/basic/pod-topo/pod-topo.png"
+SPDX-FileCopyrightText = "2019 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/source_routing/setup.png"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "exercises/multicast/topo.png"
+SPDX-FileCopyrightText = "2024 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "P4_tutorial.pdf"
+SPDX-FileCopyrightText = "2018 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "tmp1.txt"
+SPDX-FileCopyrightText = " Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "vm/p4-logo.png"
+SPDX-FileCopyrightText = "2017 Contributors to the P4 Project"
+SPDX-License-Identifier = "Apache-2.0"

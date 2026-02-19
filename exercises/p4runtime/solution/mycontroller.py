@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2018 Contributors to the P4 Project
+#
 # SPDX-License-Identifier: Apache-2.0
+
 import argparse
 import os
 import sys

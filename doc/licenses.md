@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Contributors to the P4 Project
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Introduction
 
 The P4 Consortium's strongly recommends that all source files in this
