@@ -92,10 +92,17 @@ class ExerciseTopo(Topo):
             else:
                 # add default switch
                 switchClass = None
-            if "cpu_port" in params:
-                self.addSwitch(sw, log_file="%s/%s.log" %(log_dir, sw), cpu_port=params["cpu_port"], cls=switchClass)
-            else:
-                self.addSwitch(sw, log_file="%s/%s.log" %(log_dir, sw), cls=switchClass)
+
+            switch_opts = {
+                "log_file": "%s/%s.log" % (log_dir, sw),
+                "cls": switchClass
+            }
+
+            for key in ("cpu_port", "priority_queues"):
+                if key in params:
+                    switch_opts[key] = params[key]
+
+            self.addSwitch(sw, **switch_opts)
 
         for link in host_links:
             host_name = link['node1']
