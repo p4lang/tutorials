@@ -93,9 +93,17 @@ class ExerciseTopo(Topo):
                 # add default switch
                 switchClass = None
             if "cpu_port" in params:
-                self.addSwitch(sw, log_file="%s/%s.log" %(log_dir, sw), cpu_port=params["cpu_port"], cls=switchClass)
+                if "priority_queues" in params:
+                    self.addSwitch(sw, log_file="%s/%s.log" % (log_dir, sw), cpu_port=params["cpu_port"],
+                                   priority_queues=params["priority_queues"], cls=switchClass)
+                else:
+                    self.addSwitch(sw, log_file="%s/%s.log" % (log_dir, sw), cpu_port=params["cpu_port"], cls=switchClass)
             else:
-                self.addSwitch(sw, log_file="%s/%s.log" %(log_dir, sw), cls=switchClass)
+                if "priority_queues" in params:
+                    self.addSwitch(sw, log_file="%s/%s.log" % (log_dir, sw), priority_queues=params["priority_queues"],
+                                   cls=switchClass)
+                else:
+                    self.addSwitch(sw, log_file="%s/%s.log" % (log_dir, sw), cls=switchClass)
 
         for link in host_links:
             host_name = link['node1']

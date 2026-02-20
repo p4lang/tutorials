@@ -94,6 +94,10 @@ class P4RuntimeSwitch(P4Switch):
         if "cpu_port" in kwargs:
             self.cpu_port = kwargs["cpu_port"]
 
+        self.priority_queues = None
+        if "priority_queues" in kwargs:
+            self.priority_queues = kwargs["priority_queues"]
+
 
     def check_switch_started(self, pid):
         for _ in range(SWITCH_START_TIMEOUT * 2):
@@ -129,6 +133,8 @@ class P4RuntimeSwitch(P4Switch):
             args.append("-- --grpc-server-addr 0.0.0.0:" + str(self.grpc_port))
         if self.cpu_port:
             args.append("--cpu-port " + str(self.cpu_port))
+        if self.priority_queues:
+            args.append("--priority-queues " + str(self.priority_queues))
         cmd = ' '.join(args)
         info(cmd + "\n")
         print(cmd + "\n")
