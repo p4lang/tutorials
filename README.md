@@ -84,23 +84,6 @@ All exercises in this repository use the v1model architecture, the documentation
 1. The BMv2 Simple Switch target document accessible [here](https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md) talks mainly about the v1model architecture.
 2. The include file `v1model.p4` has extensive comments and can be accessed [here](https://github.com/p4lang/p4c/blob/master/p4include/v1model.p4).
 
-## P4sim – A Simple P4 Behavioral Simulator
-
-**P4sim** is a lightweight, dependency-free P4 packet-processing simulator designed for learning and experimentation.
-Unlike BMv2 or P4-DPDK, P4sim does **not** emulate a full switch pipeline. Instead, it provides a minimal execution environment that evaluates P4 parser, control, and deparser logic on user-provided packets.
-
-P4sim is intended for:
-
-* Running P4 programs without installing large data plane frameworks
-* Quickly testing parser and control-flow behavior
-* Understanding how P4 programs process packets step-by-step
-
-P4sim is **not** a performance model and does not aim to replicate full-featured switch behavior (such as multitable pipelines, extern objects, or architecture-specific metadata).
-It is mainly a **teaching and debugging tool**.
-
-To learn more or try P4sim examples, see:
-[`P4sim/README.md`](./doc/P4sim/README.md)
-
 ## Obtaining required software
 
 If you are starting this tutorial at one of the proctored tutorial events,
@@ -118,12 +101,27 @@ you will need to do one of the following:
   tools within it.
 + Install the P4 development tools on an existing system with a
   supported version of Ubuntu Linux.
++ Install P4 development tools and also
+  [P4sim](https://github.com/HapCommSys/p4sim).
+  + Note: No instructions have been written yet on how to run the
+    tutorials exercises using P4sim.  If your goal is to learn from
+    doing the exercises, we recommend you ignore P4sim for now.
+
+See the appropriate section below for more details on your choice.
+
+If you have a Windows, Mac, or Linux system with a 64-bit Intel/AMD
+processor architecture, or an Apple Silicon Mac, and are willing to
+install and use VirtualBox to run a Linux virtual machine, then the
+first option above is the quickest way to get started, followed by the
+second option.  If you prefer not to use VirtualBox for some reason,
+or prefer to use an existing system with a supported version of Ubuntu
+Linux installed, the third option may be best for you.
 
 ### Download a virtual machine with the P4 development tools already installed
 
-You will need a system with a 64-bit Intel/AMD processor architecture,
-with [VirtualBox](https://virtualbox.org) installed on it.  See the
-table
+You will need a Windows, Mac, or Linux system with a 64-bit Intel/AMD
+processor architecture, or an Apple Silicon Mac, with
+[VirtualBox](https://virtualbox.org) installed on it.  See the table
 [here](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md)
 for a list of virtual machine images that you can download, then use
 VirtualBox's File->Import Appliance menu item to add the virtual
@@ -138,7 +136,37 @@ See the instructions [here](vm-ubuntu-24.04/README.md).
 
 ### To install P4 development tools on an existing system
 
-There are instructions and scripts in another Github repository that can, starting from a freshly installed Ubuntu 20.04, 22.04, or 24.04 Linux system with enough RAM and free disk space, install all of the necessary P4 development tools to run the exercises in this repository.  You can find those instructions and scripts [here](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md) (note that you must clone a copy of that entire repository in order for its install scripts to work).
+There are instructions and scripts in another Github repository that
+can, starting from a freshly installed Ubuntu 22.04, or 24.04 Linux
+system with enough RAM and free disk space, install all of the
+necessary P4 development tools to run the exercises in this
+repository.  You can find those instructions and scripts
+[here](https://github.com/jafingerhut/p4-guide/blob/master/bin/README-install-troubleshooting.md)
+(note that you must clone a copy of that entire repository in order
+for its install scripts to work).
+
+### Install P4 development tools and also P4sim
+
+[P4sim](https://github.com/HapCommSys/p4sim) is a lightweight,
+dependency-free P4 packet-processing simulator designed for learning
+and experimentation.  Unlike BMv2 or P4-DPDK, P4sim does **not**
+emulate a full switch pipeline.  Instead, it provides a minimal
+execution environment that evaluates P4 parser, control, and deparser
+logic on user-provided packets.
+
+P4sim is intended for:
+
+* Running P4 programs without installing large data plane frameworks
+* Quickly testing parser and control-flow behavior
+* Understanding how P4 programs process packets step-by-step
+
+P4sim is **not** a performance model and does not aim to replicate
+full-featured switch behavior (such as multitable pipelines, extern
+objects, or architecture-specific metadata).  It is mainly a
+**teaching and debugging tool**.
+
+To learn more or try P4sim examples, see:
+[`P4sim/README.md`](./doc/P4sim/README.md)
 
 # How to Contribute
 
