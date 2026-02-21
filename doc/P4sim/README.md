@@ -82,32 +82,36 @@ cd ../..
 ```
 
 ---
+## 4. Run a Simulation Example
 
-##  4. Run an Example
+You can run any example from the `p4sim/examples` directory. In this guide, we use `p4-basic-controller.cc` as a demonstration, but the steps apply to any example file (with appropriate path adjustments).
 
-You can run a built-in example using:
+To run `p4-basic-controller.cc`, you must first ensure the file paths inside the code match your local directory structure. The original file uses placeholder paths, which we will update automatically. We will also copy the example to the `scratch` directory to avoid modifying the source directly.
+
+Run the following commands to prepare and run the example:
 
 ```bash
-./ns3 run "exampleA"  # This will run exampleA (name).
+# Ensure you are in the ns-3 root directory
+cd ~/workdir/ns3.39
+
+# Define the example you want to run (change this for other examples)
+EXAMPLE_NAME="p4-basic-controller.cc"
+
+# 1. Copy the example to the scratch directory
+cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
+
+# 2. Update the hardcoded paths to match your current location
+# Get the absolute path to the examples directory
+P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
+
+# Use sed to replace the placeholder path with your actual path in the copied file
+# Note: This command targets the specific placeholder path used in the example:
+# "/home/p4/workdir/ns3.39/contrib/p4sim/examples/"
+sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
+
+# 3. Run the example
+./ns3 run scratch/$EXAMPLE_NAME
 ```
-
----
-
-## 5. Configure P4 Files in Your Simulation
-
-You may need to **manually update file paths** for P4 artifacts in your simulation code.
-
-Example path updates:
-
-```cpp
-// p4 is the username 
-std::string p4JsonPath = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/test_simple.json";
-std::string flowTablePath = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/flowtable_0.txt";
-std::string topoInput = "/home/p4/workdir/ns3.39/contrib/p4sim/test/test_simple/topo.txt";
-```
-
-Make sure these paths match your actual working directory and files.
-
 ---
 
 ## Done!
@@ -199,17 +203,24 @@ git apply ./contrib/p4sim/doc/changes.patch
 ./ns3 build
 ```
 
-### 7. Run a Simulation Example  
-```bash
-./ns3 run "exampleA" # This will run exampleA (name).
+### 7. Run a Simulation Example
 
-# In the p4sim example, you may need to adjust the path of p4 and other files.
-# For example:
-# std::string p4JsonPath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/test_simple.json";
-#   std::string flowTablePath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/flowtable_0.txt";
-#   std::string topoInput = "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/topo.txt";
+Instead of modifying the source files directly, it is recommended to copy the example to the `scratch` directory. We can then use a command to automatically update the hardcoded paths to match your environment.
+
+```bash
+# Ensure you are in the ns-3 root directory
+EXAMPLE_NAME="p4-basic-controller.cc"
+P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
+
+# 1. Copy the example to the scratch directory
+cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
+
+# 2. Update the paths automatically
+# Note: This command replaces the default placeholder path with your actual path
+sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
+
+# 3. Run the example
+./ns3 run scratch/$EXAMPLE_NAME
 ```
 
 ---
@@ -276,17 +287,24 @@ sudo ./set_pkg_config_env.sh
 ./ns3 build
 ```
 
-### 7. Run a Simulation Example  
-```bash
-./ns3 run "exampleA" # This will run exampleA (name).
+### 7. Run a Simulation Example
 
-# In the p4sim example, you may need to adjust the path of p4 and other files.
-# For example:
-# std::string p4JsonPath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/test_simple.json";
-#   std::string flowTablePath =
-#       "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/flowtable_0.txt";
-#   std::string topoInput = "/home/p4/workdir/ns3.35/contrib/p4sim/test/test_simple/topo.txt";
+Instead of modifying the source files directly, it is recommended to copy the example to the `scratch` directory. We can then use a command to automatically update the hardcoded paths to match your environment.
+
+```bash
+# Ensure you are in the ns-3 root directory
+EXAMPLE_NAME="p4-basic-controller.cc"
+P4_EXAMPLES_DIR=$(pwd)/contrib/p4sim/examples/
+
+# 1. Copy the example to the scratch directory
+cp contrib/p4sim/examples/$EXAMPLE_NAME scratch/
+
+# 2. Update the paths automatically
+# Note: This command replaces the default placeholder path with your actual path
+sed -i "s|/home/p4/workdir/ns3.39/contrib/p4sim/examples/|$P4_EXAMPLES_DIR|g" scratch/$EXAMPLE_NAME
+
+# 3. Run the example
+./ns3 run scratch/$EXAMPLE_NAME
 ```
 
 ---
