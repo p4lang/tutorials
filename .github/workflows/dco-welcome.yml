@@ -1,0 +1,30 @@
+name: DCO Assistant for First-Time Contributors
+
+on:
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  dco-help:
+    runs-on: ubuntu-latest
+    # Only run for first-time contributors or users with no previous history
+    if: |
+      github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' || 
+      github.event.pull_request.author_association == 'NONE'
+    steps:
+      - name: Post DCO Instructions
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Welcome to the project, @${{ github.actor }}!
+            
+            It looks like this is your first contribution. We noticed the **DCO (Developer Certificate of Origin)** check might fail if your commits aren't signed. 
+            
+            To fix this, please ensure every commit has a `Signed-off-by: Name <email>` line. You can do this automatically by using the `-s` flag:
+            `git commit -s -m "Your message"`
+            
+            For existing commits, you can fix them with:
+            `git commit --amend --signoff` or `git rebase -i HEAD~N --signoff` (where N is the number of commits)
+            The Developer Community DCO guide also provides helpful tips on fixing DCO inconveniences. Setting a commit hook in the git repository will automate adding the DCO signoff.
+            See https://github.com/p4lang/governance/wiki/P4-DCO-Guidelines for information.
