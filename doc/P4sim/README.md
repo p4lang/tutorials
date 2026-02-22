@@ -18,15 +18,94 @@ Supported P4 architecture specifications:
 
 ## Getting Started
 
-For installation and environment setup, see the [Installation & Usage](https://github.com/HapCommSys/p4sim/blob/main/doc/vm-env.md) guide.
+### Installation <a name="local-deployment-ns339"></a>
+
+The following steps set up a local environment to run P4sim with `ns-3.39` on **Ubuntu 24.04 LTS**. The setup has been tested on Ubuntu 24.04 LTS Desktop.
+
+> **Note:** The bmv2 and P4 software installation will take **1–2 hours** and consume up to **15 GB** of disk space.
+
+> **Why ns-3.39 or earlier?** Starting from ns-3.40, ns-3 requires C++20. However, bmv2 is currently built with C++17. P4sim therefore supports ns-3.39 and earlier versions. We plan to upgrade once a C++20-compatible bmv2 build becomes available.
+
+#### Step 1: Initialize the Working Directory
+
+```bash
+sudo apt update
+sudo apt install git vim cmake
+mkdir ~/workdir
+cd ~/workdir
+```
+
+#### Step 2: Install bmv2 and P4 Dependencies
+
+Install all required libraries and tools via the official [p4lang/tutorials](https://github.com/p4lang/tutorials) repository:
+
+```bash
+cd ~
+git clone https://github.com/p4lang/tutorials
+mkdir ~/src && cd ~/src
+../tutorials/vm-ubuntu-24.04/install.sh |& tee log.txt
+```
+
+Verify the installation:
+
+```bash
+simple_switch --version
+```
+
+#### Step 3: Clone and Build ns-3.39 with P4sim
+
+```bash
+cd ~/workdir
+git clone https://github.com/nsnam/ns-3-dev-git.git ns3.39
+cd ns3.39
+git checkout ns-3.39
+```
+
+Add the P4sim module:
+
+```bash
+cd contrib
+git clone https://github.com/HapCommSys/p4sim.git
+cd p4sim && sudo ./set_pkg_config_env.sh
+```
+
+Configure and build:
+
+```bash
+cd ../..
+./ns3 configure --enable-tests --enable-examples
+./ns3 build
+```
+
+#### Step 4: Set the `P4SIM_DIR` Environment Variable
+
+P4sim resolves P4 artifact paths (JSON pipelines, flow tables, topology files) via the `P4SIM_DIR` environment variable. Add it to your shell profile:
+
+```bash
+echo 'export P4SIM_DIR="$HOME/workdir/ns3.39/contrib/p4sim"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+> **Tip:** If `P4SIM_DIR` is not set, P4sim falls back to a path derived from the executable location, but setting it explicitly is recommended for reliability.
+
+#### Step 5: Run an Example
+
+```bash
+./ns3 run p4-v1model-ipv4-forwarding
+# ./ns3 run [example name]
+```
+
+No manual path editing is required — all examples use portable path helpers. A full list of available example names can be found in [`examples/CMakeLists.txt`](https://github.com/HapCommSys/p4sim/blob/main/examples/CMakeLists.txt).
+
+### P4sim Development Workflow
 
 Using P4sim typically involves the following steps:
 
 1. **Develop the P4 Program**: Implement your packet processing logic in P4 (e.g., defining headers, parsers, match-action tables, and control flow).
-2. **Compile the P4 Program**: Use a P4 compiler (such as `p4c`) to generate the corresponding JSON pipeline description.
-3. **Create an ns-3 Simulation Script**: Write an ns-3 simulation script (e.g., in the `scratch/` directory) and specify which nodes should operate as P4-enabled switches.
-4. **Configure Tables and Control Plane Logic**: Populate match-action tables and implement the required control-plane logic before or during simulation runtime.
-5. **Run the Simulation**: Execute the ns-3 simulation, including traffic generation, forwarding, and observation of performance metrics.
+2. **Compile the P4 Program**: Use `p4c` to generate the corresponding JSON pipeline description.
+3. **Create an ns-3 Simulation Script**: Write a simulation script (e.g., in the `scratch/` directory) and assign P4-enabled switches to the desired nodes.
+4. **Configure Control Plane Logic**: Populate match-action tables and implement the required control-plane logic before or during simulation runtime.
+5. **Run and Observe**: Execute the simulation and collect performance metrics such as throughput, latency, and packet traces.
 
 ## Use Cases
 
