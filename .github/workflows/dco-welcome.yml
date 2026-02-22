@@ -1,29 +1,56 @@
 name: DCO Assistant for First-Time Contributors
 
 on:
-  pull_request_target:
-    types: [opened]
+  check_run:
+    types: [completed]
 
 jobs:
   dco-help:
     runs-on: ubuntu-latest
-    # Only run for first-time contributors or users with no previous history
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
     if: |
-      github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR' || 
-      github.event.pull_request.author_association == 'NONE'
+      github.event.check_run.conclusion == 'failure' &&
+      contains(github.event.check_run.name, 'DCO') &&
+      github.event.check_run.pull_requests[0] != null
     steps:
+      - name: Load PR Context
+        id: pr-context
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prs = context.payload.check_run.pull_requests || [];
+            if (prs.length === 0) {
+              core.setOutput('should_comment', 'false');
+              return;
+            }
+
+            const prNumber = prs[0].number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            const shouldComment = ['FIRST_TIME_CONTRIBUTOR', 'NONE'].includes(pr.author_association);
+            core.setOutput('pr_number', String(prNumber));
+            core.setOutput('should_comment', shouldComment ? 'true' : 'false');
+
       - name: Post DCO Instructions
+        if: steps.pr-context.outputs.should_comment == 'true'
         uses: peter-evans/create-or-update-comment@v3
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ steps.pr-context.outputs.pr_number }}
           body: |
             Welcome to the project, @${{ github.actor }}!
-            
-            It looks like this is your first contribution. We noticed the **DCO (Developer Certificate of Origin)** check might fail if your commits aren't signed. 
-            
+
+            It looks like this is your first contribution. We noticed the **DCO (Developer Certificate of Origin)** check might fail if your commits aren't signed.
+
             To fix this, please ensure every commit has a `Signed-off-by: Name <email>` line. You can do this automatically by using the `-s` flag:
             `git commit -s -m "Your message"`
-            
+
             For existing commits, you can fix them with:
             `git commit --amend --signoff` or `git rebase -i HEAD~N --signoff` (where N is the number of commits)
             The Developer Community DCO guide also provides helpful tips on fixing DCO inconveniences. Setting a commit hook in the git repository will automate adding the DCO signoff.
