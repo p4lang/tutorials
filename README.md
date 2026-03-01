@@ -6,11 +6,7 @@
 * [Introduction](#introduction)
 * [Presentation](#presentation)
 * [P4 Documentation](#p4-documentation)
-* [P4sim](#p4sim--a-simple-p4-behavioral-simulator)
 * [Obtaining required software](#obtaining-required-software)
-     * [To build the virtual machine](#to-build-a-virtual-machine-with-the-p4-development-tools)
-     * [Accessing the VM](#download-a-virtual-machine-with-the-p4-development-tools-already-installed)
-     * [To install P4 development tools on an existing system](#to-install-p4-development-tools-on-an-existing-system)
 * [How to Contribute](#how-to-contribute)
 * [Older tutorials](#older-tutorials)
 
