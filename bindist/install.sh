@@ -58,9 +58,10 @@ check_os() {
     fi
 }
 
-# Runtime apt dependencies that simple_switch_grpc and simple_switch need.
+# Runtime apt dependencies that the p4c compiler and BMv2 binaries need.
 # These are standard Ubuntu 24.04 packages.
 RUNTIME_DEPS=(
+    cpp
     python3
     patchelf
     libboost-filesystem1.83.0
