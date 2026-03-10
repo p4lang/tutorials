@@ -92,7 +92,9 @@ RUN git clone --recurse-submodules https://github.com/p4lang/p4c.git \
     && cd /build && rm -rf p4c
 
 # Step 8: Collect artifacts into bindist
-RUN mkdir -p /build/bindist/p4-bindist-ubuntu2404-x86_64/{bin,lib,share}
+RUN mkdir -p /build/bindist/p4-bindist-ubuntu2404-x86_64/bin \
+    && mkdir -p /build/bindist/p4-bindist-ubuntu2404-x86_64/lib \
+    && mkdir -p /build/bindist/p4-bindist-ubuntu2404-x86_64/share
 
 # Copy p4c binaries
 RUN for bin in p4c p4c-bm2-ss p4c-bm2-psa p4c-bm2-pna p4c-dpdk p4c-ebpf \
