@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2018 Contributors to the P4 Project
+#
 # SPDX-License-Identifier: GPL-2.0-only
 # Reason-GPL: import-scapy
+
 import sys
 
 from scapy.all import Ether, IPOption, Packet, bind_layers, get_if_list, sniff
