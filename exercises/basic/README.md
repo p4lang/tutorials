@@ -189,6 +189,21 @@ make stop
 Congratulations, your implementation works! Move onto the next assignment
 [Basic Tunneling](../basic_tunnel)
 
+## Automated Tests
+
+PTF (Packet Test Framework) tests are available to verify the solution
+program works correctly. These tests run against `solution/basic.p4`
+and check forwarding behavior, including drop on miss, single entry
+forwarding, and multi-entry LPM routing.
+
+To run the tests:
+```bash
+./runptf.sh
+```
+
+Note: The `veth` interfaces must be set up before running. If you see
+a "No such device" error, run the `veth_setup.sh` script from
+[p4-guide](https://github.com/jafingerhut/p4-guide/blob/master/bin/veth_setup.sh).
 
 ## Relevant Documentation
 
