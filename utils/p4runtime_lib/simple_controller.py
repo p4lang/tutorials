@@ -65,7 +65,8 @@ def main():
                        device_id=args.device_id,
                        sw_conf_file=sw_conf_file,
                        workdir=workdir,
-                       proto_dump_fpath=args.proto_dump_file)
+                       proto_dump_fpath=args.proto_dump_file,
+                       runtime_json=args.runtime_conf_file)
 
 
 def check_switch_conf(sw_conf, workdir):
