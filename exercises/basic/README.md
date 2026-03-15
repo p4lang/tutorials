@@ -198,12 +198,11 @@ forwarding, and multi-entry LPM routing.
 
 To run the tests:
 ```bash
-./runptf.sh
+make test
 ```
 
-Note: The `veth` interfaces must be set up before running. If you see
-a "No such device" error, run the `veth_setup.sh` script from
-[p4-guide](https://github.com/jafingerhut/p4-guide/blob/master/bin/veth_setup.sh).
+This handles veth interface creation, P4 compilation, switch startup,
+test execution, and cleanup automatically.
 
 ## Relevant Documentation
 

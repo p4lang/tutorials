@@ -2,18 +2,25 @@
 # Run PTF tests for the basic forwarding exercise.
 # Tests run against the solution P4 program.
 
-# Path to p4runtime_shell_utils and testlib
-T="`realpath ~/p4-guide/testlib`"
-if [ x"${PYTHONPATH}" == "x" ]
-then
-    P="${T}"
-else
-    P="${T}:${PYTHONPATH}"
-fi
+set -e
+
+# ---- veth setup ----
+echo "Creating veth interfaces..."
+for i in 0 1 2 3 4 5 6 7; do
+    intf0="veth$(( i * 2 ))"
+    intf1="veth$(( i * 2 + 1 ))"
+    if ! ip link show $intf0 &>/dev/null; then
+        sudo ip link add name $intf0 type veth peer name $intf1
+        sudo ip link set dev $intf0 up
+        sudo ip link set dev $intf1 up
+        sudo sysctl -q net.ipv6.conf.$intf0.disable_ipv6=1
+        sudo sysctl -q net.ipv6.conf.$intf1.disable_ipv6=1
+    fi
+done
 
 set -x
 
-# Compile the solution P4 program into build directory
+# ---- compile ----
 mkdir -p build
 p4c --target bmv2 \
     --arch v1model \
@@ -23,7 +30,7 @@ p4c --target bmv2 \
 
 /bin/rm -f ss-log.txt
 
-# Start simple_switch_grpc with no P4 program loaded (loaded via P4Runtime)
+# ---- start switch ----
 sudo simple_switch_grpc \
      --log-file ss-log \
      --log-flush \
@@ -39,12 +46,11 @@ sudo simple_switch_grpc \
      --no-p4 &
 
 echo ""
-echo "Started simple_switch_grpc.  Waiting 2 seconds before starting PTF test ..."
+echo "Started simple_switch_grpc. Waiting 2 seconds before starting PTF test..."
 sleep 2
 
-# Run PTF tests
+# ---- run tests ----
 sudo ${P4_EXTRA_SUDO_OPTS} `which ptf` \
-    --pypath "$P" \
     -i 0@veth1 \
     -i 1@veth3 \
     -i 2@veth5 \
@@ -57,10 +63,22 @@ sudo ${P4_EXTRA_SUDO_OPTS} `which ptf` \
     --test-dir ptf
 
 echo ""
-echo "PTF test finished.  Waiting 2 seconds before killing simple_switch_grpc ..."
+echo "PTF test finished. Waiting 2 seconds before killing simple_switch_grpc..."
 sleep 2
+
+# ---- cleanup ----
 sudo pkill --signal 9 --list-name simple_switch
+
 echo ""
-echo "Verifying that there are no simple_switch_grpc processes running any longer in 4 seconds ..."
-sleep 4
+echo "Cleaning up veth interfaces..."
+for i in 0 1 2 3 4 5 6 7; do
+    intf0="veth$(( i * 2 ))"
+    if ip link show $intf0 &>/dev/null; then
+        sudo ip link del $intf0
+    fi
+done
+
+echo ""
+echo "Verifying no simple_switch_grpc processes remain..."
+sleep 2
 ps axguwww | grep simple_switch

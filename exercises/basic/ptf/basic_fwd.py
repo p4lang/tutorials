@@ -15,12 +15,20 @@
 # limitations under the License.
 
 import logging
+import os
+import sys
 
 import ptf
 import ptf.testutils as tu
 from ptf.base_tests import BaseTest
-import p4runtime_sh.shell as sh
-import p4runtime_shell_utils as shu
+
+# Import p4runtime_lib from the tutorials repo utils directory
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                 '../../../utils/'))
+import p4runtime_lib.bmv2
+import p4runtime_lib.helper
+from p4runtime_lib.switch import ShutdownAllSwitchConnections
 
 
 # Configure logging
@@ -38,32 +46,53 @@ class BasicFwdTest(BaseTest):
         self.dataplane.flush()
 
         logging.debug("BasicFwdTest.setUp()")
+
+        # Get test parameters
         grpc_addr = tu.test_param_get("grpcaddr")
         if grpc_addr is None:
             grpc_addr = 'localhost:9559'
         p4info_txt_fname = tu.test_param_get("p4info")
         p4prog_binary_fname = tu.test_param_get("config")
-        sh.setup(device_id=0,
-                 grpc_addr=grpc_addr,
-                 election_id=(0, 1),
-                 config=sh.FwdPipeConfig(p4info_txt_fname, p4prog_binary_fname),
-                 verbose=False)
+
+        # Create P4Info helper for building table entries
+        self.p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_txt_fname)
+
+        # Connect to the switch via gRPC
+        self.sw = p4runtime_lib.bmv2.Bmv2SwitchConnection(
+            name='s1',
+            address=grpc_addr,
+            device_id=0,
+            proto_dump_file='logs/s1-p4runtime-requests.txt')
+
+        # Establish as master controller
+        self.sw.MasterArbitrationUpdate()
+
+        # Load the P4 program onto the switch
+        self.sw.SetForwardingPipelineConfig(
+            p4info=self.p4info_helper.p4info,
+            bmv2_json_file_path=p4prog_binary_fname)
 
     def tearDown(self):
         logging.debug("BasicFwdTest.tearDown()")
-        sh.teardown()
+        ShutdownAllSwitchConnections()
 
 
 ######################################################################
 # Helper function to add entries to ipv4_lpm table
 ######################################################################
 
-def add_ipv4_lpm_entry(ipv4_addr_str, prefix_len, dst_mac_str, port):
-    te = sh.TableEntry('MyIngress.ipv4_lpm')(action='MyIngress.ipv4_forward')
-    te.match['hdr.ipv4.dstAddr'] = '%s/%d' % (ipv4_addr_str, prefix_len)
-    te.action['dstAddr'] = dst_mac_str
-    te.action['port'] = '%d' % port
-    te.insert()
+    def add_ipv4_lpm_entry(self, ipv4_addr_str, prefix_len, dst_mac_str, port):
+        table_entry = self.p4info_helper.buildTableEntry(
+            table_name='MyIngress.ipv4_lpm',
+            match_fields={
+                'hdr.ipv4.dstAddr': (ipv4_addr_str, prefix_len)
+            },
+            action_name='MyIngress.ipv4_forward',
+            action_params={
+                'dstAddr': dst_mac_str,
+                'port': port
+            })
+        self.sw.WriteTableEntry(table_entry)
 
 
 class DropTest(BasicFwdTest):
@@ -92,7 +121,7 @@ class FwdTest(BasicFwdTest):
         out_dmac = '08:00:00:00:02:22'
 
         # Add a forwarding entry
-        add_ipv4_lpm_entry(ip_dst, 32, out_dmac, eg_port)
+        self.add_ipv4_lpm_entry(ip_dst, 32, out_dmac, eg_port)
 
         # Send packet
         pkt = tu.simple_tcp_packet(eth_src=in_smac, eth_dst=in_dmac,
@@ -131,8 +160,8 @@ class MultiEntryTest(BasicFwdTest):
 
         # Add all entries
         for e in entries:
-            add_ipv4_lpm_entry(e['ip_dst'], e['prefix_len'],
-                               e['out_dmac'], e['eg_port'])
+            self.add_ipv4_lpm_entry(e['ip_dst'], e['prefix_len'],
+                                    e['out_dmac'], e['eg_port'])
 
         # Test each entry
         ttl_in = 64
