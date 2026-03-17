@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# SPDX-License-Identifier: Apache-2.0
 # Copyright 2026 Andrew Nguyen
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
 
 import logging
 import os
@@ -174,3 +176,69 @@ class MultiEntryTest(BasicFwdTest):
             tu.send_packet(self, ig_port, pkt)
             tu.verify_packets(self, exp_pkt, [e['eg_port']])
             ttl_in -= 10
+
+
+class LpmTiebreakerTest(BasicFwdTest):
+    """Test that longest-prefix match wins for overlapping routes."""
+    def runTest(self):
+        in_dmac = 'ee:30:ca:9d:1e:00'
+        in_smac = 'ee:cd:00:7e:70:00'
+        ig_port = 0
+
+        less_specific_out_dmac = '08:00:00:00:11:11'
+        less_specific_eg_port = 1
+        more_specific_out_dmac = '08:00:00:00:22:22'
+        more_specific_eg_port = 2
+
+        # Two overlapping routes: /16 and /24. Packet should match /24.
+        self.add_ipv4_lpm_entry('10.0.0.0', 16,
+                                less_specific_out_dmac, less_specific_eg_port)
+        self.add_ipv4_lpm_entry('10.0.1.0', 24,
+                                more_specific_out_dmac, more_specific_eg_port)
+
+        pkt = tu.simple_tcp_packet(eth_src=in_smac, eth_dst=in_dmac,
+                                   ip_dst='10.0.1.99', ip_ttl=64)
+        exp_pkt = tu.simple_tcp_packet(eth_src=in_dmac, eth_dst=more_specific_out_dmac,
+                                       ip_dst='10.0.1.99', ip_ttl=63)
+
+        tu.send_packet(self, ig_port, pkt)
+        tu.verify_packets(self, exp_pkt, [more_specific_eg_port])
+
+
+class TtlBoundaryTest(BasicFwdTest):
+    """Test forwarding behavior when input IPv4 TTL is at boundary value 1."""
+    def runTest(self):
+        in_dmac = 'ee:30:ca:9d:1e:00'
+        in_smac = 'ee:cd:00:7e:70:00'
+        ip_dst = '10.0.9.9'
+        ig_port = 1
+
+        eg_port = 3
+        out_dmac = '08:00:00:00:09:99'
+
+        self.add_ipv4_lpm_entry(ip_dst, 32, out_dmac, eg_port)
+
+        pkt = tu.simple_tcp_packet(eth_src=in_smac, eth_dst=in_dmac,
+                                   ip_dst=ip_dst, ip_ttl=1)
+        exp_pkt = tu.simple_tcp_packet(eth_src=in_dmac, eth_dst=out_dmac,
+                                       ip_dst=ip_dst, ip_ttl=0)
+
+        tu.send_packet(self, ig_port, pkt)
+        tu.verify_packets(self, exp_pkt, [eg_port])
+
+
+class NonIpv4DropTest(BasicFwdTest):
+    """Test non-IPv4 traffic bypasses IPv4 LPM forwarding logic."""
+    def runTest(self):
+        ig_port = 1
+        pkt = tu.simple_arp_packet(
+            eth_dst='ff:ff:ff:ff:ff:ff',
+            eth_src='00:de:ad:be:ef:01',
+            arp_op=1,
+            ip_snd='10.0.1.10',
+            ip_tgt='10.0.1.1',
+            hw_snd='00:de:ad:be:ef:01',
+            hw_tgt='00:00:00:00:00:00')
+
+        tu.send_packet(self, ig_port, pkt)
+        tu.verify_packets(self, pkt, [0])
