@@ -21,7 +21,7 @@ jobs:
       - name: Install build dependencies
         run: |
           apt-get update
-          apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-devs
+          apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           pip3 install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
 
       - name: Ensure scripts are executable
