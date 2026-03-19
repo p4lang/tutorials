@@ -31,7 +31,6 @@ jobs:
       - name: Run PTF Tests
         run: |
           cd exercises/basic
-          mkdir -p logs
           make test
         # Retain logs in case runs fail
       - name: Upload Logs

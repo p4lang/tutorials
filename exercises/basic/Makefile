@@ -4,5 +4,5 @@ TOPO = pod-topo/topology.json
 
 include ../../utils/Makefile
 
-test:
+test: dirs
 	./runptf.sh
