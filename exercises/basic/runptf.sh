@@ -3,20 +3,9 @@
 # Tests run against the solution P4 program.
 
 set -e
+BINDIR=$(realpath ../../bin)
 
-# ---- veth setup ----
-echo "Creating veth interfaces..."
-for i in 0 1 2 3 4 5 6 7; do
-    intf0="veth$(( i * 2 ))"
-    intf1="veth$(( i * 2 + 1 ))"
-    if ! ip link show $intf0 &>/dev/null; then
-        sudo ip link add name $intf0 type veth peer name $intf1
-        sudo ip link set dev $intf0 up
-        sudo ip link set dev $intf1 up
-        sudo sysctl -q net.ipv6.conf.$intf0.disable_ipv6=1
-        sudo sysctl -q net.ipv6.conf.$intf1.disable_ipv6=1
-    fi
-done
+sudo "${BINDIR}"/veth_setup.sh
 
 set -x
 
@@ -71,12 +60,7 @@ sudo pkill --signal 9 --list-name simple_switch
 
 echo ""
 echo "Cleaning up veth interfaces..."
-for i in 0 1 2 3 4 5 6 7; do
-    intf0="veth$(( i * 2 ))"
-    if ip link show $intf0 &>/dev/null; then
-        sudo ip link del $intf0
-    fi
-done
+sudo "${BINDIR}"/veth_teardown.sh
 
 echo ""
 echo "Verifying no simple_switch_grpc processes remain..."
