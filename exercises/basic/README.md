@@ -189,6 +189,20 @@ make stop
 Congratulations, your implementation works! Move onto the next assignment
 [Basic Tunneling](../basic_tunnel)
 
+## Automated Tests
+
+PTF (Packet Test Framework) tests are available to verify the solution
+program works correctly. These tests run against `solution/basic.p4`
+and check forwarding behavior, including drop on miss, single entry
+forwarding, and multi-entry LPM routing.
+
+To run the tests:
+```bash
+make test
+```
+
+This handles veth interface creation, P4 compilation, switch startup,
+test execution, and cleanup automatically.
 
 ## Relevant Documentation
 
