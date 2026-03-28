@@ -116,6 +116,75 @@ In the [paper](https://dl.acm.org/doi/10.1145/3747204.3747210), P4sim is evaluat
 
 More use cases can be found [here](https://github.com/HapCommSys/p4sim/blob/main/doc/examples.md), demonstrating that P4sim can serve both research and educational purposes, enabling exploration of programmable data-plane behaviors in realistic network contexts.
 
+### High-Performance Simulation with P4sim
+
+**Some of the examples have results and plots for analysis in [link](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result), include the `parameters`, `pcaps` for running, please have a look with more detail.**
+
+| Name | Description | ns-3 script | p4 script |
+|-----|-------------|--------------|------|
+| [p4-basic-example](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-basic-example) | [basic](https://github.com/p4lang/tutorials/tree/master/exercises/basic) example | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-basic-example.cc) | basic pipeline verification [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/p4_basic) |
+| [p4-basic-tunnel](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-basic-tunnel) | [basic tunnel](https://github.com/p4lang/tutorials/tree/master/exercises/basic_tunnel) example | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-basic-tunnel.cc) | encapsulation / decapsulation test [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/basic_tunnel) |
+| [p4-fat-tree](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-fat-tree) | fat tree topo testing | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/topo-fattree.cc) | multi-switch forwarding validation [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/fat-tree) |
+| [p4-firewall](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-firewall) | [firewall](https://github.com/p4lang/tutorials/tree/master/exercises/firewall) example | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-firewall.cc) | ACL rule verification [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/firewall) |
+| [p4-psa-ipv4-forwarding](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-psa-ipv4-forwarding) | ipv4 forwarding in psa arch | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-psa-ipv4-forwarding.cc) | PSA pipeline example [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/simple_psa) |
+| [p4-spine-leaf-topo](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-spine-leaf-topo) | Spine leaf topo testing | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-spine-leaf-topo.cc) | datacenter fabric test [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/load_balance) |
+| [p4-v1model-ipv4-forwarding](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/examples_test_result/p4-v1model-ipv4-forwarding) | ipv4 forwarding in v1model arch | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-v1model-ipv4-forwarding.cc) | v1model pipeline example [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/ipv4_forward) |
+| [queuing_test](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/queuing_test) | queuing test with qos priority mapping | [ns-3](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-queue-test.cc) | QoS / priority queue experiment [p4src](https://github.com/HapCommSys/p4sim/tree/main/examples/p4src/qos) |
+
+Following we give two simple examples: `IPv4 Forwarding Benchmark` and `Queue and Packet Scheduling Test` show how run the examples.
+
+#### IPv4 Forwarding Benchmark
+
+The following example runs a simple two-host, one-switch topology with IPv4 forwarding at 100 Mbps. The link rate (`--linkRate`), application data rate (`--appDataRate`), and other parameters can be tuned as needed:
+
+```bash
+# V1model architecture (recommended)
+./ns3 run p4-v1model-ipv4-forwarding -- \
+  --pktSize=1000 --appDataRate=100Mbps --linkRate=1000Mbps \
+  --switchRate=100000 --linkDelay=0.01ms --simDuration=20 --pcap=false
+
+# PSA (Portable Switch Architecture)
+./ns3 run p4-psa-ipv4-forwarding -- \
+  --pktSize=1000 --appDataRate=100Mbps --linkRate=1000Mbps \
+  --switchRate=100000 --linkDelay=0.01ms --simDuration=20 --pcap=false
+
+# PNA (Portable NIC Architecture) — not yet fully implemented
+./ns3 run p4-pna-ipv4-forwarding -- \
+  --pktSize=1000 --appDataRate=100Mbps --linkRate=1000Mbps \
+  --switchRate=100000 --linkDelay=0.01ms --simDuration=20 --pcap=false
+```
+
+#### Queue and Packet Scheduling Test
+
+To evaluate queuing and packet scheduling behavior on the P4 switch, use the [`p4-queue-test.cc`](https://github.com/HapCommSys/p4sim/blob/main/examples/p4-queue-test.cc) example. It accepts three independent traffic flows with configurable data rates:
+
+```bash
+./ns3 run p4-queue-test -- \
+  --pktSize=1000 \
+  --appDataRate1=3Mbps --appDataRate2=4Mbps --appDataRate3=5Mbps \
+  --switchRate=1500 --linkRate=1000Mbps --queueSize=1000 --pcap=true
+```
+
+Mote details, results, plots please check [Queue Status Monitor](https://github.com/HapCommSys/p4sim-artifact-icns3/tree/main/queuing_test)
+
+> **Note:** Per-port queue parameters cannot currently be set via command-line arguments. Instead, configure them at runtime using the P4 controller command interface:
+>
+> ```
+> set_queue_depth <depth_in_packets> <port_number>
+> set_queue_rate  <rate_in_pps>      <port_number>
+> ```
+>
+> Flow priorities are assigned through match-action table entries that map UDP port numbers to priority levels:
+>
+> ```
+> table_add udp_priority set_priority 2000              => 0x1
+> table_add udp_priority set_priority <udp_port_number> => <priority>
+> ```
+>
+> The bottleneck processing rate is controlled by `--switchRate` (in packets per second). In this example it is set to `1500`.
+
+After the simulation completes, inspect the generated PCAP files to observe how packets from the three flows are scheduled and reordered according to their assigned priorities.
+
 ## Known Limitations
 
 The packet processing rate `SwitchRate` (in packets per second, pps) must currently be configured manually for each switch. An inappropriate value can cause the switch to enter an idle polling loop, leading to wasted CPU cycles. Automatic rate tuning is planned for a future release.
