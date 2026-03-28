@@ -1,0 +1,47 @@
+name: P4 Tutorials CI
+
+on:
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
+# Add concurrency so only most recent push have CI
+concurrency:
+  group: p4-tutorials-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-exercise:
+    timeout-minutes: 30   
+    runs-on: ubuntu-latest
+    # We use need a privileged container because P4 tests need to create veth interfaces
+    container:
+      image: p4lang/p4c:latest
+      options: --privileged
+    strategy:
+      matrix:
+        exercise: [basic, basic_tunnel]    # Add more exercises here for future tests
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
+          pip3 install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
+
+      - name: Run PTF Tests
+        run: |
+          chmod +x exercises/${{ matrix.exercise }}/runptf.sh
+          cd exercises/${{ matrix.exercise }}
+          make test
+        # Retain logs in case runs fail
+      - name: Upload Logs
+        if: always() 
+        uses: actions/upload-artifact@v4
+        with:
+          name: p4-logs-${{ matrix.exercise }}
+          path: exercises/${{ matrix.exercise }}/logs/
+

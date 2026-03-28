@@ -32,9 +32,9 @@ sudo apt clean
 # image files.
 
 echo "Writing zeros to unused disk blocks (be patient) ..."
-FNAME=`mktemp --tmpdir big-empty-zero-file-XXXXXXXX`
-dd if=/dev/zero of=${FNAME} bs=4096k
-/bin/rm -f ${FNAME}
+FNAME="/bigemptyfile"
+sudo dd if=/dev/zero | sudo dd of=${FNAME} bs=4096k
+sudo /bin/rm -f ${FNAME}
 
 echo "Disk usage before running this script:"
 echo "$DF1_BEFORE"
