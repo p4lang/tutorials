@@ -34,7 +34,6 @@ jobs:
 
       - name: Run PTF Tests
         run: |
-          chmod +x exercises/${{ matrix.exercise }}/runptf.sh
           cd exercises/${{ matrix.exercise }}
           make test
         # Retain logs in case runs fail
