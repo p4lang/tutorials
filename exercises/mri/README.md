@@ -1,5 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2018 Contributors to the P4 Project
 
-[comment]: # (SPDX-License-Identifier:  Apache-2.0)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # Implementing MRI
 
