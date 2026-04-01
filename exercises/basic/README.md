@@ -189,6 +189,12 @@ make stop
 Congratulations, your implementation works! Move onto the next assignment
 [Basic Tunneling](../basic_tunnel)
 
+## Automated Tests
+
+These tests are maintained to support CI/CD and help contributors verify 
+that the solution continues to work correctly across changes. PTF tests 
+are located in the `ptf/` directory and run against the solution program.
+
 ## Relevant Documentation
 
 The documentation for P4_16 and P4Runtime is available [here](https://p4.org/specifications/)
