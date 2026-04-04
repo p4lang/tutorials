@@ -1,3 +1,5 @@
+" SPDX-FileCopyrightText: 2017 Contributors to the P4 Project
+"
 " SPDX-License-Identifier: Apache-2.0
 " Vim syntax file
 " Language: P4_16

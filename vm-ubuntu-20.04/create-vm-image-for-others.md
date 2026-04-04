@@ -1,5 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2021 Contributors to the P4 Project
 
-[comment]: # (SPDX-License-Identifier:  Apache-2.0)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # Creating a VM image for distribution to others
 

@@ -1,5 +1,8 @@
+# SPDX-FileCopyrightText: 2019 Contributors to the P4 Project
+#
 # SPDX-License-Identifier: GPL-2.0-only
 # Reason-GPL: import-scapy
+
 from scapy.all import *
 
 TYPE_PROBE = 0x812
