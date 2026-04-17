@@ -3,6 +3,13 @@
 # SPDX-FileCopyrightText: 2013 Barefoot Networks, Inc.
 #
 # SPDX-License-Identifier: Apache-2.0
+
+# Adapted by Robert MacDavid (macdavid@cs.princeton.edu) from scripts found in
+# the p4app repository (https://github.com/p4lang/p4app)
+#
+# We encourage you to dissect this script to better understand the BMv2/Mininet
+# environment used by the P4 tutorial.
+
 import argparse
 import json
 import os
