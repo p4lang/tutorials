@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2024 Andy Fingerhut
+#
 # SPDX-License-Identifier: Apache-2.0
 
 # Copyright 2024 Andy Fingerhut

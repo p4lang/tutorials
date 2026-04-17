@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2026 Vineet Goel
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # P4sim: P4-Programmable Packet Processing in ns-3
 
 P4sim ([GitHub](https://github.com/HapCommSys/p4sim)) is a high-performance simulation framework that brings P4-programmable data plane processing into the [ns-3 network simulator](https://www.nsnam.org/). It enables researchers and developers to model, execute, and evaluate P4 programs within realistic end-to-end network simulations, tightly coupling a P4-driven packet processing engine with ns-3's flexible network modeling for fine-grained analysis of programmable networks at scale.

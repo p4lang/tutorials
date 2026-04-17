@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2018 Nate Foster
+#
 # SPDX-License-Identifier: GPL-2.0-only
-# Reason-GPL: import-scapy
 
 import re
 

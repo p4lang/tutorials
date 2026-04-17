@@ -1,7 +1,9 @@
 #!/bin/bash
-# SPDX-License-Identifier: Apache-2.0
+
 # Copyright 2019 Andy Fingerhut
+# SPDX-FileCopyrightText: 2026 Andy Fingerhut
 #
+# SPDX-License-Identifier: Apache-2.0
 
 # This script was copied from the location below, for convenience of
 # p4-guide users:

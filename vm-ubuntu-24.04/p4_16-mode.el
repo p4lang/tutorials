@@ -1,7 +1,7 @@
 ;;; p4_16-mode.el --- Support for the P4_16 programming language
+;; SPDX-FileCopyrightText: 2016 Barefoot Networks, Inc.
 ;; SPDX-License-Identifier: Apache-2.0
 
-;; Copyright (C) 2016- Barefoot Networks
 ;; Author: Vladimir Gurevich <vladimir.gurevich@barefootnetworks.com>
 ;; Maintainer: Vladimir Gurevich <vladimir.gurevich@barefootnetworks.com>
 ;; Created: 15 April 2017

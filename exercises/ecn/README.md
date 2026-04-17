@@ -1,5 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2018 Nate Foster
 
-[comment]: # (SPDX-License-Identifier:  Apache-2.0)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # Implementing ECN
 

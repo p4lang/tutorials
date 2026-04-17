@@ -1,5 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2024 Andy Fingerhut
 
-[comment]: # (SPDX-License-Identifier:  Apache-2.0)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # Create VM using ISO installer
 
