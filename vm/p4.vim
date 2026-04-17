@@ -1,3 +1,4 @@
+" SPDX-FileCopyrightText: 2014 Barefoot Networks, Inc.
 " SPDX-License-Identifier: Apache-2.0
 " Vim syntax file
 " Language: P4_16
