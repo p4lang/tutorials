@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 Andy Fingerhut
+
+SPDX-License-Identifier: Apache-2.0
+-->
+
 # Introduction
 
 The P4 Consortium's strongly recommends that all source files in this

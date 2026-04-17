@@ -1,5 +1,6 @@
+# SPDX-FileCopyrightText: 2019 Stephen Ibanez
+#
 # SPDX-License-Identifier: GPL-2.0-only
-# Reason-GPL: import-scapy
 from scapy.all import *
 
 TYPE_PROBE = 0x812

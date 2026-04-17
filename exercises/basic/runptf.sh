@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2026 An Nguyen
+#
+# SPDX-License-Identifier: Apache-2.0
+
 # Run PTF tests for the basic forwarding exercise.
 # Tests run against the solution P4 program.
 

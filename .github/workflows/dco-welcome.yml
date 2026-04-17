@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Fabian Ruffy
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: DCO Assistant for First-Time Contributors
 
 on:

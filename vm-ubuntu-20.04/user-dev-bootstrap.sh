@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2021 Radostin Stoyanov
+#
 # SPDX-License-Identifier: Apache-2.0
 
 # Print script commands and exit on errors.
