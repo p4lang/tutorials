@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-FileCopyrightText: 2019 Stephen Ibanez
+#
 # SPDX-License-Identifier: GPL-2.0-only
-# Reason-GPL: import-scapy via probe_hdrs
 import sys
 import time
 

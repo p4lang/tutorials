@@ -1,4 +1,7 @@
 #! /bin/bash
+
+# SPDX-FileCopyrightText: 2021 Andy Fingerhut
+#
 # SPDX-License-Identifier: Apache-2.0
 
 # To reduce disk space used by the virtual machine, delete many build

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 An Nguyen
+#
+# SPDX-License-Identifier: Apache-2.0
+
 name: P4 Tutorials CI
 
 on:

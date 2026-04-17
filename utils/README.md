@@ -1,5 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2024 Duarte Dias
 
-[comment]: # (SPDX-License-Identifier:  Apache-2.0)
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # P4 Utils
 

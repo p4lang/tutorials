@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: Apache-2.0
+
+# SPDX-FileCopyrightText: 2025 Davide Scano
+#
+# SPDX-License-Identifier: GPL-2.0-only
 import argparse
 import os
 import sys
