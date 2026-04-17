@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2026 Andrew Nguyen
-# SPDX-FileCopyrightText: 2026 An Nguyen
+# SPDX-FileCopyrightText: 2026 Andrew Nguyen
 #
 # SPDX-License-Identifier: Apache-2.0
 
