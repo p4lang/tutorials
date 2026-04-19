@@ -1,5 +1,9 @@
 #! /bin/bash
 
+# SPDX-FileCopyrightText: 2026 Andy Fingerhut
+#
+# SPDX-License-Identifier: Apache-2.0
+
 sudo apt-get update
 # Set up uv for Python dependency management.
 # TODO: Consider using a system-provided package here.
