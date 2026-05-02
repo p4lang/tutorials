@@ -1,32 +1,49 @@
 diff --git a/install_deps.sh b/install_deps.sh
-index 4c5a45d..246bf03 100755
+index 37a49c9..cb06756 100755
 --- a/install_deps.sh
 +++ b/install_deps.sh
-@@ -1,28 +1,57 @@
+@@ -1,45 +1,58 @@
  #!/bin/bash
  set -e
--ubuntu_release=`lsb_release -s -r`
+ 
 -sudo apt-get install -y \
+-    autoconf \
 -    automake \
+-    bison \
+-    build-essential \
+-    ccache \
 -    cmake \
--    libgmp-dev \
--    libpcap-dev \
+-    flex \
+-    git \
+-    g++ \
 -    libboost-dev \
--    libboost-test-dev \
+-    libboost-filesystem-dev \
 -    libboost-program-options-dev \
 -    libboost-system-dev \
--    libboost-filesystem-dev \
+-    libboost-test-dev \
 -    libboost-thread-dev \
 -    libevent-dev \
--    libtool \
--    flex \
--    bison \
--    pkg-config \
--    g++ \
--    libssl-dev \
 -    libffi-dev \
+-    libgmp-dev \
+-    libgrpc++-dev \
+-    libgrpc-dev \
+-    libnanomsg-dev \
+-    libpcap-dev \
+-    libprotobuf-dev \
+-    libprotoc-dev \
+-    libreadline-dev \
+-    libssl-dev \
+-    libthrift-dev \
+-    libtool \
+-    libtool-bin \
+-    pkg-config \
+-    protobuf-compiler \
+-    protobuf-compiler-grpc \
 -    python3-dev \
 -    python3-pip \
+-    python3-six \
+-    python3-thrift \
+-    thrift-compiler \
 -    wget
 +if [ ! -r /etc/os-release ]
 +then
