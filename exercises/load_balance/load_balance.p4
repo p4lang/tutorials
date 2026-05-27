@@ -104,9 +104,42 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
     action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        /* TODO: hash on 5-tuple and save the hash result in meta.ecmp_select
-           so that the ecmp_nhop table can use it to make a forwarding decision accordingly */
-    }
+
+    /* Compute ECMP path selection using a CRC16 hash over the packet 5-tuple.
+
+       5-tuple fields:
+       - source IP
+       - destination IP
+       - protocol
+       - TCP source port
+       - TCP destination port
+
+       ecmp_base:
+       Starting offset for the ECMP next-hop group.
+
+       ecmp_count:
+       Number of equal-cost paths available.
+
+       The resulting hash is stored in meta.ecmp_select and later used
+       by the ecmp_nhop table to select a forwarding path.
+    */
+
+    hash(
+        meta.ecmp_select,
+        HashAlgorithm.crc16,
+        ecmp_base,
+        {
+            hdr.ipv4.srcAddr,
+            hdr.ipv4.dstAddr,
+            hdr.ipv4.protocol,
+            hdr.tcp.srcPort,
+            hdr.tcp.dstPort
+        },
+        ecmp_count
+    );
+}
+
+
     action set_nhop(bit<48> nhop_dmac, bit<32> nhop_ipv4, bit<9> port) {
         hdr.ethernet.dstAddr = nhop_dmac;
         hdr.ipv4.dstAddr = nhop_ipv4;
@@ -134,9 +167,11 @@ control MyIngress(inout headers hdr,
         size = 2;
     }
     apply {
-        /* TODO: apply ecmp_group table and ecmp_nhop table if IPv4 header is
-         * valid and TTL hasn't reached zero
-         */
+        if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
+            if (ecmp_group.apply().hit) {
+               ecmp_nhop.apply();
+               }
+               }
         if (ecmp_group.apply().hit) { 
             ecmp_nhop.apply(); 
         }
