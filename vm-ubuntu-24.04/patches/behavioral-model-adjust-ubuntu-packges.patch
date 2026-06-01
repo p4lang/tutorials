@@ -1,0 +1,37 @@
+diff --git a/install_deps.sh b/install_deps.sh
+index 02dd6d2..7673969 100755
+--- a/install_deps.sh
++++ b/install_deps.sh
+@@ -18,31 +18,20 @@ sudo apt-get install -y \
+     g++ \
+     libboost-dev \
+     libboost-program-options-dev \
++    libboost-test-dev \
+     libboost-thread-dev \
+     libevent-dev \
+     libffi-dev \
+     libgmp-dev \
+-    libgrpc++-dev \
+-    libgrpc-dev \
+     libjsoncpp-dev \
+-    libnanomsg-dev \
+     libpcap-dev \
+-    libprotobuf-dev \
+-    libprotoc-dev \
+-    libreadline-dev \
+     libssl-dev \
+-    libthrift-dev \
+     libtool \
+     libtool-bin \
+     libxxhash-dev \
+     pkg-config \
+-    protobuf-compiler \
+-    protobuf-compiler-grpc \
+     python3-dev \
+     python3-pip \
+-    python3-six \
+-    python3-thrift \
+-    thrift-compiler \
+     wget
+ 
+ tmpdir=`mktemp -d -p .`
