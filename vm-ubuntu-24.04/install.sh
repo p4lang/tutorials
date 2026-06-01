@@ -29,12 +29,12 @@ print_usage() {
     1>&2 echo "usage: $0 [ latest | <date> ]"
     1>&2 echo ""
     1>&2 echo "Dates supported:"
-    1>&2 echo "    2026-May-01"
+    1>&2 echo "    2026-Jun-01"
 }
 
 if [ $# -eq 0 ]
 then
-    VERSION="2026-May-01"
+    VERSION="2026-Jun-01"
     echo "No version specified.  Defaulting to ${VERSION}"
 elif [ $# -eq 1 ]
 then
