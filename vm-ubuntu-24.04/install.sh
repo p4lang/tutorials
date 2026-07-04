@@ -34,7 +34,7 @@ print_usage() {
 
 if [ $# -eq 0 ]
 then
-    VERSION="2026-Jun-01"
+    VERSION="2026-Jul-04"
     echo "No version specified.  Defaulting to ${VERSION}"
 elif [ $# -eq 1 ]
 then
@@ -45,6 +45,12 @@ else
 fi
 
 case ${VERSION} in
+    2026-Jul-04)
+	export INSTALL_BEHAVIORAL_MODEL_SOURCE_VERSION="05ce6940a559ea87da180cf8288bf078735a7148"
+	export INSTALL_PI_SOURCE_VERSION="749760bb9ecc820e6cc46a777ea37ed078467318"
+	export INSTALL_P4C_SOURCE_VERSION="cae220019f4c3b12ff9ded146cbc9d702bab0640"
+	export INSTALL_PTF_SOURCE_VERSION="fe62f401dcc38ec983f9a2df6b2e890983c357fb"
+	;;
     2026-Jun-01)
 	export INSTALL_BEHAVIORAL_MODEL_SOURCE_VERSION="282fce33f94046150781e0cb2e1576a01a2522b9"
 	export INSTALL_PI_SOURCE_VERSION="c99ed2ad5d2614be33e788d9c5f32f4f22e9c384"
