@@ -59,7 +59,10 @@ jobs:
       - name: Run PTF Tests
         run: |
           cd exercises/${{ matrix.exercise }}
-          make test
+          echo "Got here #1"
+          export PATH="${PATH}:${HOME}/.venv/bin"
+          echo "Got here #2"
+          uvx run make test
         # Retain logs in case runs fail
       - name: Upload Logs
         if: always() 
