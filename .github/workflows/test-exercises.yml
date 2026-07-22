@@ -23,7 +23,6 @@ jobs:
       - name: Install REUSE
         run: |
           ./CI/install-uv.sh
-          uv pip install reuse
       - name: Validate presence of copyright and license info (python w/reuse)
         run: |
           uvx reuse lint
