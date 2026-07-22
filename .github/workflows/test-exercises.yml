@@ -48,7 +48,8 @@ jobs:
           ./CI/install-uv.sh
           uv venv
           export PATH="${PATH}:${HOME}/.venv/bin"
-          uv pip install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy ptf
+          uv pip install protobuf==3.20.3
+          uv pip install grpcio grpcio-tools googleapis-common-protos scapy ptf
 
       - name: Run PTF Tests
         run: |
