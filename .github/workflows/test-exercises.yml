@@ -46,6 +46,7 @@ jobs:
           apt-get update
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           ./CI/install-uv.sh
+          uv venv
           export PATH="${PATH}:${HOME}/.local/bin"
           uv pip install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
 
