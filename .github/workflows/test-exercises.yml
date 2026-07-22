@@ -22,11 +22,11 @@ jobs:
       - uses: actions/checkout@v6
       - name: Install REUSE
         run: |
-          ./CI/setup-uv.sh
+          ./CI/install-uv.sh
           uv pip install reuse
       - name: Validate presence of copyright and license info (python w/reuse)
         run: |
-          uv run reuse lint
+          uvx reuse lint
   test-exercise:
     timeout-minutes: 30   
     runs-on: ubuntu-latest
