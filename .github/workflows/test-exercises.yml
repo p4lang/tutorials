@@ -39,13 +39,15 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install build dependencies
         run: |
           apt-get update
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
-          pip3 install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
+          ./CI/install-uv.sh
+          export PATH="${PATH}:${HOME}/.local/bin"
+          uv pip install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
 
       - name: Run PTF Tests
         run: |
