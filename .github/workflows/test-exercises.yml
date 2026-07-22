@@ -46,10 +46,15 @@ jobs:
           apt-get update
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           ./CI/install-uv.sh
+          echo "Just before: uv venv"
           uv venv
           export PATH="${PATH}:${HOME}/.venv/bin"
+          echo "Just before: uv pip install protobuf==3.20.3"
           uv pip install protobuf==3.20.3
-          uv pip install grpcio grpcio-tools googleapis-common-protos scapy ptf
+          echo "Just before: uv pip install grpcio"
+          uv pip install grpcio
+          echo "Just before: uv pip install grpcio-tools googleapis-common-protos scapy ptf"
+          uv pip install grpcio-tools googleapis-common-protos scapy ptf
 
       - name: Run PTF Tests
         run: |
