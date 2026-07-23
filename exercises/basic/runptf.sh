@@ -50,9 +50,9 @@ echo "ls -la $HOME"
 echo "--------------------"
 ls -la $HOME
 echo "--------------------"
-echo "ls -la $HOME/.local/bin"
+echo "ls -la $HOME/.venv/bin"
 echo "--------------------"
-ls -la $HOME/.local/bin
+ls -la $HOME/.venv/bin
 echo "--------------------"
 echo "which ptf=:`which ptf`:"
 

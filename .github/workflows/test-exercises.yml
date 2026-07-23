@@ -47,6 +47,7 @@ jobs:
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           ./CI/install-uv.sh
           echo "Just before: uv venv"
+          cd $HOME
           uv venv
           echo "ls -la $HOME"
           echo "--------------------"
@@ -65,7 +66,7 @@ jobs:
           echo "--------------------"
           echo "ls -la $HOME/.venv/bin"
           echo "--------------------"
-          ls -la $HOME/.local/bin
+          ls -la $HOME/.venv/bin
           echo "--------------------"
 
       - name: Run PTF Tests
@@ -80,9 +81,9 @@ jobs:
           echo "--------------------"
           ls -la $HOME
           echo "--------------------"
-          echo "ls -la $HOME/.local/bin"
+          echo "ls -la $HOME/.venv/bin"
           echo "--------------------"
-          ls -la $HOME/.local/bin
+          ls -la $HOME/.venv/bin
           echo "--------------------"
           echo "which ptf:"
           which ptf
