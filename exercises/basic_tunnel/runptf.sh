@@ -43,6 +43,19 @@ echo ""
 echo "Started simple_switch_grpc. Waiting 2 seconds before starting PTF test..."
 sleep 2
 
+echo "P4_EXTRA_SUDO_OPTS=:${P4_EXTRA_SUDO_OPTS}:"
+echo "HOME=${HOME}"
+echo "source ${HOME}/p4dev-venv/bin/activate ..."
+source ${HOME}/p4dev-venv/bin/activate
+echo "PATH=${PATH}"
+echo "ls -la $HOME"
+echo "--------------------"
+ls -la $HOME
+echo "--------------------"
+echo "pip3 list -v"
+pip3 list -v
+echo "which ptf=:`which ptf`:"
+
 # ---- run tests ----
 sudo ${P4_EXTRA_SUDO_OPTS} `which ptf` \
     -i 0@veth1 \

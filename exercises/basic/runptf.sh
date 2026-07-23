@@ -45,6 +45,8 @@ sleep 2
 
 echo "P4_EXTRA_SUDO_OPTS=:${P4_EXTRA_SUDO_OPTS}:"
 echo "HOME=${HOME}"
+echo "source ${HOME}/p4dev-venv/bin/activate ..."
+source ${HOME}/p4dev-venv/bin/activate
 echo "PATH=${PATH}"
 echo "ls -la $HOME"
 echo "--------------------"
