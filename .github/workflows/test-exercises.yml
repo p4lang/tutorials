@@ -52,8 +52,8 @@ jobs:
           echo "which p4c"
           which p4c
           echo "HOME=${HOME}"
-          python3 -m venv ${HOME}/p4dev-venv --system-site-packages
-          source ${HOME}/p4dev-venv/bin/activate
+          #python3 -m venv ${HOME}/p4dev-venv --system-site-packages
+          #source ${HOME}/p4dev-venv/bin/activate
           echo "id:"
           id
           echo "VIRTUAL_ENV=${VIRTUAL_ENV}"
@@ -79,12 +79,26 @@ jobs:
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
+          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
           echo "pip3 list -v"
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo "----------------------------------------"
+          find / -name site-packages -o -name dist-packages
+          echo "----------------------------------------"
+          echo "ls -la /usr/lib/python3/dist-packages"
+          echo "----------------------------------------"
+          ls -la /usr/lib/python3/dist-packages
+          echo "----------------------------------------"
+          echo "ls -la /usr/local/lib/python3.12/dist-packages"
+          echo "----------------------------------------"
+          ls -la /usr/local/lib/python3.12/dist-packages
+          echo "----------------------------------------"
+          echo "ls -la /usr/local/lib/python3.12/site-packages"
+          echo "----------------------------------------"
+          ls -la /usr/local/lib/python3.12/site-packages
           echo "----------------------------------------"
           echo "which ptf"
           which ptf
