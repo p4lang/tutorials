@@ -52,23 +52,6 @@ jobs:
       - name: Run PTF Tests
         run: |
           cd exercises/${{ matrix.exercise }}
-          echo "Got here #1"
-          pip3 list -v
-          echo "which ptf:"
-          which ptf
-          #export PATH="${PATH}:${HOME}/.venv/bin"
-          #echo "Got here #2"
-          echo "HOME=${HOME}"
-          echo "PATH=${PATH}"
-          #echo "ls -la $HOME"
-          #echo "--------------------"
-          #ls -la $HOME
-          #echo "--------------------"
-          #echo "ls -la $HOME/.venv/bin"
-          #echo "--------------------"
-          #ls -la $HOME/.venv/bin
-          #echo "--------------------"
-          #uvx make test
           make test
         # Retain logs in case runs fail
       - name: Upload Logs
