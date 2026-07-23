@@ -52,7 +52,7 @@ jobs:
           echo "which p4c"
           which p4c
           echo "HOME=${HOME}"
-          python3 -m venv ${HOME}/p4dev-venv
+          python3 -m venv ${HOME}/p4dev-venv --system-site-packages
           source ${HOME}/p4dev-venv/bin/activate
           echo "id:"
           id
