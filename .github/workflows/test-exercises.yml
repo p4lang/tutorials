@@ -79,18 +79,21 @@ jobs:
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy
+          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
           echo "pip3 list -v"
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo "----------------------------------------"
+          echo "which ptf"
+          which ptf
 
       - name: Run PTF Tests
         run: |
           cd exercises/${{ matrix.exercise }}
-          echo "pip3 list -v"
-          pip3 list -v
+          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
           make test
         # Retain logs in case runs fail
       - name: Upload Logs
