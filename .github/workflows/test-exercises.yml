@@ -72,7 +72,12 @@ jobs:
           echo "----------------------------------------"
           ls -la /usr/local/lib/python3.12/site-packages
           echo "----------------------------------------"
+          echo "python3 -c 'import sys; print(sys.path)'"
           python3 -c 'import sys; print(sys.path)'
+          echo "python3 -m site"
+          python3 -m site
+          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages python3 -m site"
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages python3 -m site
           #find / -name site-packages -o -name dist-packages | xargs ls -la
           #find / | egrep '(site-packages|dist-packages)'
           echo "pip3 list -v"
