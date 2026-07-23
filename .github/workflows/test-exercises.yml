@@ -55,12 +55,12 @@ jobs:
           #echo "--------------------"
           #export PATH="${PATH}:${HOME}/.venv/bin"
           pip3 list -v
-          echo "Just before: uv pip install protobuf==3.20.3"
-          uv pip install protobuf==3.20.3
-          echo "Just before: uv pip install grpcio"
-          uv pip install grpcio
-          echo "Just before: uv pip install grpcio-tools googleapis-common-protos scapy ptf"
-          uv pip install grpcio-tools googleapis-common-protos scapy ptf
+          echo "Just before: pip install protobuf==3.20.3"
+          pip install protobuf==3.20.3
+          echo "Just before: pip install grpcio"
+          pip install grpcio
+          echo "Just before: pip install grpcio-tools googleapis-common-protos scapy ptf"
+          pip install grpcio-tools googleapis-common-protos scapy ptf
           pip3 list -v
           echo "which ptf:"
           which ptf
