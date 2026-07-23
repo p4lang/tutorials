@@ -46,11 +46,17 @@ jobs:
         run: |
           apt-get update
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
+          echo "pip3 list -v"
+          pip3 list -v
           pip3 install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
+          echo "pip3 list -v"
+          pip3 list -v
 
       - name: Run PTF Tests
         run: |
           cd exercises/${{ matrix.exercise }}
+          echo "pip3 list -v"
+          pip3 list -v
           make test
         # Retain logs in case runs fail
       - name: Upload Logs
