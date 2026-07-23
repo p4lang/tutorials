@@ -53,7 +53,8 @@ jobs:
           echo "----------------------------------------"
           find / -name site-packages -o -name dist-packages
           echo "----------------------------------------"
-          ls -la /usr/lib/python3.12/site-packages
+          ls -la /usr/lib/python3/dist-packages
+          ls -la /usr/local/lib/python3.12/dist-packages
           ls -la /usr/local/lib/python3.12/site-packages
           #find / -name site-packages -o -name dist-packages | xargs ls -la
           #find / | egrep '(site-packages|dist-packages)'
