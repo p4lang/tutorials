@@ -43,6 +43,9 @@ echo ""
 echo "Started simple_switch_grpc. Waiting 2 seconds before starting PTF test..."
 sleep 2
 
+echo "P4_EXTRA_SUDO_OPTS=:${P4_EXTRA_SUDO_OPTS}:"
+echo "which ptf=:`which ptf`:"
+
 # ---- run tests ----
 sudo ${P4_EXTRA_SUDO_OPTS} `which ptf` \
     -i 0@veth1 \

@@ -62,6 +62,7 @@ jobs:
           echo "Got here #1"
           export PATH="${PATH}:${HOME}/.venv/bin"
           echo "Got here #2"
+          echo "PATH=${PATH}"
           uvx make test
         # Retain logs in case runs fail
       - name: Upload Logs
