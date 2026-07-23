@@ -79,8 +79,8 @@ jobs:
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
+          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
           echo "pip3 list -v"
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
