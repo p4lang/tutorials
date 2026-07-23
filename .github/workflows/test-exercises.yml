@@ -46,44 +46,15 @@ jobs:
         shell: bash
         run: |
           apt-get update
-          apt-get install -y make python3-pip python3-venv sudo libboost-iostreams-dev libboost-graph-dev
-          echo "which simple_switch_grpc"
-          which simple_switch_grpc
-          echo "which p4c"
-          which p4c
-          echo "HOME=${HOME}"
-          #python3 -m venv ${HOME}/p4dev-venv --system-site-packages
-          #source ${HOME}/p4dev-venv/bin/activate
-          echo "id:"
-          id
-          echo "VIRTUAL_ENV=${VIRTUAL_ENV}"
-          echo "----------------------------------------"
-          find / -name site-packages -o -name dist-packages
-          echo "----------------------------------------"
-          echo "ls -la /usr/lib/python3/dist-packages"
-          echo "----------------------------------------"
-          ls -la /usr/lib/python3/dist-packages
-          echo "----------------------------------------"
-          echo "ls -la /usr/local/lib/python3.12/dist-packages"
-          echo "----------------------------------------"
-          ls -la /usr/local/lib/python3.12/dist-packages
-          echo "----------------------------------------"
-          echo "ls -la /usr/local/lib/python3.12/site-packages"
-          echo "----------------------------------------"
-          ls -la /usr/local/lib/python3.12/site-packages
-          echo "----------------------------------------"
+          apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           echo "python3 -c 'import sys; print(sys.path)'"
           python3 -c 'import sys; print(sys.path)'
           echo "python3 -m site"
           python3 -m site
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages python3 -m site"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages python3 -m site
-          #find / -name site-packages -o -name dist-packages | xargs ls -la
-          #find / | egrep '(site-packages|dist-packages)'
           echo 'mv /usr/local/lib/python3.12/site-packages/* /usr/local/lib/python3.12/dist-packages'
           mv /usr/local/lib/python3.12/site-packages/* /usr/local/lib/python3.12/dist-packages
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo "PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
+          PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
           echo "----------------------------------------"
           find / -name site-packages -o -name dist-packages
           echo "----------------------------------------"
@@ -101,16 +72,16 @@ jobs:
           echo "----------------------------------------"
           echo "pip3 list -v"
           pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
+          echo "PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
+          PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo "PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf"
+          PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
           echo "pip3 list -v"
           pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo "PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
+          PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo "PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
+          PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
           echo "----------------------------------------"
           find / -name site-packages -o -name dist-packages
           echo "----------------------------------------"
@@ -132,9 +103,7 @@ jobs:
       - name: Run PTF Tests
         run: |
           cd exercises/${{ matrix.exercise }}
-          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages make test
+          PYTHONPATH=/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages make test
         # Retain logs in case runs fail
       - name: Upload Logs
         if: always() 
