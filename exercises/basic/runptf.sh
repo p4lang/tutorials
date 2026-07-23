@@ -46,13 +46,13 @@ sleep 2
 echo "P4_EXTRA_SUDO_OPTS=:${P4_EXTRA_SUDO_OPTS}:"
 echo "HOME=${HOME}"
 echo "PATH=${PATH}"
-echo "ls $HOME"
+echo "ls -la $HOME"
 echo "--------------------"
-ls $HOME
+ls -la $HOME
 echo "--------------------"
-echo "ls $HOME/.local/bin"
+echo "ls -la $HOME/.local/bin"
 echo "--------------------"
-ls $HOME/.local/bin
+ls -la $HOME/.local/bin
 echo "--------------------"
 echo "which ptf=:`which ptf`:"
 
