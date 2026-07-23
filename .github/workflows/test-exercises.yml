@@ -68,6 +68,7 @@ jobs:
           echo "----------------------------------------"
           ls -la /usr/local/lib/python3.12/site-packages
           echo "----------------------------------------"
+          python3 -c 'import sys; print(sys.path)'
           #find / -name site-packages -o -name dist-packages | xargs ls -la
           #find / | egrep '(site-packages|dist-packages)'
           echo "pip3 list -v"
