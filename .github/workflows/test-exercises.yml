@@ -48,13 +48,25 @@ jobs:
           ./CI/install-uv.sh
           echo "Just before: uv venv"
           uv venv
-          export PATH="${PATH}:${HOME}/.local/bin"
+          echo "ls -la $HOME"
+          echo "--------------------"
+          ls -la $HOME
+          echo "--------------------"
+          export PATH="${PATH}:${HOME}/.venv/bin"
           echo "Just before: uv pip install protobuf==3.20.3"
           uv pip install protobuf==3.20.3
           echo "Just before: uv pip install grpcio"
           uv pip install grpcio
           echo "Just before: uv pip install grpcio-tools googleapis-common-protos scapy ptf"
           uv pip install grpcio-tools googleapis-common-protos scapy ptf
+          echo "ls -la $HOME"
+          echo "--------------------"
+          ls -la $HOME
+          echo "--------------------"
+          echo "ls -la $HOME/.venv/bin"
+          echo "--------------------"
+          ls -la $HOME/.local/bin
+          echo "--------------------"
 
       - name: Run PTF Tests
         run: |
