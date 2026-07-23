@@ -50,7 +50,12 @@ jobs:
           which simple_switch_grpc
           echo "which p4c"
           which p4c
-          find / -name site-packages -o -name dist-packages | xargs ls -la
+          echo "----------------------------------------"
+          find / -name site-packages -o -name dist-packages
+          echo "----------------------------------------"
+          ls -la /usr/lib/python3.12/site-packages
+          ls -la /usr/local/lib/python3.12/site-packages
+          #find / -name site-packages -o -name dist-packages | xargs ls -la
           #find / | egrep '(site-packages|dist-packages)'
           echo "pip3 list -v"
           pip3 list -v
