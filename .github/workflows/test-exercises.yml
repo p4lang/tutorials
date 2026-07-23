@@ -90,6 +90,10 @@ jobs:
           pip3 list -v
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
+          echo 'mv /usr/local/lib/python3.12/site-packages/* /usr/local/lib/python3.12/dist-packages'
+          mv /usr/local/lib/python3.12/site-packages/* /usr/local/lib/python3.12/dist-packages
+          echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
           echo "----------------------------------------"
           find / -name site-packages -o -name dist-packages
           echo "----------------------------------------"
