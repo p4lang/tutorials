@@ -44,6 +44,12 @@ echo "Started simple_switch_grpc. Waiting 2 seconds before starting PTF test..."
 sleep 2
 
 echo "P4_EXTRA_SUDO_OPTS=:${P4_EXTRA_SUDO_OPTS}:"
+echo "HOME=${HOME}"
+echo "PATH=${PATH}"
+echo "ls $HOME/.venv/bin"
+echo "--------------------"
+ls $HOME/.venv/bin
+echo "--------------------"
 echo "which ptf=:`which ptf`:"
 
 # ---- run tests ----

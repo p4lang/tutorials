@@ -62,7 +62,14 @@ jobs:
           echo "Got here #1"
           export PATH="${PATH}:${HOME}/.venv/bin"
           echo "Got here #2"
+          echo "HOME=${HOME}"
           echo "PATH=${PATH}"
+          echo "ls $HOME/.venv/bin"
+          echo "--------------------"
+          ls $HOME/.venv/bin
+          echo "--------------------"
+          echo "which ptf:"
+          which ptf
           uvx make test
         # Retain logs in case runs fail
       - name: Upload Logs
