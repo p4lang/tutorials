@@ -45,49 +45,55 @@ jobs:
         run: |
           apt-get update
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
-          ./CI/install-uv.sh
-          echo "Just before: uv venv"
-          cd $HOME
-          uv venv
-          echo "ls -la $HOME"
-          echo "--------------------"
-          ls -la $HOME
-          echo "--------------------"
-          export PATH="${PATH}:${HOME}/.venv/bin"
+          #./CI/install-uv.sh
+          #echo "Just before: uv venv"
+          #cd $HOME
+          #uv venv
+          #echo "ls -la $HOME"
+          #echo "--------------------"
+          #ls -la $HOME
+          #echo "--------------------"
+          #export PATH="${PATH}:${HOME}/.venv/bin"
+          pip3 list -v
           echo "Just before: uv pip install protobuf==3.20.3"
           uv pip install protobuf==3.20.3
           echo "Just before: uv pip install grpcio"
           uv pip install grpcio
           echo "Just before: uv pip install grpcio-tools googleapis-common-protos scapy ptf"
           uv pip install grpcio-tools googleapis-common-protos scapy ptf
-          echo "ls -la $HOME"
-          echo "--------------------"
-          ls -la $HOME
-          echo "--------------------"
-          echo "ls -la $HOME/.venv/bin"
-          echo "--------------------"
-          ls -la $HOME/.venv/bin
-          echo "--------------------"
+          pip3 list -v
+          echo "which ptf:"
+          which ptf
+          #echo "ls -la $HOME"
+          #echo "--------------------"
+          #ls -la $HOME
+          #echo "--------------------"
+          #echo "ls -la $HOME/.venv/bin"
+          #echo "--------------------"
+          #ls -la $HOME/.venv/bin
+          #echo "--------------------"
 
       - name: Run PTF Tests
         run: |
           cd exercises/${{ matrix.exercise }}
           echo "Got here #1"
-          export PATH="${PATH}:${HOME}/.venv/bin"
-          echo "Got here #2"
-          echo "HOME=${HOME}"
-          echo "PATH=${PATH}"
-          echo "ls -la $HOME"
-          echo "--------------------"
-          ls -la $HOME
-          echo "--------------------"
-          echo "ls -la $HOME/.venv/bin"
-          echo "--------------------"
-          ls -la $HOME/.venv/bin
-          echo "--------------------"
+          pip3 list -v
           echo "which ptf:"
           which ptf
-          uvx make test
+          #export PATH="${PATH}:${HOME}/.venv/bin"
+          #echo "Got here #2"
+          echo "HOME=${HOME}"
+          echo "PATH=${PATH}"
+          #echo "ls -la $HOME"
+          #echo "--------------------"
+          #ls -la $HOME
+          #echo "--------------------"
+          #echo "ls -la $HOME/.venv/bin"
+          #echo "--------------------"
+          #ls -la $HOME/.venv/bin
+          #echo "--------------------"
+          #uvx make test
+          make test
         # Retain logs in case runs fail
       - name: Upload Logs
         if: always() 

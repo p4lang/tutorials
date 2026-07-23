@@ -50,10 +50,10 @@ echo "ls -la $HOME"
 echo "--------------------"
 ls -la $HOME
 echo "--------------------"
-echo "ls -la $HOME/.venv/bin"
-echo "--------------------"
-ls -la $HOME/.venv/bin
-echo "--------------------"
+#echo "ls -la $HOME/.venv/bin"
+#echo "--------------------"
+#ls -la $HOME/.venv/bin
+#echo "--------------------"
 echo "which ptf=:`which ptf`:"
 
 # ---- run tests ----
