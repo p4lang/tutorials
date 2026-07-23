@@ -50,6 +50,7 @@ jobs:
           which simple_switch_grpc
           echo "which p4c"
           which p4c
+          find / | egrep '(site-packages|dist-packages)'
           echo "pip3 list -v"
           pip3 list -v
           pip3 install protobuf==3.20.3 grpcio grpcio-tools googleapis-common-protos scapy
