@@ -48,6 +48,7 @@ echo "HOME=${HOME}"
 echo "source ${HOME}/p4dev-venv/bin/activate ..."
 source ${HOME}/p4dev-venv/bin/activate
 echo "PATH=${PATH}"
+echo "PYTHONPATH=${PYTHONPATH}"
 echo "ls -la $HOME"
 echo "--------------------"
 ls -la $HOME
