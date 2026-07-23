@@ -48,14 +48,26 @@ jobs:
           apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           echo "which simple_switch_grpc"
           which simple_switch_grpc
+          echo "id:"
+          id
+          echo "HOME=${HOME}"
           echo "which p4c"
           which p4c
           echo "----------------------------------------"
           find / -name site-packages -o -name dist-packages
           echo "----------------------------------------"
+          echo "ls -la /usr/lib/python3/dist-packages"
+          echo "----------------------------------------"
           ls -la /usr/lib/python3/dist-packages
+          echo "----------------------------------------"
+          echo "ls -la /usr/local/lib/python3.12/dist-packages"
+          echo "----------------------------------------"
           ls -la /usr/local/lib/python3.12/dist-packages
+          echo "----------------------------------------"
+          echo "ls -la /usr/local/lib/python3.12/site-packages"
+          echo "----------------------------------------"
           ls -la /usr/local/lib/python3.12/site-packages
+          echo "----------------------------------------"
           #find / -name site-packages -o -name dist-packages | xargs ls -la
           #find / | egrep '(site-packages|dist-packages)'
           echo "pip3 list -v"
