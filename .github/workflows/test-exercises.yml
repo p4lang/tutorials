@@ -45,14 +45,17 @@ jobs:
       - name: Install build dependencies
         run: |
           apt-get update
-          apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
+          apt-get install -y make python3-pip python3-ve3nv sudo libboost-iostreams-dev libboost-graph-dev
           echo "which simple_switch_grpc"
           which simple_switch_grpc
+          echo "which p4c"
+          which p4c
+          python3 -m venv ${HOME}/p4dev-venv
+          source ${HOME}/p4dev-venv/bin/activate
           echo "id:"
           id
           echo "HOME=${HOME}"
-          echo "which p4c"
-          which p4c
+          echo "VIRTUAL_ENV=${VIRTUAL_ENV}"
           echo "----------------------------------------"
           find / -name site-packages -o -name dist-packages
           echo "----------------------------------------"
