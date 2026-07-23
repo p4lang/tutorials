@@ -94,7 +94,7 @@ jobs:
           cd exercises/${{ matrix.exercise }}
           echo "PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v"
           PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages pip3 list -v
-          make test
+          PYTHONPATH=/usr/local/lib/python3.12/site-packages:/usr/local/lib/python3.12/dist-packages:/usr/lib/python3/dist-packages make test
         # Retain logs in case runs fail
       - name: Upload Logs
         if: always() 
