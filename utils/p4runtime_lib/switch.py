@@ -7,7 +7,6 @@ from queue import Queue
 import threading
 
 import grpc
-from p4.tmp import p4config_pb2
 from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
 
 MSG_LOG_MAX_LEN = 1024
@@ -71,7 +70,8 @@ class SwitchConnection(object):
 
     @abstractmethod
     def buildDeviceConfig(self, **kwargs):
-        return p4config_pb2.P4DeviceConfig()
+        print("switch.py:SwitchConnection:buildDeviceConfig() should be overridden, but never called (?)", flush=True)
+        assert False
 
     def shutdown(self):
         self.requests_stream.close()
@@ -97,7 +97,7 @@ class SwitchConnection(object):
         config = request.config
 
         config.p4info.CopyFrom(p4info)
-        config.p4_device_config = device_config.SerializeToString()
+        config.p4_device_config = device_config
 
         request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
         if dry_run:
