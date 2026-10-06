@@ -1,0 +1,13 @@
+diff --git a/targets/simple_switch_grpc/CMakeLists.txt b/targets/simple_switch_grpc/CMakeLists.txt
+index 375684f9..c667d209 100644
+--- a/targets/simple_switch_grpc/CMakeLists.txt
++++ b/targets/simple_switch_grpc/CMakeLists.txt
+@@ -30,6 +30,8 @@ target_link_libraries(simpleswitchgrpc
+   bm_grpc_dataplane
+   ${PROTOBUF_LIBRARIES}
+   ${GRPC_LIBRARIES}
++  absl_strings
++  absl_synchronization
+ )
+ 
+ target_include_directories(simpleswitchgrpc PRIVATE
