@@ -1,0 +1,12 @@
+diff --git a/setup.cfg b/setup.cfg
+index 07c5c31..8a9dad9 100644
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -24,6 +24,5 @@ install_requires =
+     ipython >= 7.31.1, == 7.31.*; python_version>='3.7'
+     ipython >= 7.16.3, == 7.16.*; python_version<'3.7'
+     # more recent versions of Protobuf need P4Runtime Python files to be regenerated with the correct protoc version
+-    protobuf >= 3.15.0, < 3.21.0
++    protobuf >= 3.15.0, < 4.22.0
+     grpcio >= 1.35.0
+-    p4runtime == 1.4.1

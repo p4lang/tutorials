@@ -1,0 +1,75 @@
+diff --git a/util/install.sh b/util/install.sh
+index bf4492d..7a2092b 100755
+--- a/util/install.sh
++++ b/util/install.sh
+@@ -5,6 +5,7 @@
+ 
+ # Fail on error
+ set -e
++set -x
+ 
+ # Fail on unset var usage
+ set -o nounset
+@@ -175,6 +176,7 @@ function mn_deps {
+     else  # Debian/Ubuntu
+         pf=pyflakes
+         pep8=pep8
++        pylint=pylint
+         # Starting around 20.04, installing pyflakes instead of pyflakes3
+         # causes Python 2 to be installed, which is exactly NOT what we want.
+         if [ "$DIST" = "Ubuntu" -a `expr $RELEASE '>=' 20.04` = "1" ]; then
+@@ -187,31 +189,30 @@ function mn_deps {
+                 pf=pyflakes3
+                 pep8=python3-pep8
+         fi
++        if [ "$DIST" = "Ubuntu" -a `expr $RELEASE '>=' 23.10` = "1" ]; then
++                pep8=pycodestyle
++        fi
++        if [ "$DIST" = "Ubuntu" -a `expr $RELEASE '<=' 20.04` = "1" ]; then
++                pylint=pylint3
++        fi
+ 
+         $install gcc make socat psmisc xterm ssh iperf telnet \
+-                 ethtool help2man $pf pylint $pep8 \
++                 ethtool help2man $pylint \
+                  net-tools ${PYPKG}-tk
++        $install --no-install-recommends $pf $pep8
+ 
+-        # Install pip
+-        $install ${PYPKG}-pip || $install ${PYPKG}-pip-whl
+-        if ! ${PYTHON} -m pip -V; then
+-            if [ $PYTHON_VERSION == 2 ]; then
+-                wget https://bootstrap.pypa.io/pip/2.7/get-pip.py
+-            else
+-                wget https://bootstrap.pypa.io/get-pip.py
+-            fi
+-            sudo ${PYTHON} get-pip.py
+-            rm get-pip.py
+-        fi
+-       ${python} -m pip install pexpect
++        uv pip install pexpect
+         $install iproute2 || $install iproute
+         $install cgroup-tools || $install cgroup-bin
+-        $install cgroupfs-mount
++        #$install cgroupfs-mount
+     fi
+ 
+     echo "Installing Mininet core"
+     pushd $MININET_DIR/mininet
+-    sudo PYTHON=${PYTHON} make install
++    sudo PYTHON=${PYTHON} make install-mnexec
++    sudo PYTHON=${PYTHON} make install-manpages
++    uv pip uninstall -y mininet || true
++    uv pip install -e . --no-binary :all:
+     popd
+ }
+ 
+@@ -303,7 +304,7 @@ function install_wireshark {
+     if ! which wireshark; then
+         echo "Installing Wireshark"
+         if [ "$DIST" = "Fedora" -o "$DIST" = "RedHatEnterpriseServer" ]; then
+-            $install wireshark wireshark-gnome
++            $install wireshark
+ 		elif [ "$DIST" = "SUSE LINUX"  ]; then
+ 			$install wireshark
+         else
