@@ -45,9 +45,11 @@ jobs:
         shell: bash
         run: |
           apt-get update
-          apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
-          mv /usr/local/lib/python3.12/site-packages/* /usr/local/lib/python3.12/dist-packages
-          sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
+          #apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
+          #mv /usr/local/lib/python3.12/site-packages/* /usr/local/lib/python3.12/dist-packages
+          #sudo pip3 install --break-system-packages protobuf==3.20.3 grpcio googleapis-common-protos scapy ptf
+          uv pip list
+          uv pip install googleapis-common-protos scapy ptf
 
       - name: Run PTF Tests
         run: |
