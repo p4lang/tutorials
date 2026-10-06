@@ -1,8 +1,126 @@
+diff --git a/ci/install-nanomsg.sh b/ci/install-nanomsg.sh
+index 675a329..54fcb3d 100644
+--- a/ci/install-nanomsg.sh
++++ b/ci/install-nanomsg.sh
+@@ -4,6 +4,34 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ 
++dump_python_lib_info() {
++    local output_dir=$1
++    set +e
++    mkdir -p ${output_dir}
++    outf=${output_dir}/dirs.txt
++    echo "All directories named site-packages or dist-packages:" > ${outf}
++    find / -name site-packages -o -name dist-packages | sort >> ${outf}
++    echo "" >> ${outf}
++    echo "ls -la on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages | sort)
++    do
++	echo $d >> ${outf}
++	ls -la $d >> ${outf}
++    done
++    #echo "" >> ${outf}
++    #echo "ls -laR on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages | sort)
++    do
++	outf="${output_dir}/ls-laR-of-$(echo "$d" | tr '/' '-')"
++	cp /dev/null ${outf}
++	#echo $d >> ${outf}
++	ls -laR $d >> ${outf}
++    done
++    set -e
++}
++
++DEBUG_DUMP_DIR="${HOME}/install-p4dev-dumpdir"
++
+ THIS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+ source $THIS_DIR/common.sh
+ 
+@@ -22,5 +50,7 @@ cd build
+ # some reason ldconfig cannot find it
+ cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+ cmake --build .
++dump_python_lib_info "${DEBUG_DUMP_DIR}/033b-behavioral-model-just-before-nanomsg-cmake-install"
+ sudo cmake --build . --target install
++dump_python_lib_info "${DEBUG_DUMP_DIR}/033c-behavioral-model-just-after-nanomsg-cmake-install"
+ cd ..
+diff --git a/ci/install-pynng.sh b/ci/install-pynng.sh
+index 6abcd8e..3b4ae9f 100644
+--- a/ci/install-pynng.sh
++++ b/ci/install-pynng.sh
+@@ -4,5 +4,34 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ 
++dump_python_lib_info() {
++    local output_dir=$1
++    set +e
++    mkdir -p ${output_dir}
++    outf=${output_dir}/dirs.txt
++    echo "All directories named site-packages or dist-packages:" > ${outf}
++    find / -name site-packages -o -name dist-packages | sort >> ${outf}
++    echo "" >> ${outf}
++    echo "ls -la on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages | sort)
++    do
++	echo $d >> ${outf}
++	ls -la $d >> ${outf}
++    done
++    #echo "" >> ${outf}
++    #echo "ls -laR on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages | sort)
++    do
++	outf="${output_dir}/ls-laR-of-$(echo "$d" | tr '/' '-')"
++	cp /dev/null ${outf}
++	#echo $d >> ${outf}
++	ls -laR $d >> ${outf}
++    done
++    set -e
++}
++
++DEBUG_DUMP_DIR="${HOME}/install-p4dev-dumpdir"
++
+ set -e
+-python3 -m pip install --upgrade pynng==0.9.0
++uv pip install pynng==0.9.0
++dump_python_lib_info "${DEBUG_DUMP_DIR}/034-behavioral-model-just-after-pip-install-pynng"
 diff --git a/ci/install-thrift.sh b/ci/install-thrift.sh
-index 1316476..ea6203c 100644
+index 587e9d3..088569d 100644
 --- a/ci/install-thrift.sh
 +++ b/ci/install-thrift.sh
-@@ -3,22 +3,18 @@
+@@ -4,25 +4,51 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ 
++dump_python_lib_info() {
++    local output_dir=$1
++    set +e
++    mkdir -p ${output_dir}
++    outf=${output_dir}/dirs.txt
++    echo "All directories named site-packages or dist-packages:" > ${outf}
++    find / -name site-packages -o -name dist-packages | sort >> ${outf}
++    echo "" >> ${outf}
++    echo "ls -la on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages | sort)
++    do
++	echo $d >> ${outf}
++	ls -la $d >> ${outf}
++    done
++    #echo "" >> ${outf}
++    #echo "ls -laR on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages | sort)
++    do
++	outf="${output_dir}/ls-laR-of-$(echo "$d" | tr '/' '-')"
++	cp /dev/null ${outf}
++	#echo $d >> ${outf}
++	ls -laR $d >> ${outf}
++    done
++    set -e
++}
++
++DEBUG_DUMP_DIR="${HOME}/install-p4dev-dumpdir"
++
  THIS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
  source $THIS_DIR/common.sh
  
@@ -29,5 +147,7 @@ index 1316476..ea6203c 100644
 -cd lib/py
 -sudo python3 setup.py install
 -cd ../../..
++dump_python_lib_info "${DEBUG_DUMP_DIR}/032-behavioral-model-just-before-pip-install-thrift"
 +cd ..
-+pip install thrift==0.16.0
++uv pip install thrift==0.16.0
++dump_python_lib_info "${DEBUG_DUMP_DIR}/033-behavioral-model-just-after-pip-install-thrift"

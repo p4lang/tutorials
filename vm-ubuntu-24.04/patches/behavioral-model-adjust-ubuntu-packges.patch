@@ -1,5 +1,5 @@
 diff --git a/install_deps.sh b/install_deps.sh
-index 02dd6d2..7673969 100755
+index 02dd6d2..f1510fe 100755
 --- a/install_deps.sh
 +++ b/install_deps.sh
 @@ -18,31 +18,20 @@ sudo apt-get install -y \
@@ -35,3 +35,11 @@ index 02dd6d2..7673969 100755
      wget
  
  tmpdir=`mktemp -d -p .`
+@@ -50,7 +39,6 @@ cd $tmpdir
+ 
+ bash ../ci/install-thrift.sh
+ bash ../ci/install-nanomsg.sh
+-bash ../ci/install-pi.sh
+ sudo ldconfig
+ bash ../ci/install-pynng.sh
+ 
