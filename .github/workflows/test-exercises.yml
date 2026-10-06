@@ -41,14 +41,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install build dependencies
+      - name: Install test dependencies
         shell: bash
         run: |
           apt-get update
-          #apt-get install -y make python3-pip sudo libboost-iostreams-dev libboost-graph-dev
           apt-get install -y make sudo
-          uv pip list
-          uv pip install googleapis-common-protos scapy ptf
 
       - name: Run PTF Tests
         run: |
