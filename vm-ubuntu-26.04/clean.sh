@@ -28,17 +28,30 @@ cd p4c
 cd ..
 
 /bin/rm usr-local-*.txt pip3-list-2b-*.txt $HOME/.ssh/*
+/bin/rm -fr $HOME/.cache install-details install-p4dev-dumpdir
 
 sudo apt autoremove
 sudo apt clean
 
-# Zero out unused disk blocks.  Results in significantly smaller VM
-# image files.
+VIRT=`systemd-detect-virt`
+if [ ${VIRT} == "oracle" ]
+then
+    # This is the case if running within VirtualBox.
+    # Zero out unused disk blocks.  Results in significantly smaller VM
+    # image files.
 
-echo "Writing zeros to unused disk blocks (be patient) ..."
-FNAME="/bigemptyfile"
-sudo dd if=/dev/zero | sudo dd of=${FNAME} bs=4096k
-sudo /bin/rm -f ${FNAME}
+    echo "Writing zeros to unused disk blocks (be patient) ..."
+    FNAME="/bigemptyfile"
+    sudo dd if=/dev/zero | sudo dd of=${FNAME} bs=4096k
+    sudo /bin/rm -f ${FNAME}
+elif [ ${VIRT} == "apple" ]
+then
+    # This is the case if running within UTM on an Apple Silicon Mac
+    # using Apple Virtualization.
+    sudo fstrim -av
+else
+    echo "Unknown output from command systemd-detect-virt: $VIRT"
+fi
 
 echo "Disk usage before running this script:"
 echo "$DF1_BEFORE"
