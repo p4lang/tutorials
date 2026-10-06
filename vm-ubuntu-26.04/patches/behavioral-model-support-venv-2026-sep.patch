@@ -1,0 +1,201 @@
+diff --git a/ci/install-nanomsg.sh b/ci/install-nanomsg.sh
+index 675a3290..0559dea9 100644
+--- a/ci/install-nanomsg.sh
++++ b/ci/install-nanomsg.sh
+@@ -4,6 +4,43 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ 
++dump_python_lib_info() {
++    local output_dir=$1
++    if [ ${DEBUG_INSTALL_P4DEV} -lt 2 ]
++    then
++       return
++    fi
++    set +e
++    mkdir -p ${output_dir}
++    outf=${output_dir}/dirs.txt
++    cp /dev/null ${outf}
++    echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> ${outf}
++    # This variable enables `uv sync` and other commands to use the
++    # venv.
++    echo "UV_PROJECT_ENVIRONMENT=${UV_PROJECT_ENVIRONMENT}" >> ${outf}
++    echo "All directories named site-packages or dist-packages:" >> ${outf}
++    find / -name site-packages -o -name dist-packages 2>/dev/null | sort >> ${outf}
++    echo "" >> ${outf}
++    echo "ls -la on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages 2>/dev/null | sort)
++    do
++       echo $d >> ${outf}
++       ls -la $d >> ${outf}
++    done
++    #echo "" >> ${outf}
++    #echo "ls -laR on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages 2>/dev/null | sort)
++    do
++       outf="${output_dir}/ls-laR-of-$(echo "$d" | tr '/' '-')"
++       cp /dev/null ${outf}
++       #echo $d >> ${outf}
++       ls -laR $d >> ${outf}
++    done
++    set -e
++}
++
++DEBUG_DUMP_DIR="${HOME}/install-p4dev-dumpdir"
++
+ THIS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+ source $THIS_DIR/common.sh
+ 
+@@ -15,6 +52,8 @@ set -e
+ wget https://github.com/nanomsg/nanomsg/archive/1.0.0.tar.gz -O nanomsg-1.0.0.tar.gz
+ tar -xzvf nanomsg-1.0.0.tar.gz
+ cd nanomsg-1.0.0
++PATCH_DIR="${THIS_SCRIPT_DIR_ABSOLUTE}/patches"
++patch -p1 < "${PATCH_DIR}/nanomsg-1.0.0-bump-minimum-cmake-version.patch"
+ mkdir build
+ cd build
+ # I added -DCMAKE_INSTALL_PREFIX=/usr because on my Ubuntu 14.04 machine, the
+@@ -22,5 +61,7 @@ cd build
+ # some reason ldconfig cannot find it
+ cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+ cmake --build .
++dump_python_lib_info "${DEBUG_DUMP_DIR}/033b-behavioral-model-just-before-nanomsg-cmake-install"
+ sudo cmake --build . --target install
++dump_python_lib_info "${DEBUG_DUMP_DIR}/033c-behavioral-model-just-after-nanomsg-cmake-install"
+ cd ..
+diff --git a/ci/install-pynng.sh b/ci/install-pynng.sh
+index 6abcd8e3..9e95cdb6 100644
+--- a/ci/install-pynng.sh
++++ b/ci/install-pynng.sh
+@@ -4,5 +4,43 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ 
++dump_python_lib_info() {
++    local output_dir=$1
++    if [ ${DEBUG_INSTALL_P4DEV} -lt 2 ]
++    then
++       return
++    fi
++    set +e
++    mkdir -p ${output_dir}
++    outf=${output_dir}/dirs.txt
++    cp /dev/null ${outf}
++    echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> ${outf}
++    # This variable enables `uv sync` and other commands to use the
++    # venv.
++    echo "UV_PROJECT_ENVIRONMENT=${UV_PROJECT_ENVIRONMENT}" >> ${outf}
++    echo "All directories named site-packages or dist-packages:" >> ${outf}
++    find / -name site-packages -o -name dist-packages 2>/dev/null | sort >> ${outf}
++    echo "" >> ${outf}
++    echo "ls -la on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages 2>/dev/null | sort)
++    do
++       echo $d >> ${outf}
++       ls -la $d >> ${outf}
++    done
++    #echo "" >> ${outf}
++    #echo "ls -laR on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages 2>/dev/null | sort)
++    do
++       outf="${output_dir}/ls-laR-of-$(echo "$d" | tr '/' '-')"
++       cp /dev/null ${outf}
++       #echo $d >> ${outf}
++       ls -laR $d >> ${outf}
++    done
++    set -e
++}
++
++DEBUG_DUMP_DIR="${HOME}/install-p4dev-dumpdir"
++
+ set -e
+-python3 -m pip install --upgrade pynng==0.9.0
++uv pip install pynng==0.9.0
++dump_python_lib_info "${DEBUG_DUMP_DIR}/034-behavioral-model-just-after-pip-install-pynng"
+diff --git a/ci/install-thrift.sh b/ci/install-thrift.sh
+index 587e9d31..89c0117e 100644
+--- a/ci/install-thrift.sh
++++ b/ci/install-thrift.sh
+@@ -4,25 +4,60 @@
+ #
+ # SPDX-License-Identifier: Apache-2.0
+ 
++dump_python_lib_info() {
++    local output_dir=$1
++    if [ ${DEBUG_INSTALL_P4DEV} -lt 2 ]
++    then
++       return
++    fi
++    set +e
++    mkdir -p ${output_dir}
++    outf=${output_dir}/dirs.txt
++    cp /dev/null ${outf}
++    echo "VIRTUAL_ENV=${VIRTUAL_ENV}" >> ${outf}
++    # This variable enables `uv sync` and other commands to use the
++    # venv.
++    echo "UV_PROJECT_ENVIRONMENT=${UV_PROJECT_ENVIRONMENT}" >> ${outf}
++    echo "All directories named site-packages or dist-packages:" >> ${outf}
++    find / -name site-packages -o -name dist-packages 2>/dev/null | sort >> ${outf}
++    echo "" >> ${outf}
++    echo "ls -la on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages 2>/dev/null | sort)
++    do
++       echo $d >> ${outf}
++       ls -la $d >> ${outf}
++    done
++    #echo "" >> ${outf}
++    #echo "ls -laR on each such directory:" >> ${outf}
++    for d in $(find / -name site-packages -o -name dist-packages 2>/dev/null | sort)
++    do
++       outf="${output_dir}/ls-laR-of-$(echo "$d" | tr '/' '-')"
++       cp /dev/null ${outf}
++       #echo $d >> ${outf}
++       ls -laR $d >> ${outf}
++    done
++    set -e
++}
++
++DEBUG_DUMP_DIR="${HOME}/install-p4dev-dumpdir"
++
+ THIS_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+ source $THIS_DIR/common.sh
+ 
+-check_lib libthrift libthrift-0.13.0
++check_lib libthrift libthrift-0.22.0
+ 
+ set -e
+-# Make it possible to get thrift in China
+-# wget http://archive.apache.org/dist/thrift/0.13.0/thrift-0.13.0.tar.gz
+-# tar -xzvf thrift-0.13.0.tar.gz
+-git clone -b 0.13.0 https://github.com/apache/thrift.git thrift-0.13.0
+-cd thrift-0.13.0
++git clone -b 0.22.0 https://github.com/apache/thrift.git thrift-0.22.0
++cd thrift-0.22.0
+ ./bootstrap.sh
+ ./configure --with-as3=no --with-c_glib=no --with-csharp=no --with-cpp=yes \
+     --with-cl=no --with-d=no --with-dart=no --with-dotnetcore=no \
+     --with-erlang=no --with-go=no --with-haskell=no --with-haxe=no \
+     --with-java=no --with-lua=no --with-nodejs=no --with-nodets=no \
+-    --with-perl=no --with-php=no --with-python=yes --with-py3=no \
++    --with-perl=no --with-php=no --with-python=no --with-py3=no \
+     --with-qt5=no --with-ruby=no --with-rs=no --with-swift=no
+ make -j4 && sudo make install
+-cd lib/py
+-sudo python3 setup.py install
+-cd ../../..
++dump_python_lib_info "${DEBUG_DUMP_DIR}/032-behavioral-model-just-before-pip-install-thrift"
++cd ..
++uv pip install thrift==0.22.0
++dump_python_lib_info "${DEBUG_DUMP_DIR}/033-behavioral-model-just-after-pip-install-thrift"
+diff --git a/install_deps.sh b/install_deps.sh
+index 02dd6d2b..f1510feb 100755
+--- a/install_deps.sh
++++ b/install_deps.sh
+@@ -50,7 +39,6 @@ cd $tmpdir
+ 
+ bash ../ci/install-thrift.sh
+ bash ../ci/install-nanomsg.sh
+-bash ../ci/install-pi.sh
+ sudo ldconfig
+ bash ../ci/install-pynng.sh
+ 

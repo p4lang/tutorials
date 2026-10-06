@@ -1,0 +1,15 @@
+diff --git a/proto/configure.ac b/proto/configure.ac
+index 8393c95..8e4bb70 100644
+--- a/proto/configure.ac
++++ b/proto/configure.ac
+@@ -62,8 +62,8 @@ AM_CONDITIONAL([HAVE_GRPC_PY_PLUGIN], [test "x$GRPC_PY_PLUGIN" != x])
+ 
+ AX_BOOST_BASE([1.54.0], [], [AC_MSG_ERROR(
+               [Please install boost >= 1.54.0 (thread and system)])])
+-AX_BOOST_SYSTEM
+-AC_SUBST([BOOST_SYSTEM_LIB])
++#AX_BOOST_SYSTEM
++#AC_SUBST([BOOST_SYSTEM_LIB])
+ 
+ want_bmv2=no
+ AC_ARG_WITH([bmv2],
