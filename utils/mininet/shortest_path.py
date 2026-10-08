@@ -2,7 +2,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 class ShortestPath:
-    def __init__(self, edges=[]):
+    def __init__(self, edges=None):
+        if edges is None:
+            edges = []
         self.neighbors = {}
         for edge in edges:
             self.addEdge(*edge)

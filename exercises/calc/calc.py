@@ -93,7 +93,7 @@ def main():
             break
         print(s)
         try:
-            i, ts = p(s, 0, [])
+            _i, ts = p(s, 0, [])
             # Construct packet using parsed tokens
             pkt = Ether(dst="00:04:00:00:00:00", type=0x1234) / P4calc(
                 op=ts[1].value, operand_a=int(ts[0].value), operand_b=int(ts[2].value)

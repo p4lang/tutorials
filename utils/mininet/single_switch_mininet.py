@@ -98,7 +98,7 @@ class SingleSwitchTopo(Topo):
 
         for h in range(n):
             host = self.addHost(
-                "h%d" % (h + 1), ip="10.0.%d.10/24" % h, mac="00:04:00:00:00:%02x" % h
+                f"h{h+1}", ip=f"10.0.{h}.10/24", mac=f"00:04:00:00:00:{h:02x}"
             )
             print("Adding host", str(host))
             self.addLink(host, switch)
@@ -119,20 +119,20 @@ def main():
     net = Mininet(topo=topo, host=P4Host, switch=P4Switch, controller=None)
     net.start()
 
-    sw_mac = ["00:aa:bb:00:00:%02x" % n for n in range(num_hosts)]
+    sw_mac = [f"00:aa:bb:00:00:{n:02x}" for n in range(num_hosts)]
 
-    sw_addr = ["10.0.%d.1" % n for n in range(num_hosts)]
+    sw_addr = [f"10.0.{n}.1" for n in range(num_hosts)]
 
     for n in range(num_hosts):
-        h = net.get("h%d" % (n + 1))
+        h = net.get(f"h{n+1}")
         if mode == "l2":
-            h.setDefaultRoute("dev %s" % h.defaultIntf().name)
+            h.setDefaultRoute(f"dev {h.defaultIntf().name}")
         else:
             h.setARP(sw_addr[n], sw_mac[n])
-            h.setDefaultRoute("dev %s via %s" % (h.defaultIntf().name, sw_addr[n]))
+            h.setDefaultRoute(f"dev {h.defaultIntf().name} via {sw_addr[n]}")
 
     for n in range(num_hosts):
-        h = net.get("h%d" % (n + 1))
+        h = net.get(f"h{n+1}")
         h.describe(sw_addr[n], sw_mac[n])
 
     sleep(1)

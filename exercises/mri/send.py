@@ -85,12 +85,9 @@ def main():
     #           dport=4321, sport=1234) / sys.argv[2]
     pkt.show2()
     # hexdump(pkt)
-    try:
-        for i in range(int(sys.argv[3])):
-            sendp(pkt, iface=iface)
-            sleep(1)
-    except KeyboardInterrupt:
-        raise
+    for i in range(int(sys.argv[3])):
+        sendp(pkt, iface=iface)
+        sleep(1)
 
 
 if __name__ == "__main__":

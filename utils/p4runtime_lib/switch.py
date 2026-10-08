@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2017 Open Networking Foundation
 #
 # SPDX-License-Identifier: Apache-2.0
+import datetime
 import threading
 from abc import abstractmethod
-from datetime import datetime
 from queue import Queue
 
 import grpc
@@ -155,8 +155,7 @@ class SwitchConnection:
         if dry_run:
             print("P4Runtime Read:", request)
         else:
-            for response in self.client_stub.Read(request):
-                yield response
+            yield from self.client_stub.Read(request)
 
     def ReadCounters(self, counter_id=None, index=None, dry_run=False):
         request = p4runtime_pb2.ReadRequest()
@@ -172,8 +171,7 @@ class SwitchConnection:
         if dry_run:
             print("P4Runtime Read:", request)
         else:
-            for response in self.client_stub.Read(request):
-                yield response
+            yield from self.client_stub.Read(request)
 
     def WritePREEntry(self, pre_entry, dry_run=False):
         request = p4runtime_pb2.WriteRequest()
@@ -233,13 +231,13 @@ class GrpcRequestLogger(
 
     def log_message(self, method_name, body):
         with open(self.log_file, "a") as f:
-            ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             msg = str(body)
-            f.write("\n[%s] %s\n---\n" % (ts, method_name))
+            f.write(f"\n[{ts}] {method_name}\n---\n")
             if len(msg) < MSG_LOG_MAX_LEN:
                 f.write(str(body))
             else:
-                f.write("Message too long (%d bytes)! Skipping log...\n" % (len(msg)))
+                f.write(f"Message too long ({len(msg)} bytes)! Skipping log...\n")
             f.write("---\n")
 
     def intercept_unary_unary(self, continuation, client_call_details, request):

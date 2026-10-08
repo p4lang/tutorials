@@ -24,7 +24,7 @@ if len(l1) == 1:
         sys.exit(1)
 else:
     print(
-        "Found %d matching entries in Python3 sys.path instead of 1: %s" % (len(l1), l1)
+        f"Found {len(l1)} matching entries in Python3 sys.path instead of 1: {l1}"
     )
     sys.exit(1)
 

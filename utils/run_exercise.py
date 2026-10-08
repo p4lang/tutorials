@@ -39,7 +39,7 @@ def configureP4Switch(**switch_args):
                 P4RuntimeSwitch.__init__(self, *opts, **kwargs)
 
             def describe(self):
-                print("%s -> gRPC port: %d" % (self.name, self.grpc_port))
+                print(f"{self.name} -> gRPC port: {self.grpc_port}")
 
         return ConfiguredP4RuntimeSwitch
     else:
@@ -54,7 +54,7 @@ def configureP4Switch(**switch_args):
                 P4Switch.__init__(self, *opts, **kwargs)
 
             def describe(self):
-                print("%s -> Thrift port: %d" % (self.name, self.thrift_port))
+                print(f"{self.name} -> Thrift port: {self.thrift_port}")
 
         return ConfiguredP4Switch
 
@@ -86,7 +86,7 @@ class ExerciseTopo(Topo):
                 # add default switch
                 switchClass = None
 
-            switch_opts = {"log_file": "%s/%s.log" % (log_dir, sw), "cls": switchClass}
+            switch_opts = {"log_file": f"{log_dir}/{sw}.log", "cls": switchClass}
 
             for key in ("cpu_port", "priority_queues"):
                 if key in params:
@@ -125,8 +125,8 @@ class ExerciseTopo(Topo):
         sw_name, sw_port = node.split("-")
         try:
             sw_port = int(sw_port[1:])
-        except:
-            raise Exception(f"Invalid switch node in topology file: {node}")
+        except ValueError:
+            raise ValueError(f"Invalid switch node in topology file: {node}")
         return sw_name, sw_port
 
 
@@ -194,7 +194,7 @@ class ExerciseRunner:
         for dir_name in [log_dir, pcap_dir]:
             if not os.path.isdir(dir_name):
                 if os.path.exists(dir_name):
-                    raise Exception("'%s' exists and is not a directory!" % (dir_name))
+                    raise ValueError(f"'{dir_name}' exists and is not a directory!")
                 os.mkdir(dir_name)
         self.log_dir = log_dir
         self.pcap_dir = pcap_dir
@@ -297,13 +297,12 @@ class ExerciseRunner:
         device_id = sw_obj.device_id
         runtime_json = sw_dict["runtime_json"]
         self.logger(
-            "Configuring switch %s using P4Runtime with file %s"
-            % (sw_name, runtime_json)
+            f"Configuring switch {sw_name} using P4Runtime with file {runtime_json}"
         )
         with open(runtime_json, "r") as sw_conf_file:
-            outfile = "%s/%s-p4runtime-requests.txt" % (self.log_dir, sw_name)
+            outfile = f"{self.log_dir}/{sw_name}-p4runtime-requests.txt"
             p4runtime_lib.simple_controller.program_switch(
-                addr="127.0.0.1:%d" % grpc_port,
+                addr=f"127.0.0.1:{grpc_port}",
                 device_id=device_id,
                 sw_conf_file=sw_conf_file,
                 workdir=os.getcwd(),
@@ -322,10 +321,10 @@ class ExerciseRunner:
 
         cli_input_commands = sw_dict["cli_input"]
         self.logger(
-            "Configuring switch %s with file %s" % (sw_name, cli_input_commands)
+            f"Configuring switch {sw_name} with file {cli_input_commands}"
         )
         with open(cli_input_commands, "r") as fin:
-            cli_outfile = "%s/%s_cli_output.log" % (self.log_dir, sw_name)
+            cli_outfile = f"{self.log_dir}/{sw_name}_cli_output.log"
             with open(cli_outfile, "w") as fout:
                 subprocess.Popen(
                     [cli, "--thrift-port", str(thrift_port)], stdin=fin, stdout=fout
@@ -339,7 +338,7 @@ class ExerciseRunner:
         for sw_name, sw_dict in self.switches.items():
             if "cli_input" not in sw_dict and "runtime_json" not in sw_dict:
                 self.logger(
-                    "Warning: No control plane file provided for switch %s." % (sw_name)
+                    f"Warning: No control plane file provided for switch {sw_name}."
                 )
                 continue
             if "cli_input" in sw_dict:
@@ -385,19 +384,18 @@ class ExerciseRunner:
             print("  simple_switch_CLI --thrift-port <switch thrift port>")
             print()
         print("To view a switch log, run this command from your host OS:")
-        print("  tail -f %s/<switchname>.log" % self.log_dir)
+        print(f"  tail -f {self.log_dir}/<switchname>.log")
         print()
         print(
-            "To view the switch output pcap, check the pcap files in %s:"
-            % self.pcap_dir
+            f"To view the switch output pcap, check the pcap files in {self.pcap_dir}:"
         )
         print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap")
         print()
         if "grpc" in self.bmv2_exe:
             print("To view the P4Runtime requests sent to the switch, check")
-            print("the corresponding txt file in %s:" % (self.log_dir))
+            print(f"the corresponding txt file in {self.log_dir}:")
             print(
-                " for example run:  cat %s/s1-p4runtime-requests.txt" % (self.log_dir)
+                f" for example run:  cat {self.log_dir}/s1-p4runtime-requests.txt"
             )
             print()
 

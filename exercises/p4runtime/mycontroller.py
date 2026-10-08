@@ -54,7 +54,7 @@ def writeTunnelRules(
         },
     )
     ingress_sw.WriteTableEntry(table_entry)
-    print("Installed ingress tunnel rule on %s" % ingress_sw.name)
+    print(f"Installed ingress tunnel rule on {ingress_sw.name}")
 
     # 2) Tunnel Transit Rule
     # The rule will need to be added to the myTunnel_exact table and
@@ -90,7 +90,7 @@ def writeTunnelRules(
         action_params={"dstAddr": dst_eth_addr, "port": SWITCH_TO_HOST_PORT},
     )
     egress_sw.WriteTableEntry(table_entry)
-    print("Installed egress tunnel rule on %s" % egress_sw.name)
+    print(f"Installed egress tunnel rule on {egress_sw.name}")
 
 
 def readTableRules(p4info_helper, sw):
@@ -100,7 +100,7 @@ def readTableRules(p4info_helper, sw):
     :param p4info_helper: the P4Info helper
     :param sw: the switch connection
     """
-    print("\n----- Reading tables rules for %s -----" % sw.name)
+    print(f"\n----- Reading tables rules for {sw.name} -----")
     for response in sw.ReadTableEntries():
         for entity in response.entities:
             entry = entity.table_entry
@@ -124,16 +124,9 @@ def printCounter(p4info_helper, sw, counter_name, index):
     for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
         for entity in response.entities:
             counter = entity.counter_entry
-            print(
-                "%s %s %d: %d packets (%d bytes)"
-                % (
-                    sw.name,
-                    counter_name,
-                    index,
-                    counter.data.packet_count,
-                    counter.data.byte_count,
-                )
-            )
+            print(f"{sw.name} {counter_name} {index}:"
+                  " {counter.data.packet_count} packets"
+                  " ({counter.data.byte_count} bytes)")
 
 
 def main(p4info_file_path, bmv2_file_path):
@@ -237,10 +230,10 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.p4info):
         parser.print_help()
-        print("\np4info file not found: %s\nHave you run 'make'?" % (args.p4info))
+        print(f"\np4info file not found: {args.p4info}\nHave you run 'make'?")
         parser.exit(1)
     if not os.path.exists(args.bmv2_json):
         parser.print_help()
-        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % (args.bmv2_json))
+        print(f"\nBMv2 JSON file not found: {args.bmv2_json}\nHave you run 'make'?")
         parser.exit(1)
     main(args.p4info, args.bmv2_json)

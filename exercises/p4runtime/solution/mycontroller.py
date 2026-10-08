@@ -53,7 +53,7 @@ def writeTunnelRules(
         },
     )
     ingress_sw.WriteTableEntry(table_entry)
-    print("Installed ingress tunnel rule on %s" % ingress_sw.name)
+    print(f"Installed ingress tunnel rule on {ingress_sw.name}")
 
     # 2) Tunnel Transit Rule
     # The rule will need to be added to the myTunnel_exact table and
@@ -82,7 +82,7 @@ def writeTunnelRules(
         action_params={"port": SWITCH_TO_SWITCH_PORT},
     )
     ingress_sw.WriteTableEntry(table_entry)
-    print("Installed transit tunnel rule on %s" % ingress_sw.name)
+    print(f"Installed transit tunnel rule on {ingress_sw.name}")
 
     # 3) Tunnel Egress Rule
     # For our simple topology, the host will always be located on the
@@ -96,7 +96,7 @@ def writeTunnelRules(
         action_params={"dstAddr": dst_eth_addr, "port": SWITCH_TO_HOST_PORT},
     )
     egress_sw.WriteTableEntry(table_entry)
-    print("Installed egress tunnel rule on %s" % egress_sw.name)
+    print(f"Installed egress tunnel rule on {egress_sw.name}")
 
 
 def readTableRules(p4info_helper, sw):
@@ -106,19 +106,19 @@ def readTableRules(p4info_helper, sw):
     :param p4info_helper: the P4Info helper
     :param sw: the switch connection
     """
-    print("\n----- Reading tables rules for %s -----" % sw.name)
+    print(f"\n----- Reading tables rules for {sw.name} -----")
     for response in sw.ReadTableEntries():
         for entity in response.entities:
             entry = entity.table_entry
             # TODO For extra credit, you can use the p4info_helper to translate
             #      the IDs in the entry to names
             table_name = p4info_helper.get_tables_name(entry.table_id)
-            print("%s: " % table_name, end=" ")
+            print(f"{table_name}: ", end=" ")
             for m in entry.match:
                 print(
                     p4info_helper.get_match_field_name(table_name, m.field_id), end=" "
                 )
-                print("%r" % (p4info_helper.get_match_field_value(m)), end=" ")
+                print(f"{p4info_helper.get_match_field_value(m)!r}", end=" ")
             action = entry.action.action
             action_name = p4info_helper.get_actions_name(action.action_id)
             print("->", action_name, end=" ")
@@ -127,7 +127,7 @@ def readTableRules(p4info_helper, sw):
                     p4info_helper.get_action_param_name(action_name, p.param_id),
                     end=" ",
                 )
-                print("%r" % p.value, end=" ")
+                print(f"{p.value!r}", end=" ")
             print()
 
 
@@ -145,24 +145,17 @@ def printCounter(p4info_helper, sw, counter_name, index):
     for response in sw.ReadCounters(p4info_helper.get_counters_id(counter_name), index):
         for entity in response.entities:
             counter = entity.counter_entry
-            print(
-                "%s %s %d: %d packets (%d bytes)"
-                % (
-                    sw.name,
-                    counter_name,
-                    index,
-                    counter.data.packet_count,
-                    counter.data.byte_count,
-                )
-            )
+            print(f"{sw.name} {counter_name} {index}:"
+                  " {counter.data.packet_count} packets"
+                  " ({counter.data.byte_count} bytes)")
 
 
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=" ")
     status_code = e.code()
-    print("(%s)" % status_code.name, end=" ")
+    print(f"({status_code.name})", end=" ")
     traceback = sys.exc_info()[2]
-    print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno))
+    print(f"[{traceback.tb_frame.f_code.co_filename}:{traceback.tb_lineno}]")
 
 
 def main(p4info_file_path, bmv2_file_path):
@@ -266,10 +259,10 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.p4info):
         parser.print_help()
-        print("\np4info file not found: %s\nHave you run 'make'?" % (args.p4info))
+        print(f"\np4info file not found: {args.p4info}\nHave you run 'make'?")
         parser.exit(1)
     if not os.path.exists(args.bmv2_json):
         parser.print_help()
-        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % (args.bmv2_json))
+        print(f"\nBMv2 JSON file not found: {args.bmv2_json}\nHave you run 'make'?")
         parser.exit(1)
     main(args.p4info, args.bmv2_json)

@@ -91,7 +91,7 @@ def read_manifest(manifest_file):
     elif "default-target" in manifest:
         chosen_target = manifest["default-target"]
     else:
-        chosen_target = list(manifest["targets"].keys())[0]
+        chosen_target = next(iter(manifest["targets"].keys()))
 
     if chosen_target not in manifest["targets"]:
         log_error("Target not found in manifest:", chosen_target)
@@ -130,9 +130,9 @@ def run_compile_bmv2(manifest):
 
     # Compile the program.
     output_file = manifest.program_file + ".json"
-    compiler_args.append('"%s"' % manifest.program_file)
-    compiler_args.append('-o "%s"' % output_file)
-    rv = run_command("p4c-bm2-ss %s" % " ".join(compiler_args))
+    compiler_args.append(f'"{manifest.program_file}"')
+    compiler_args.append(f'-o "{output_file}"')
+    rv = run_command("p4c-bm2-ss {}".format(" ".join(compiler_args)))
 
     if "run-after-compile" in manifest.target_config:
         commands = manifest.target_config["run-after-compile"]
@@ -158,12 +158,12 @@ def run_mininet(manifest):
     # We'll place the switch's log file in current (build) folder.
     cwd = os.getcwd()
     log_file = os.path.join(cwd, manifest.program_file + ".log")
-    print("*** Log file %s" % log_file)
-    switch_args.append('--log-file "%s"' % log_file)
+    print(f"*** Log file {log_file}")
+    switch_args.append(f'--log-file "{log_file}"')
 
     pcap_dir = os.path.join(cwd)
-    print("*** Pcap folder %s" % pcap_dir)
-    switch_args.append('--pcap-dump "%s" ' % pcap_dir)
+    print(f"*** Pcap folder {pcap_dir}")
+    switch_args.append(f'--pcap-dump "{pcap_dir}" ')
 
     # Generate a message that will be printed by the Mininet CLI to make
     # interacting with the simple switch a little easier.
@@ -196,10 +196,10 @@ def run_mininet(manifest):
         print(
             "To view the switch log, run this command from your host OS:", file=message
         )
-        print("  tail -f %s" % log_file, file=message)
+        print(f"  tail -f {log_file}", file=message)
         print(file=message)
         print(
-            "To view the switch output pcap, check the pcap files in %s:" % (pcap_dir),
+            f"To view the switch output pcap, check the pcap files in {pcap_dir}:",
             file=message,
         )
         print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap", file=message)
@@ -208,21 +208,21 @@ def run_mininet(manifest):
     #        print('  bm_p4dbg' , file=message)
     #        print(file=message)
 
-    switch_args.append('--cli-message "%s"' % message_file)
+    switch_args.append(f'--cli-message "{message_file}"')
 
     if "num-hosts" in manifest.target_config:
-        switch_args.append("--num-hosts %s" % (manifest.target_config["num-hosts"]))
+        switch_args.append("--num-hosts {}".format(manifest.target_config["num-hosts"]))
 
     if "switch-config" in manifest.target_config:
         switch_args.append(
-            '--switch-config "%s"' % manifest.target_config["switch-config"]
+            '--switch-config "{}"'.format(manifest.target_config["switch-config"])
         )
 
-    switch_args.append('--behavioral-exe "%s"' % "simple_switch")
-    switch_args.append('--json "%s"' % output_file)
+    switch_args.append('--behavioral-exe "{}"'.format("simple_switch"))
+    switch_args.append(f'--json "{output_file}"')
 
-    program = '"%s/mininet/single_switch_mininet.py"' % sys.path[0]
-    return run_command("python3 %s %s" % (program, " ".join(switch_args)))
+    program = f'"{sys.path[0]}/mininet/single_switch_mininet.py"'
+    return run_command("python3 {} {}".format(program, " ".join(switch_args)))
 
 
 def run_multiswitch(manifest):
@@ -231,18 +231,18 @@ def run_multiswitch(manifest):
     script_args = []
     cwd = os.getcwd()
     log_dir = os.path.join(cwd, cwd + "/logs")
-    print("*** Log directory %s" % log_dir)
-    script_args.append('--log-dir "%s"' % log_dir)
+    print(f"*** Log directory {log_dir}")
+    script_args.append(f'--log-dir "{log_dir}"')
     pcap_dir = os.path.join(cwd)
-    print("*** Pcap directory %s" % cwd)
-    script_args.append('--manifest "%s"' % args.manifest)
-    script_args.append('--target "%s"' % manifest.target)
+    print(f"*** Pcap directory {cwd}")
+    script_args.append(f'--manifest "{args.manifest}"')
+    script_args.append(f'--target "{manifest.target}"')
     if (
         manifest.target_config.get("auto-control-plane")
     ):
         script_args.append("--auto-control-plane")
-    script_args.append('--behavioral-exe "%s"' % "simple_switch")
-    script_args.append('--json "%s"' % output_file)
+    script_args.append('--behavioral-exe "{}"'.format("simple_switch"))
+    script_args.append(f'--json "{output_file}"')
     # script_args.append('--cli')
 
     # Generate a message that will be printed by the Mininet CLI to make
@@ -274,10 +274,10 @@ def run_multiswitch(manifest):
         print("  simple_switch_CLI --thrift-port <switch thrift port>", file=message)
         print(file=message)
         print("To view a switch log, run this command from your host OS:", file=message)
-        print("  tail -f %s/<switchname>.log" % log_dir, file=message)
+        print(f"  tail -f {log_dir}/<switchname>.log", file=message)
         print(file=message)
         print(
-            "To view the switch output pcap, check the pcap files in %s:" % (pcap_dir),
+            f"To view the switch output pcap, check the pcap files in {pcap_dir}:",
             file=message,
         )
         print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap", file=message)
@@ -286,10 +286,10 @@ def run_multiswitch(manifest):
     #        print('  bm_p4dbg' , file=message)
     #        print(file=message)
 
-    script_args.append('--cli-message "%s"' % message_file)
+    script_args.append(f'--cli-message "{message_file}"')
 
-    program = '"%s/mininet/multi_switch_mininet.py"' % sys.path[0]
-    return run_command("python3 %s %s" % (program, " ".join(script_args)))
+    program = f'"{sys.path[0]}/mininet/multi_switch_mininet.py"'
+    return run_command("python3 {} {}".format(program, " ".join(script_args)))
 
 
 def run_stf(manifest):
@@ -306,8 +306,8 @@ def run_stf(manifest):
     stf_args.append(os.path.join(args.build_dir, output_file))
     stf_args.append(os.path.join(args.build_dir, stf_file))
 
-    program = '"%s/stf/bmv2stf.py"' % sys.path[0]
-    rv = run_command("python3 %s %s" % (program, " ".join(stf_args)))
+    program = f'"{sys.path[0]}/stf/bmv2stf.py"'
+    rv = run_command("python3 {} {}".format(program, " ".join(stf_args)))
     if rv != 0:
         sys.exit(1)
     return rv
@@ -317,14 +317,14 @@ def run_custom(manifest):
     output_file = run_compile_bmv2(manifest)
     python_path = "PYTHONPATH=$PYTHONPATH:/scripts/mininet/"
     script_args = []
-    script_args.append('--behavioral-exe "%s"' % "simple_switch")
-    script_args.append('--json "%s"' % output_file)
-    script_args.append('--cli "%s"' % "simple_switch_CLI")
+    script_args.append('--behavioral-exe "{}"'.format("simple_switch"))
+    script_args.append(f'--json "{output_file}"')
+    script_args.append('--cli "{}"'.format("simple_switch_CLI"))
     if "program" not in manifest.target_config:
         log_error("No mininet program file provided.")
         sys.exit(1)
     program = manifest.target_config["program"]
-    rv = run_command("%s python3 %s %s" % (python_path, program, " ".join(script_args)))
+    rv = run_command("{} python3 {} {}".format(python_path, program, " ".join(script_args)))
 
     if rv != 0:
         sys.exit(1)
@@ -338,9 +338,8 @@ def main():
     # A '.p4app' package is really just a '.tar.gz' archive. Extract it so we
     # can process its contents.
     log("Extracting package.")
-    tar = tarfile.open(args.app)
-    tar.extractall()
-    tar.close()
+    with tarfile.open(args.app) as tar:
+        tar.extractall()
 
     log("Reading package manifest.")
     with open(args.manifest, "r") as manifest_file:

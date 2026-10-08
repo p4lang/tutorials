@@ -65,7 +65,7 @@ def handle_pkt(pkt):
 
 def main():
     iface = "eth0"
-    print("sniffing on %s" % iface)
+    print(f"sniffing on {iface}")
     sys.stdout.flush()
     sniff(filter="udp and port 4321", iface=iface, prn=lambda x: handle_pkt(x))
 

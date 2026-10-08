@@ -65,15 +65,14 @@ class P4RuntimeSwitch(P4Switch):
 
         if check_listening_on_port(self.grpc_port):
             error(
-                "%s cannot bind port %d because it is bound"
+                f"{self.name} cannot bind port {self.grpc_port} because it is bound"
                 " by another process\n"
-                "" % (self.name, self.grpc_port)
             )
             sys.exit(1)
 
         self.verbose = verbose
         logfile = f"/tmp/p4s.{self.name}.log"
-        self.output = open(logfile, "w")
+        self.output = open(logfile, "w")   # noqa: SIM115
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger
         self.log_console = log_console
@@ -112,7 +111,7 @@ class P4RuntimeSwitch(P4Switch):
             if not intf.IP():
                 args.extend(["-i", str(port) + "@" + intf.name])
         if self.pcap_dump:
-            args.append("--pcap %s" % self.pcap_dump)
+            args.append(f"--pcap {self.pcap_dump}")
         if self.nanomsg:
             args.extend(["--nanolog", self.nanomsg])
         args.extend(["--device-id", str(self.device_id)])

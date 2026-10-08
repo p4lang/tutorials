@@ -46,10 +46,8 @@ class AppController:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        stdout, stderr = p.communicate(input="register_read %s %d" % (register, idx))
-        reg_val = [x for x in stdout.split("\n") if " %s[%d]" % (register, idx) in x][
-            0
-        ].split("= ", 1)[1]
+        stdout, _stderr = p.communicate(input=f"register_read {register} {idx}")
+        reg_val = next(x for x in stdout.split("\n") if f" {register}[{idx}]" in x).split("= ", 1)[1]
         return int(reg_val)
 
     def start(self):
@@ -84,18 +82,18 @@ class AppController:
                 h.setIP(link["host_ip"], 24)
                 h.setMAC(link["host_mac"])
                 # h.cmd('ifconfig %s %s hw ether %s' % (iface, link['host_ip'], link['host_mac']))
-                h.cmd("arp -i %s -s %s %s" % (iface, link["sw_ip"], link["sw_mac"]))
-                h.cmd("ethtool --offload %s rx off tx off" % iface)
-                h.cmd("ip route add %s dev %s" % (link["sw_ip"], iface))
-            h.setDefaultRoute("via %s" % link["sw_ip"])
+                h.cmd("arp -i {} -s {} {}".format(iface, link["sw_ip"], link["sw_mac"]))
+                h.cmd(f"ethtool --offload {iface} rx off tx off")
+                h.cmd("ip route add {} dev {}".format(link["sw_ip"], iface))
+            h.setDefaultRoute("via {}".format(link["sw_ip"]))
 
         for h in self.net.hosts:
-            h_link = list(self.topo._host_links[h.name].values())[0]
+            h_link = next(iter(self.topo._host_links[h.name].values()))
             for sw in self.net.switches:
                 path = shortestpath.get(sw.name, h.name, exclude=lambda n: n[0] == "h")
                 if not path:
                     continue
-                if not path[1][0] == "s":
+                if path[1][0] != "s":
                     continue  # next hop is a switch
                 # sw_link = self.topo._sw_links[sw.name][path[1]]
                 # entries[sw.name].append('table_add send_frame rewrite_mac %d => %s' % (sw_link[0]['port'], sw_link[0]['mac']))
@@ -109,17 +107,17 @@ class AppController:
                 if not path:
                     continue
                 h_link = self.topo._host_links[h.name][path[1]]
-                h2_link = list(self.topo._host_links[h2.name].values())[0]
-                h.cmd("ip route add %s via %s" % (h2_link["host_ip"], h_link["sw_ip"]))
+                h2_link = next(iter(self.topo._host_links[h2.name].values()))
+                h.cmd("ip route add {} via {}".format(h2_link["host_ip"], h_link["sw_ip"]))
 
         print("**********")
         print("Configuring entries in p4 tables")
-        for sw_name in entries:
+        for sw_name, value in entries.items():
             print()
-            print("Configuring switch... %s" % sw_name)
+            print(f"Configuring switch... {sw_name}")
             sw = self.net.get(sw_name)
-            if entries[sw_name]:
-                self.add_entries(sw=sw, entries=entries[sw_name])
+            if value:
+                self.add_entries(sw=sw, entries=value)
         print("Configuration complete.")
         print("**********")
 

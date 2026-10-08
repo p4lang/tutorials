@@ -70,7 +70,7 @@ def intToIpv4(n):
     """Take an argument 'n' containing a 32-bit IPv4 address as an
     integer in the range [0, 2^32-1], and return a string in dotted
     decimal notation."""
-    return "%d.%d.%d.%d" % (
+    return "{}.{}.{}.{}".format(
         (n >> 24) & 0xFF,
         (n >> 16) & 0xFF,
         (n >> 8) & 0xFF,
@@ -89,7 +89,7 @@ def flowCacheEntryToDebugStr(table_entry, include_action=False):
         int.from_bytes(table_entry.match[2].exact.value, byteorder="big")
     )
     proto = int.from_bytes(table_entry.match[0].exact.value, byteorder="big")
-    return "(SA=%s, DA=%s, proto=%d)" % (src_ip, dst_ip, proto)
+    return f"(SA={src_ip}, DA={dst_ip}, proto={proto})"
 
 
 def decodePacketInMetadata(pktin_info, packet):
@@ -101,7 +101,7 @@ def decodePacketInMetadata(pktin_info, packet):
         md_field_info = pktin_info[md_id_int]
         pktin_field_to_val[md_field_info["name"]] = md_val_int
     ret = {"metadata": pktin_field_to_val, "payload": packet.payload}
-    print("decodePacketInMetadata: ret=%s" % (ret))
+    print(f"decodePacketInMetadata: ret={ret}")
     return ret
 
 
@@ -115,8 +115,7 @@ def serializableEnumDict(p4info_data, name):
         name_to_int[name] = int_val
         int_to_name[int_val] = name
     print(
-        "serializableEnumDict: name='%s' name_to_int=%s int_to_name=%s"
-        "" % (name, name_to_int, int_to_name)
+        f"serializableEnumDict: name='{name}' name_to_int={name_to_int} int_to_name={int_to_name}"
     )
     return name_to_int, int_to_name
 
@@ -239,8 +238,7 @@ def createFlowRule(notif):
 def deleteFlowRule(sw, table_entry):
     sw.DeleteTableEntry(table_entry)
     print(
-        "Deleted flow_cache entry on %s. %s"
-        "" % (sw.name, flowCacheEntryToDebugStr(table_entry))
+        f"Deleted flow_cache entry on {sw.name}. {flowCacheEntryToDebugStr(table_entry)}"
     )
 
 
@@ -307,7 +305,7 @@ def readTableRules(p4info_helper, sw):
     :param p4info_helper: the P4Info helper
     :param sw: the switch connection
     """
-    print("\n----- Reading tables rules for %s -----" % (sw.name))
+    print(f"\n----- Reading tables rules for {sw.name} -----")
     for response in sw.ReadTableEntries():
         for entity in response.entities:
             entry = entity.table_entry
@@ -337,14 +335,7 @@ def printCounter(p4info_helper, sw, counter_name, index):
             for entity in response.entities:
                 counter = entity.counter_entry
                 print(
-                    "%s %s %d: %d packets (%d bytes)"
-                    % (
-                        sw.name,
-                        counter_name,
-                        index,
-                        counter.data.packet_count,
-                        counter.data.byte_count,
-                    )
+                    f"{sw.name} {counter_name} {index}: {counter.data.packet_count} packets ({counter.data.byte_count} bytes)"
                 )
     except grpc.RpcError as e:
         print(f"[gRPC Error in printCounter for {sw.name}]")
@@ -363,10 +354,9 @@ def printCounter(p4info_helper, sw, counter_name, index):
 def processPacket(message):
     payload = message["packet-in"].payload
     packet = message["packet-in"]
-    print(
-        "Received PacketIn message of length %d bytes from switch %s"
-        "" % (len(payload), message["sw"].name)
-    )
+    print("Received PacketIn message of length {} bytes from switch {}".format(
+        len(payload), message["sw"].name
+    ))
     if len(payload) > 0:
         i = 0
         pkt = Ether(payload)
@@ -380,15 +370,15 @@ def processPacket(message):
         if debug_packetin:
             i += 1
             print()
-            print("pktin %d of %d" % (i, len(payload)))
-            print("type(pktin.packet.payload)=%s" % (type(payload)))
+            print(f"pktin {i} of {len(payload)}")
+            print(f"type(pktin.packet.payload)={type(payload)}")
             print(payload)
             print(pktinfo)
             print("Scapy decode:")
             print(pkt)
-            print("IPv4 proto %d (type %s)" % (ip_proto, type(ip_proto)))
-            print("IPv4 SA %08x (type %s)" % (src_ip_addr, type(src_ip_addr)))
-            print("IPv4 DA %08x (type %s)" % (dst_ip_addr, type(dst_ip_addr)))
+            print(f"IPv4 proto {ip_proto} (type {type(ip_proto)})")
+            print(f"IPv4 SA {src_ip_addr:08x} (type {type(src_ip_addr)})")
+            print(f"IPv4 DA {dst_ip_addr:08x} (type {type(dst_ip_addr)})")
         if (
             pktinfo["metadata"]["punt_reason"]
             == global_data["punt_reason_name2int"]["FLOW_UNKNOWN"]
@@ -416,11 +406,9 @@ def processPacket(message):
             )
 
             print(
-                "For switch %s flow (SA=%s, DA=%s, proto=%d)"
+                "For switch {} flow (SA={}, DA={}, proto={})"
                 " added table entry to send packets"
-                " to port %d with new DSCP %d"
-                ""
-                % (
+                " to port {} with new DSCP {}".format(
                     message["sw"].name,
                     ip_sa_str,
                     ip_da_str,
@@ -472,10 +460,10 @@ async def processNotif(notif_queue):
                 deleteFlowRule(notif["sw"], table_entry)
             else:
                 print(
-                    "Received idle timeout notification for switch=%s %s"
+                    "Received idle timeout notification for switch={} {}"
                     "  It is duplicate of recently processed notification,"
                     " so ignoring it."
-                    "" % (notif["sw"].name, flowCacheEntryToDebugStr(table_entry))
+                    "".format(notif["sw"].name, flowCacheEntryToDebugStr(table_entry))
                 )
         notif_queue.task_done()
 
@@ -515,9 +503,9 @@ async def idleTimeHandler(notif_queue, sw):
 def printGrpcError(e):
     print("gRPC Error:", e.details(), end=" ")
     status_code = e.code()
-    print("(%s)" % status_code.name, end=" ")
+    print(f"({status_code.name})", end=" ")
     traceback = sys.exc_info()[2]
-    print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno))
+    print("f[{traceback.tb_frame.f_code.co_filename}:{traceback.tb_lineno}]")
 
 
 async def main(p4info_file_path, bmv2_file_path):
@@ -590,10 +578,10 @@ async def main(p4info_file_path, bmv2_file_path):
 
         except shp4rt.P4RuntimeWriteException:
             print(
-                "Got exception trying to configure clone session %d."
+                "Got exception trying to configure clone session {}."
                 "  Assuming it was initialized already in an earlier"
-                " run of the controller."
-                "" % (global_data["CPU_PORT_CLONE_SESSION_ID"])
+                " run of the controller.".format(
+                    global_data["CPU_PORT_CLONE_SESSION_ID"])
             )
 
         notif_queue = asyncio.Queue()
@@ -651,10 +639,10 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.p4info):
         parser.print_help()
-        print("\np4info file not found: %s\nHave you run 'make'?" % (args.p4info))
+        print(f"\np4info file not found: {args.p4info}\nHave you run 'make'?")
         parser.exit(1)
     if not os.path.exists(args.bmv2_json):
         parser.print_help()
-        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % (args.bmv2_json))
+        print(f"\nBMv2 JSON file not found: {args.bmv2_json}\nHave you run 'make'?")
         parser.exit(1)
     asyncio.run(main(args.p4info, args.bmv2_json))

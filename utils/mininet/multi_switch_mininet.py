@@ -111,9 +111,9 @@ def main():
         manifest = json.load(f)
 
     conf = manifest["targets"][args.target]
-    params = conf["parameters"] if "parameters" in conf else {}
+    params = conf.get("parameters", {})
 
-    os.environ.update(dict([(k_v[0], str(k_v[1])) for k_v in iter(params.items())]))
+    os.environ.update({k_v[0]: str(k_v[1]) for k_v in iter(params.items())})
 
     def formatParams(s):
         for param in params:
@@ -136,15 +136,15 @@ def main():
 
     if not os.path.isdir(args.log_dir):
         if os.path.exists(args.log_dir):
-            raise Exception("Log dir exists and is not a dir")
+            raise ValueError("Log dir exists and is not a dir")
         os.mkdir(args.log_dir)
     os.environ["P4APP_LOGDIR"] = args.log_dir
 
     links = [x[:2] for x in conf["links"]]
-    latencies = dict(
-        [("".join(sorted(x[:2])), x[2]) for x in conf["links"] if len(x) >= 3]
-    )
-    bws = dict([("".join(sorted(x[:2])), x[3]) for x in conf["links"] if len(x) >= 4])
+    latencies = {
+        "".join(sorted(x[:2])): x[2] for x in conf["links"] if len(x) >= 3
+    }
+    bws = {"".join(sorted(x[:2])): x[3] for x in conf["links"] if len(x) >= 4}
 
     for host_name in sorted(conf["hosts"].keys()):
         host = conf["hosts"][host_name]
@@ -156,11 +156,11 @@ def main():
             other = a if a != host_name else b
             latencies[host_name + other] = host["latency"]
 
-    for x in latencies:
-        if isinstance(latencies[x], str):
-            latencies[x] = formatParams(latencies[x])
+    for x, latency in latencies.items():
+        if isinstance(latency, str):
+            latencies[x] = formatParams(latency)
         else:
-            latencies[x] = str(latencies[x]) + "ms"
+            latencies[x] = str(latency) + "ms"
 
     bmv2_log = args.bmv2_log or ("bmv2_log" in conf and conf["bmv2_log"])
     pcap_dump = args.pcap_dump or ("pcap_dump" in conf and conf["pcap_dump"])
@@ -203,7 +203,7 @@ def main():
     if args.cli or (conf.get("cli")):
         CLI(net)
 
-    stdout_files = dict()
+    stdout_files = {}
     return_codes = []
     host_procs = []
 
@@ -223,7 +223,7 @@ def main():
             stdout_files[host_name].close()
 
     print(
-        "\n".join(["%s: %s" % (k_v1[0], k_v1[1]) for k_v1 in iter(params.items())])
+        "\n".join([f"{k_v1[0]}: {k_v1[1]}" for k_v1 in iter(params.items())])
         + "\n"
     )
 
@@ -234,7 +234,7 @@ def main():
 
         h = net.get(host_name)
         stdout_filename = os.path.join(args.log_dir, h.name + ".stdout")
-        stdout_files[h.name] = open(stdout_filename, "w")
+        stdout_files[h.name] = open(stdout_filename, "w")   # noqa: SIM115
         cmd = formatCmd(host["cmd"])
         print(h.name, cmd)
         p = h.popen(cmd, stdout=stdout_files[h.name], shell=True, preexec_fn=os.setpgrp)
@@ -254,13 +254,13 @@ def main():
         if "wait" in conf["hosts"][host_name] and conf["hosts"][host_name]["wait"]:
             continue
         if p.returncode is None:
-            run_command("pkill -INT -P %d" % p.pid)
+            run_command(f"pkill -INT -P {p.pid}")
             sleep(0.2)
             # check if it's still running
-            rc = run_command("pkill -0 -P %d" % p.pid)
+            rc = run_command(f"pkill -0 -P {p.pid}")
             if rc == 0:  # the process group is still running, send TERM
                 sleep(1)  # give it a little more time to exit gracefully
-                run_command("pkill -TERM -P %d" % p.pid)
+                run_command(f"pkill -TERM -P {p.pid}")
         _wait_for_exit(p, host_name)
 
     if "after" in conf and "cmd" in conf["after"]:

@@ -45,12 +45,9 @@ def main():
                 / args.m
             )
             pkt.show2()
-            try:
-                for i in range(int(args.dur)):
-                    sendp(pkt, iface=iface)
-                    sleep(1)
-            except KeyboardInterrupt:
-                raise
+            for i in range(int(args.dur)):
+                sendp(pkt, iface=iface)
+                sleep(1)
         elif args.p == "TCP":
             pkt = (
                 Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff")
@@ -59,12 +56,9 @@ def main():
                 / args.m
             )
             pkt.show2()
-            try:
-                for i in range(int(args.dur)):
-                    sendp(pkt, iface=iface)
-                    sleep(1)
-            except KeyboardInterrupt:
-                raise
+            for i in range(int(args.dur)):
+                sendp(pkt, iface=iface)
+                sleep(1)
 
 
 if __name__ == "__main__":

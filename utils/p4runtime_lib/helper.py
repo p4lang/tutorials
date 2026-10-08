@@ -34,9 +34,9 @@ class P4InfoHelper:
                     return o
 
         if name:
-            raise AttributeError("Could not find %r of type %s" % (name, entity_type))
+            raise AttributeError(f"Could not find {name!r} of type {entity_type}")
         else:
-            raise AttributeError("Could not find id %r of type %s" % (id, entity_type))
+            raise AttributeError(f"Could not find id {id!r} of type {entity_type}")
 
     def get_id(self, entity_type, name):
         return self.get(entity_type, name=name).preamble.id
@@ -63,7 +63,7 @@ class P4InfoHelper:
             primitive = m.group(1)
             return lambda id: self.get_name(primitive, id)
 
-        raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
+        raise AttributeError(f"{self.__class__!r} object has no attribute {attr!r}")
 
     def get_match_field(self, table_name, name=None, id=None):
         for t in self.p4info.tables:
@@ -73,11 +73,10 @@ class P4InfoHelper:
                     if name is not None:
                         if mf.name == name:
                             return mf
-                    elif id is not None:
-                        if mf.id == id:
-                            return mf
+                    elif id is not None and mf.id == id:
+                        return mf
         raise AttributeError(
-            "%r has no attribute %r" % (table_name, name if name is not None else id)
+            f"{table_name!r} has no attribute {name if name is not None else id!r}"
         )
 
     def get_match_field_id(self, table_name, match_field_name):
@@ -108,7 +107,7 @@ class P4InfoHelper:
             range_entry.low = encode(value[0], bitwidth)
             range_entry.high = encode(value[1], bitwidth)
         else:
-            raise Exception("Unsupported match type with type %r" % match_type)
+            raise ValueError(f"Unsupported match type with type {match_type!r}")
         return p4runtime_match
 
     def get_match_field_value(self, match_field):
@@ -124,7 +123,7 @@ class P4InfoHelper:
         elif match_type == "range":
             return (match_field.range.low, match_field.range.high)
         else:
-            raise Exception("Unsupported match type with type %r" % match_type)
+            raise ValueError(f"Unsupported match type with type {match_type!r}")
 
     def get_action_param(self, action_name, name=None, id=None):
         for a in self.p4info.actions:
@@ -134,12 +133,10 @@ class P4InfoHelper:
                     if name is not None:
                         if p.name == name:
                             return p
-                    elif id is not None:
-                        if p.id == id:
-                            return p
+                    elif id is not None and p.id == id:
+                        return p
         raise AttributeError(
-            "action %r has no param %r, (has: %r)"
-            % (action_name, name if name is not None else id, a.params)
+            f"action {action_name!r} has no param {name if name is not None else id!r}, (has: {a.params!r})"
         )
 
     def get_action_param_id(self, action_name, param_name):

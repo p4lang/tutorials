@@ -60,7 +60,7 @@ def decodeIPv6(encoded_ip_addr):
 
 
 def bitwidthToBytes(bitwidth):
-    return int(math.ceil(bitwidth / 8.0))
+    return math.ceil(bitwidth / 8.0)
 
 
 def encodeNum(number, bitwidth):
@@ -70,21 +70,19 @@ def encodeNum(number, bitwidth):
     orig_number = number
     if number < 0:
         if number < -(2 ** (bitwidth - 1)):
-            raise Exception(
-                "Negative number, %d, has 2's complement"
-                " representation that does not fit in %d bits"
-                "" % (number, bitwidth)
+            raise ValueError(
+                f"Negative number, {number}, has 2's complement"
+                " representation that does not fit in {bitwidth} bits"
             )
         number = (2**bitwidth) + number
-    num_str = "%x" % number
+    num_str = f"{number:x}"
     if orig_number < 0:
         print(
-            "CONVERT_NEGATIVE_NUMBER debug: orig_number=%s number=%s"
-            " bitwidth=%d num_str='%s'"
-            "" % (orig_number, number, bitwidth, num_str)
+            f"CONVERT_NEGATIVE_NUMBER debug: orig_number={orig_number} number={number}"
+            " bitwidth={bitwidth} num_str='{num_str}'"
         )
     if number >= 2**bitwidth:
-        raise Exception("Number, %d, does not fit in %d bits" % (number, bitwidth))
+        raise ValueError(f"Number, {number}, does not fit in {bitwidth} bits")
     return bytes.fromhex("0" * (byte_len * 2 - len(num_str)) + num_str)
 
 
@@ -95,7 +93,7 @@ def decodeNum(encoded_number):
 def encode(x, bitwidth):
     "Tries to infer the type of `x` and encode it"
     byte_len = bitwidthToBytes(bitwidth)
-    if (isinstance(x, list) or isinstance(x, tuple)) and len(x) == 1:
+    if (isinstance(x, (list, tuple))) and len(x) == 1:
         x = x[0]
     encoded_bytes = None
     if isinstance(x, str):
@@ -111,7 +109,7 @@ def encode(x, bitwidth):
     elif isinstance(x, int):
         encoded_bytes = encodeNum(x, bitwidth)
     else:
-        raise Exception("Encoding objects of %r is not supported" % type(x))
+        raise TypeError(f"Encoding objects of {type(x)!r} is not supported")
     assert len(encoded_bytes) == byte_len
     return encoded_bytes
 
@@ -170,6 +168,6 @@ if __name__ == "__main__":
     byte_len = 2
     try:
         enc_num = encodeNum(num, 8)
-        raise Exception("expected exception")
-    except Exception as e:
+        raise ValueError("expected exception")
+    except ValueError as e:
         print(e)

@@ -18,7 +18,7 @@ class P4Host(Host):
         r = super().config(**params)
 
         for off in ["rx", "tx", "sg"]:
-            cmd = "/sbin/ethtool --offload %s %s off" % (self.defaultIntf().name, off)
+            cmd = f"/sbin/ethtool --offload {self.defaultIntf().name} {off} off"
             self.cmd(cmd)
 
         # disable IPv6
@@ -30,17 +30,12 @@ class P4Host(Host):
 
     def describe(self, sw_addr=None, sw_mac=None):
         print("**********")
-        print("Network configuration for: %s" % self.name)
+        print(f"Network configuration for: {self.name}")
         print(
-            "Default interface: %s\t%s\t%s"
-            % (
-                self.defaultIntf().name,
-                self.defaultIntf().IP(),
-                self.defaultIntf().MAC(),
-            )
+            f"Default interface: {self.defaultIntf().name}\t{self.defaultIntf().IP()}\t{self.defaultIntf().MAC()}"
         )
         if sw_addr is not None or sw_mac is not None:
-            print("Default route to switch: %s (%s)" % (sw_addr, sw_mac))
+            print(f"Default route to switch: {sw_addr} ({sw_mac})")
         print("**********")
 
 
@@ -78,7 +73,7 @@ class P4Switch(Switch):
         self.log_file = log_file
         if self.log_file is None:
             self.log_file = f"/tmp/p4s.{self.name}.log"
-        self.output = open(self.log_file, "w")
+        self.output = open(self.log_file, "w")   # noqa: SIM115
         self.thrift_port = thrift_port
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger

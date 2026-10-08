@@ -48,7 +48,7 @@ def main():
 
     addr = socket.gethostbyname(sys.argv[1])
     iface = get_if()
-    print("sending on interface %s to %s" % (iface, str(addr)))
+    print(f"sending on interface {iface} to {addr!s}")
 
     while True:
         print()

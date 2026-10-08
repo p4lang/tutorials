@@ -22,7 +22,7 @@ class P4Host(Host):
         self.defaultIntf().rename("eth0")
 
         for off in ["rx", "tx", "sg"]:
-            cmd = "/sbin/ethtool --offload eth0 %s off" % off
+            cmd = f"/sbin/ethtool --offload eth0 {off} off"
             self.cmd(cmd)
 
         # disable IPv6
@@ -36,12 +36,7 @@ class P4Host(Host):
         print("**********")
         print(self.name)
         print(
-            "default interface: %s\t%s\t%s"
-            % (
-                self.defaultIntf().name,
-                self.defaultIntf().IP(),
-                self.defaultIntf().MAC(),
-            )
+            f"default interface: {self.defaultIntf().name}\t{self.defaultIntf().IP()}\t{self.defaultIntf().MAC()}"
         )
         print("**********")
 
@@ -78,13 +73,10 @@ class P4Switch(Switch):
         self.json_path = json_path
         self.verbose = verbose
         logfile = f"/tmp/p4s.{self.name}.log"
-        self.output = open(logfile, "w")
+        self.output = open(logfile, "w")   # noqa: SIM115
         self.thrift_port = thrift_port
         if check_listening_on_port(self.thrift_port):
-            error(
-                "%s cannot bind port %d because it is bound by"
-                " another process\n" % (self.name, self.grpc_port)
-            )
+            error(f"{self.name} cannot bind port {self.grpc_port} because it is bound by another process\n")
             exit(1)
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger
@@ -126,7 +118,7 @@ class P4Switch(Switch):
             if not intf.IP():
                 args.extend(["-i", str(port) + "@" + intf.name])
         if self.pcap_dump:
-            args.append("--pcap %s" % self.pcap_dump)
+            args.append(f"--pcap {self.pcap_dump}")
         if self.thrift_port:
             args.extend(["--thrift-port", str(self.thrift_port)])
         if self.nanomsg:

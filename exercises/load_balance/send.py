@@ -31,7 +31,7 @@ def main():
     addr = socket.gethostbyname(sys.argv[1])
     iface = get_if()
 
-    print("sending on interface %s to %s" % (iface, str(addr)))
+    print(f"sending on interface {iface} to {addr!s}")
     pkt = Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff")
     pkt = (
         pkt
