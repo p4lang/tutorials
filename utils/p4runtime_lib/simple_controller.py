@@ -35,8 +35,9 @@ def main():
     parser.add_argument(
         "-a",
         "--p4runtime-server-addr",
-        help=("address and port of the switch's P4Runtime server"
-              " (e.g. 192.168.0.1:50051)"),
+        help=(
+            "address and port of the switch's P4Runtime server (e.g. 192.168.0.1:50051)"
+        ),
         type=str,
         action="store",
         required=True,
@@ -146,8 +147,9 @@ def program_switch(
         if target == "bmv2":
             info("Setting pipeline config (%s)..." % sw_conf["bmv2_json"])
             bmv2_json_fpath = os.path.join(workdir, sw_conf["bmv2_json"])
-            sw.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                           bmv2_json_file_path=bmv2_json_fpath)
+            sw.SetForwardingPipelineConfig(
+                p4info=p4info_helper.p4info, bmv2_json_file_path=bmv2_json_fpath
+            )
         else:
             raise Exception("Should not be here")
 
@@ -188,13 +190,13 @@ def validateTableEntry(flow, p4info_helper, runtime_json):
     ]
     if match_fields is not None and (priority is None or priority == 0):
         for match_field_name, _ in match_fields.items():
-            p4info_match = p4info_helper.get_match_field(table_name,
-                                                         match_field_name)
+            p4info_match = p4info_helper.get_match_field(table_name, match_field_name)
             match_type = p4info_match.match_type
             if match_type in match_types_with_priority:
-                raise AssertionError("non-zero 'priority' field is required"
-                                     " for all entries for table {} in {}"
-                                     "".format(table_name, runtime_json))
+                raise AssertionError(
+                    "non-zero 'priority' field is required"
+                    f" for all entries for table {table_name} in {runtime_json}"
+                )
 
 
 def insertTableEntry(sw, flow, p4info_helper):
@@ -232,8 +234,7 @@ def _byteify(data, ignore_dicts=False):
     # but only if we haven't already byteified it
     if isinstance(data, dict) and not ignore_dicts:
         return {
-            _byteify(key, ignore_dicts=True): _byteify(value,
-                                                       ignore_dicts=True)
+            _byteify(key, ignore_dicts=True): _byteify(value, ignore_dicts=True)
             for key, value in data.items()
         }
     # if it's anything else, return it in its original form
@@ -247,7 +248,7 @@ def tableEntryToString(flow):
             for match_name in flow["match"]
         ]
         match_str = ", ".join(match_str)
-    elif "default_action" in flow and flow["default_action"]:
+    elif flow.get("default_action"):
         match_str = "(default action)"
     else:
         match_str = "(any)"
@@ -256,15 +257,14 @@ def tableEntryToString(flow):
         for param_name in flow["action_params"]
     ]
     params = ", ".join(params)
-    return ("%s: %s => %s(%s)"
-            "" % (flow["table"], match_str, flow["action_name"], params))
+    return "%s: %s => %s(%s)" % (flow["table"], match_str, flow["action_name"], params)
 
 
 def groupEntryToString(rule):
     group_id = rule["multicast_group_id"]
     replicas = ["%d" % replica["egress_port"] for replica in rule["replicas"]]
     ports_str = ", ".join(replicas)
-    return "Group {0} => ({1})".format(group_id, ports_str)
+    return f"Group {group_id} => ({ports_str})"
 
 
 def cloneEntryToString(rule):
@@ -275,9 +275,7 @@ def cloneEntryToString(rule):
         packet_length_bytes = "NO_TRUNCATION"
     replicas = ["%d" % replica["egress_port"] for replica in rule["replicas"]]
     ports_str = ", ".join(replicas)
-    return "Clone Session {0} => ({1}) ({2})".format(
-        clone_id, ports_str, packet_length_bytes
-    )
+    return f"Clone Session {clone_id} => ({ports_str}) ({packet_length_bytes})"
 
 
 def insertMulticastGroupEntry(sw, rule, p4info_helper):

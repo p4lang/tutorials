@@ -6,6 +6,7 @@
 
 import argparse
 import socket
+import sys
 from time import sleep
 
 from scapy.all import IP, TCP, UDP, Ether, get_if_hwaddr, get_if_list, sendp
@@ -19,7 +20,7 @@ def get_if():
             break
     if not iface:
         print("Cannot find eth0 interface")
-        exit(1)
+        sys.exit(1)
     return iface
 
 
@@ -28,8 +29,7 @@ def main():
     parser.add_argument(
         "--p", help="Protocol name To send TCP/UDP etc packets", type=str
     )
-    parser.add_argument("--des", help="IP address of the destination",
-                        type=str)
+    parser.add_argument("--des", help="IP address of the destination", type=str)
     parser.add_argument("--m", help="Raw Message", type=str)
     parser.add_argument("--dur", help="in seconds", type=str)
     args = parser.parse_args()

@@ -81,8 +81,7 @@ args = parser.parse_args()
 class SingleSwitchTopo(Topo):
     "Single switch connected to n (< 256) hosts."
 
-    def __init__(self, sw_path, json_path, log_file, thrift_port, pcap_dump,
-                 n, **opts):
+    def __init__(self, sw_path, json_path, log_file, thrift_port, pcap_dump, n, **opts):
         # Initialize topology and default options
         Topo.__init__(self, **opts)
 
@@ -98,8 +97,9 @@ class SingleSwitchTopo(Topo):
         )
 
         for h in range(n):
-            host = self.addHost("h%d" % (h + 1), ip="10.0.%d.10/24" % h,
-                                mac="00:04:00:00:00:%02x" % h)
+            host = self.addHost(
+                "h%d" % (h + 1), ip="10.0.%d.10/24" % h, mac="00:04:00:00:00:%02x" % h
+            )
             print("Adding host", str(host))
             self.addLink(host, switch)
 
@@ -129,8 +129,7 @@ def main():
             h.setDefaultRoute("dev %s" % h.defaultIntf().name)
         else:
             h.setARP(sw_addr[n], sw_mac[n])
-            h.setDefaultRoute("dev %s via %s"
-                              "" % (h.defaultIntf().name, sw_addr[n]))
+            h.setDefaultRoute("dev %s via %s" % (h.defaultIntf().name, sw_addr[n]))
 
     for n in range(num_hosts):
         h = net.get("h%d" % (n + 1))

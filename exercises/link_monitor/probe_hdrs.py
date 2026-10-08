@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2019 Stephen Ibanez
 #
 # SPDX-License-Identifier: GPL-2.0-only
-from scapy.all import Packet, Ether, ByteField, BitField, IntField, bind_layers
+from scapy.all import BitField, ByteField, Ether, IntField, Packet, bind_layers
 
 TYPE_PROBE = 0x812
 

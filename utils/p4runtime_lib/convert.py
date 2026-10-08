@@ -47,7 +47,7 @@ def matchesIPv6(ip_addr_string):
     try:
         socket.inet_pton(socket.AF_INET6, ip_addr_string)
         return True
-    except socket.error:
+    except OSError:
         return False
 
 
@@ -70,18 +70,21 @@ def encodeNum(number, bitwidth):
     orig_number = number
     if number < 0:
         if number < -(2 ** (bitwidth - 1)):
-            raise Exception("Negative number, %d, has 2's complement"
-                            " representation that does not fit in %d bits"
-                            "" % (number, bitwidth))
+            raise Exception(
+                "Negative number, %d, has 2's complement"
+                " representation that does not fit in %d bits"
+                "" % (number, bitwidth)
+            )
         number = (2**bitwidth) + number
     num_str = "%x" % number
     if orig_number < 0:
-        print("CONVERT_NEGATIVE_NUMBER debug: orig_number=%s number=%s"
-              " bitwidth=%d num_str='%s'"
-              "" % (orig_number, number, bitwidth, num_str))
+        print(
+            "CONVERT_NEGATIVE_NUMBER debug: orig_number=%s number=%s"
+            " bitwidth=%d num_str='%s'"
+            "" % (orig_number, number, bitwidth, num_str)
+        )
     if number >= 2**bitwidth:
-        raise Exception("Number, %d, does not fit in %d bits"
-                        "" % (number, bitwidth))
+        raise Exception("Number, %d, does not fit in %d bits" % (number, bitwidth))
     return bytes.fromhex("0" * (byte_len * 2 - len(num_str)) + num_str)
 
 

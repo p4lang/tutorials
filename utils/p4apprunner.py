@@ -39,7 +39,7 @@ parser.add_argument(
 parser.add_argument("app", help=".p4app package to run.", type=str)
 parser.add_argument(
     "target",
-    help=("Target to run. Defaults to the first target " "in the package."),
+    help=("Target to run. Defaults to the first target in the package."),
     nargs="?",
     type=str,
 )
@@ -97,8 +97,9 @@ def read_manifest(manifest_file):
         log_error("Target not found in manifest:", chosen_target)
         sys.exit(1)
 
-    return Manifest(program_file, language, chosen_target,
-                    manifest["targets"][chosen_target])
+    return Manifest(
+        program_file, language, chosen_target, manifest["targets"][chosen_target]
+    )
 
 
 def run_compile_bmv2(manifest):
@@ -168,33 +169,40 @@ def run_mininet(manifest):
     # interacting with the simple switch a little easier.
     message_file = "mininet_message.txt"
     with open(message_file, "w") as message:
-
         print(file=message)
-        print("========================================"
-              "==============================", file=message)
+        print(
+            "======================================================================",
+            file=message,
+        )
         print("Welcome to the BMV2 Mininet CLI!", file=message)
-        print("========================================"
-              "==============================", file=message)
-        print("Your P4 program is installed into the BMV2 software switch",
-              file=message)
-        print("and your initial configuration is loaded. You can interact",
-              file=message)
+        print(
+            "======================================================================",
+            file=message,
+        )
+        print(
+            "Your P4 program is installed into the BMV2 software switch", file=message
+        )
+        print(
+            "and your initial configuration is loaded. You can interact", file=message
+        )
         print("with the network using the mininet CLI below.", file=message)
         print(file=message)
-        print("To inspect or change the switch configuration, connect to",
-              file=message)
-        print("its CLI from your host operating system using this command:",
-              file=message)
+        print("To inspect or change the switch configuration, connect to", file=message)
+        print(
+            "its CLI from your host operating system using this command:", file=message
+        )
         print("  simple_switch_CLI", file=message)
         print(file=message)
-        print("To view the switch log, run this command from your host OS:",
-              file=message)
+        print(
+            "To view the switch log, run this command from your host OS:", file=message
+        )
         print("  tail -f %s" % log_file, file=message)
         print(file=message)
-        print("To view the switch output pcap, check the pcap files in %s:"
-              "" % (pcap_dir), file=message)
-        print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap",
-              file=message)
+        print(
+            "To view the switch output pcap, check the pcap files in %s:" % (pcap_dir),
+            file=message,
+        )
+        print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap", file=message)
         print(file=message)
     #        print('To run the switch debugger, run this command from your host OS:', file=message)
     #        print('  bm_p4dbg' , file=message)
@@ -203,8 +211,7 @@ def run_mininet(manifest):
     switch_args.append('--cli-message "%s"' % message_file)
 
     if "num-hosts" in manifest.target_config:
-        switch_args.append("--num-hosts %s"
-                           "" % (manifest.target_config["num-hosts"]))
+        switch_args.append("--num-hosts %s" % (manifest.target_config["num-hosts"]))
 
     if "switch-config" in manifest.target_config:
         switch_args.append(
@@ -231,8 +238,7 @@ def run_multiswitch(manifest):
     script_args.append('--manifest "%s"' % args.manifest)
     script_args.append('--target "%s"' % manifest.target)
     if (
-        "auto-control-plane" in manifest.target_config
-        and manifest.target_config["auto-control-plane"]
+        manifest.target_config.get("auto-control-plane")
     ):
         script_args.append("--auto-control-plane")
     script_args.append('--behavioral-exe "%s"' % "simple_switch")
@@ -243,34 +249,38 @@ def run_multiswitch(manifest):
     # interacting with the simple switch a little easier.
     message_file = "mininet_message.txt"
     with open(message_file, "w") as message:
-
         print(file=message)
-        print("========================================"
-              "==============================", file=message)
+        print(
+            "======================================================================",
+            file=message,
+        )
         print("Welcome to the BMV2 Mininet CLI!", file=message)
-        print("========================================"
-              "==============================", file=message)
-        print("Your P4 program is installed into the BMV2 software switch",
-              file=message)
-        print("and your initial configuration is loaded. You can interact",
-              file=message)
+        print(
+            "======================================================================",
+            file=message,
+        )
+        print(
+            "Your P4 program is installed into the BMV2 software switch", file=message
+        )
+        print(
+            "and your initial configuration is loaded. You can interact", file=message
+        )
         print("with the network using the mininet CLI below.", file=message)
         print(file=message)
-        print("To inspect or change the switch configuration, connect to",
-              file=message)
-        print("its CLI from your host operating system using this command:",
-              file=message)
-        print("  simple_switch_CLI --thrift-port <switch thrift port>",
-              file=message)
+        print("To inspect or change the switch configuration, connect to", file=message)
+        print(
+            "its CLI from your host operating system using this command:", file=message
+        )
+        print("  simple_switch_CLI --thrift-port <switch thrift port>", file=message)
         print(file=message)
-        print("To view a switch log, run this command from your host OS:",
-              file=message)
+        print("To view a switch log, run this command from your host OS:", file=message)
         print("  tail -f %s/<switchname>.log" % log_dir, file=message)
         print(file=message)
-        print("To view the switch output pcap, check the pcap files in %s:"
-              "" % (pcap_dir), file=message)
-        print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap",
-              file=message)
+        print(
+            "To view the switch output pcap, check the pcap files in %s:" % (pcap_dir),
+            file=message,
+        )
+        print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap", file=message)
         print(file=message)
     #        print('To run the switch debugger, run this command from your host OS:', file=message)
     #        print('  bm_p4dbg' , file=message)
@@ -314,8 +324,7 @@ def run_custom(manifest):
         log_error("No mininet program file provided.")
         sys.exit(1)
     program = manifest.target_config["program"]
-    rv = run_command("%s python3 %s %s"
-                     "" % (python_path, program, " ".join(script_args)))
+    rv = run_command("%s python3 %s %s" % (python_path, program, " ".join(script_args)))
 
     if rv != 0:
         sys.exit(1)

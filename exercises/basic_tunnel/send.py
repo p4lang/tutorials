@@ -6,6 +6,7 @@
 import argparse
 import random
 import socket
+import sys
 
 from myTunnel_header import MyTunnel
 from scapy.all import IP, TCP, Ether, get_if_hwaddr, get_if_list, sendp
@@ -19,16 +20,14 @@ def get_if():
             break
     if not iface:
         print("Cannot find eth0 interface")
-        exit(1)
+        sys.exit(1)
     return iface
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("ip_addr", type=str,
-                        help="The destination IP address to use")
-    parser.add_argument("message", type=str,
-                        help="The message to include in packet")
+    parser.add_argument("ip_addr", type=str, help="The destination IP address to use")
+    parser.add_argument("message", type=str, help="The message to include in packet")
     parser.add_argument(
         "--dst_id",
         type=int,
@@ -43,7 +42,7 @@ def main():
     iface = get_if()
 
     if dst_id is not None:
-        print("sending on interface {} to dst_id {}".format(iface, str(dst_id)))
+        print(f"sending on interface {iface} to dst_id {dst_id!s}")
         pkt = Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff")
         pkt = (
             pkt
@@ -53,7 +52,7 @@ def main():
             / args.message
         )
     else:
-        print("sending on interface {} to IP addr {}".format(iface, str(addr)))
+        print(f"sending on interface {iface} to IP addr {addr!s}")
         pkt = Ether(src=get_if_hwaddr(iface), dst="ff:ff:ff:ff:ff:ff")
         pkt = (
             pkt

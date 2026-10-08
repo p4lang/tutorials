@@ -27,7 +27,7 @@ def get_if():
             break
     if not iface:
         print("Cannot find eth0 interface")
-        exit(1)
+        sys.exit(1)
     return iface
 
 
@@ -36,8 +36,9 @@ class IPOption_MRI(IPOption):
     option = 31
     fields_desc = [
         _IPOption_HDR,
-        FieldLenField("length", None, fmt="B", length_of="swids",
-                      adjust=lambda pkt, x: x + 4),
+        FieldLenField(
+            "length", None, fmt="B", length_of="swids", adjust=lambda pkt, x: x + 4
+        ),
         ShortField("count", 0),
         FieldListField(
             "swids", [], IntField("", 0), length_from=lambda pkt: pkt.count * 4

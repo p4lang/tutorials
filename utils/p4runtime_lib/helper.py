@@ -10,7 +10,7 @@ from p4.v1 import p4runtime_pb2
 from .convert import encode
 
 
-class P4InfoHelper(object):
+class P4InfoHelper:
     def __init__(self, p4_info_filepath):
         p4info = p4info_pb2.P4Info()
         # Load the p4info file into a skeleton P4Info object
@@ -34,11 +34,9 @@ class P4InfoHelper(object):
                     return o
 
         if name:
-            raise AttributeError("Could not find %r of type %s"
-                                 "" % (name, entity_type))
+            raise AttributeError("Could not find %r of type %s" % (name, entity_type))
         else:
-            raise AttributeError("Could not find id %r of type %s"
-                                 "" % (id, entity_type))
+            raise AttributeError("Could not find id %r of type %s" % (id, entity_type))
 
     def get_id(self, entity_type, name):
         return self.get(entity_type, name=name).preamble.id
@@ -65,8 +63,7 @@ class P4InfoHelper(object):
             primitive = m.group(1)
             return lambda id: self.get_name(primitive, id)
 
-        raise AttributeError("%r object has no attribute %r"
-                             "" % (self.__class__, attr))
+        raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
 
     def get_match_field(self, table_name, name=None, id=None):
         for t in self.p4info.tables:
@@ -79,9 +76,9 @@ class P4InfoHelper(object):
                     elif id is not None:
                         if mf.id == id:
                             return mf
-        raise AttributeError("%r has no attribute %r"
-                             "" % (table_name,
-                                   name if name is not None else id))
+        raise AttributeError(
+            "%r has no attribute %r" % (table_name, name if name is not None else id)
+        )
 
     def get_match_field_id(self, table_name, match_field_name):
         return self.get_match_field(table_name, name=match_field_name).id
@@ -210,13 +207,10 @@ class P4InfoHelper(object):
             mc_entry.multicast_group_entry.replicas.extend([r])
         return mc_entry
 
-    def buildCloneSessionEntry(self, clone_session_id, replicas,
-                               packet_length_bytes=0):
+    def buildCloneSessionEntry(self, clone_session_id, replicas, packet_length_bytes=0):
         clone_entry = p4runtime_pb2.PacketReplicationEngineEntry()
         clone_entry.clone_session_entry.session_id = clone_session_id
-        clone_entry.clone_session_entry.packet_length_bytes = (
-            packet_length_bytes
-        )
+        clone_entry.clone_session_entry.packet_length_bytes = packet_length_bytes
         clone_entry.clone_session_entry.class_of_service = (
             0  # PI currently supports only CoS=0 for clone session entry
         )

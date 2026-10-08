@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # SPDX-FileCopyrightText: 2026 Andrew Nguyen
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -24,8 +22,7 @@ from p4runtime_lib.switch import ShutdownAllSwitchConnections
 logger = logging.getLogger(None)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s"
-                              " - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
@@ -60,8 +57,7 @@ class BasicFwdTest(BaseTest):
 
         # Load the P4 program onto the switch
         self.sw.SetForwardingPipelineConfig(
-            p4info=self.p4info_helper.p4info,
-            bmv2_json_file_path=p4prog_binary_fname
+            p4info=self.p4info_helper.p4info, bmv2_json_file_path=p4prog_binary_fname
         )
 
     def tearDown(self):
@@ -173,8 +169,7 @@ class MultiEntryTest(BasicFwdTest):
         ttl_in = 64
         for e in entries:
             pkt = tu.simple_tcp_packet(
-                eth_src=in_smac, eth_dst=in_dmac, ip_dst=e["pkt_dst"],
-                ip_ttl=ttl_in
+                eth_src=in_smac, eth_dst=in_dmac, ip_dst=e["pkt_dst"], ip_ttl=ttl_in
             )
             exp_pkt = tu.simple_tcp_packet(
                 eth_src=in_dmac,

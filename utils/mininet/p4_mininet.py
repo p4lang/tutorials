@@ -15,11 +15,10 @@ from mininet.node import Host, Switch
 
 class P4Host(Host):
     def config(self, **params):
-        r = super(P4Host, self).config(**params)
+        r = super().config(**params)
 
         for off in ["rx", "tx", "sg"]:
-            cmd = ("/sbin/ethtool --offload %s %s off"
-                   "" % (self.defaultIntf().name, off))
+            cmd = "/sbin/ethtool --offload %s %s off" % (self.defaultIntf().name, off)
             self.cmd(cmd)
 
         # disable IPv6
@@ -62,7 +61,7 @@ class P4Switch(Switch):
         verbose=False,
         device_id=None,
         enable_debugger=False,
-        **kwargs
+        **kwargs,
     ):
         Switch.__init__(self, name, **kwargs)
         assert sw_path
@@ -78,7 +77,7 @@ class P4Switch(Switch):
         self.verbose = verbose
         self.log_file = log_file
         if self.log_file is None:
-            self.log_file = "/tmp/p4s.{}.log".format(self.name)
+            self.log_file = f"/tmp/p4s.{self.name}.log"
         self.output = open(self.log_file, "w")
         self.thrift_port = thrift_port
         self.pcap_dump = pcap_dump
@@ -90,7 +89,7 @@ class P4Switch(Switch):
         else:
             self.device_id = P4Switch.device_id
             P4Switch.device_id += 1
-        self.nanomsg = "ipc:///tmp/bm-{}-log.ipc".format(self.device_id)
+        self.nanomsg = f"ipc:///tmp/bm-{self.device_id}-log.ipc"
 
     @classmethod
     def setup(cls):
@@ -113,7 +112,7 @@ class P4Switch(Switch):
 
     def start(self, controllers):
         "Start up a new P4 switch"
-        info("Starting P4 switch {}.\n".format(self.name))
+        info(f"Starting P4 switch {self.name}.\n")
         args = [self.sw_path]
         for port, intf in list(self.intfs.items()):
             if not intf.IP():
@@ -141,15 +140,15 @@ class P4Switch(Switch):
                 " ".join(args) + " >" + self.log_file + " 2>&1 & echo $! >> " + f.name
             )
             pid = int(f.read())
-        debug("P4 switch {} PID is {}.\n".format(self.name, pid))
+        debug(f"P4 switch {self.name} PID is {pid}.\n")
         sleep(1)
         if not self.check_switch_started(pid):
             error(
-                "P4 switch {} did not start correctly."
-                "Check the switch log file.\n".format(self.name)
+                f"P4 switch {self.name} did not start correctly."
+                "Check the switch log file.\n"
             )
             exit(1)
-        info("P4 switch {} has been started.\n".format(self.name))
+        info(f"P4 switch {self.name} has been started.\n")
 
     def stop(self):
         "Terminate P4 switch."

@@ -13,7 +13,7 @@ from p4.v1 import p4runtime_pb2
 # an incorrect format.
 class P4RuntimeErrorFormatException(Exception):
     def __init__(self, message):
-        super(P4RuntimeErrorFormatException, self).__init__(message)
+        super().__init__(message)
 
 
 # Parse the binary details of the gRPC error. This is required to
@@ -26,9 +26,7 @@ class P4RuntimeErrorFormatException(Exception):
 def parseGrpcErrorBinaryDetails(grpc_error):
     # Check if grpc_error is None or not an instance of grpc.RpcError
     if not grpc_error or not isinstance(grpc_error, grpc.RpcError):
-        raise P4RuntimeErrorFormatException(
-            f"Invalid gRPC error object: {grpc_error}"
-        )
+        raise P4RuntimeErrorFormatException(f"Invalid gRPC error object: {grpc_error}")
 
     if grpc_error.code() != grpc.StatusCode.UNKNOWN:
         return None
@@ -71,10 +69,9 @@ def parseGrpcErrorBinaryDetails(grpc_error):
 def printGrpcError(grpc_error):
     print("gRPC Error", grpc_error.details(), end=" ")
     status_code = grpc_error.code()
-    print("({})".format(status_code.name), end=" ")
+    print(f"({status_code.name})", end=" ")
     traceback = sys.exc_info()[2]
-    print("[{}:{}]".format(traceback.tb_frame.f_code.co_filename,
-                           traceback.tb_lineno))
+    print(f"[{traceback.tb_frame.f_code.co_filename}:{traceback.tb_lineno}]")
     if status_code != grpc.StatusCode.UNKNOWN:
         return
     p4_errors = parseGrpcErrorBinaryDetails(grpc_error)
@@ -83,5 +80,4 @@ def printGrpcError(grpc_error):
     print("Errors in batch:")
     for idx, p4_error in p4_errors:
         code_name = code_pb2._CODE.values_by_number[p4_error.canonical_code].name
-        print("\t* At index {}: {}, '{}'\n".format(idx, code_name,
-                                                   p4_error.message))
+        print(f"\t* At index {idx}: {code_name}, '{p4_error.message}'\n")

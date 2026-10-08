@@ -6,8 +6,8 @@
 import sys
 import time
 
-from scapy.all import Ether, sendp, get_if_hwaddr
 from probe_hdrs import Probe, ProbeFwd
+from scapy.all import Ether, get_if_hwaddr, sendp
 
 
 def main():

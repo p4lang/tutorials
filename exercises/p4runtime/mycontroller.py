@@ -202,14 +202,10 @@ def main(p4info_file_path, bmv2_file_path):
         while True:
             sleep(2)
             print("\n----- Reading tunnel counters -----")
-            printCounter(p4info_helper, s1, "MyIngress.ingressTunnelCounter",
-                         100)
-            printCounter(p4info_helper, s2, "MyIngress.egressTunnelCounter",
-                         100)
-            printCounter(p4info_helper, s2, "MyIngress.ingressTunnelCounter",
-                         200)
-            printCounter(p4info_helper, s1, "MyIngress.egressTunnelCounter",
-                         200)
+            printCounter(p4info_helper, s1, "MyIngress.ingressTunnelCounter", 100)
+            printCounter(p4info_helper, s2, "MyIngress.egressTunnelCounter", 100)
+            printCounter(p4info_helper, s2, "MyIngress.ingressTunnelCounter", 200)
+            printCounter(p4info_helper, s1, "MyIngress.egressTunnelCounter", 200)
 
     except KeyboardInterrupt:
         print(" Shutting down.")
@@ -241,12 +237,10 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.p4info):
         parser.print_help()
-        print("\np4info file not found: %s\nHave you run 'make'?"
-              "" % (args.p4info))
+        print("\np4info file not found: %s\nHave you run 'make'?" % (args.p4info))
         parser.exit(1)
     if not os.path.exists(args.bmv2_json):
         parser.print_help()
-        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?"
-              "" % (args.bmv2_json))
+        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % (args.bmv2_json))
         parser.exit(1)
     main(args.p4info, args.bmv2_json)

@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 class ShortestPath:
-
     def __init__(self, edges=[]):
         self.neighbors = {}
         for edge in edges:
@@ -35,7 +34,6 @@ class ShortestPath:
 
 
 if __name__ == "__main__":
-
     edges = [
         (1, 2),
         (1, 3),

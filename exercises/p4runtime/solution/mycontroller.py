@@ -116,8 +116,7 @@ def readTableRules(p4info_helper, sw):
             print("%s: " % table_name, end=" ")
             for m in entry.match:
                 print(
-                    p4info_helper.get_match_field_name(table_name, m.field_id),
-                    end=" "
+                    p4info_helper.get_match_field_name(table_name, m.field_id), end=" "
                 )
                 print("%r" % (p4info_helper.get_match_field_value(m)), end=" ")
             action = entry.action.action
@@ -125,8 +124,7 @@ def readTableRules(p4info_helper, sw):
             print("->", action_name, end=" ")
             for p in action.params:
                 print(
-                    p4info_helper.get_action_param_name(action_name,
-                                                        p.param_id),
+                    p4info_helper.get_action_param_name(action_name, p.param_id),
                     end=" ",
                 )
                 print("%r" % p.value, end=" ")
@@ -164,8 +162,7 @@ def printGrpcError(e):
     status_code = e.code()
     print("(%s)" % status_code.name, end=" ")
     traceback = sys.exc_info()[2]
-    print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename,
-                       traceback.tb_lineno))
+    print("[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno))
 
 
 def main(p4info_file_path, bmv2_file_path):
@@ -234,14 +231,10 @@ def main(p4info_file_path, bmv2_file_path):
         while True:
             sleep(2)
             print("\n----- Reading tunnel counters -----")
-            printCounter(p4info_helper, s1, "MyIngress.ingressTunnelCounter",
-                         100)
-            printCounter(p4info_helper, s2, "MyIngress.egressTunnelCounter",
-                         100)
-            printCounter(p4info_helper, s2, "MyIngress.ingressTunnelCounter",
-                         200)
-            printCounter(p4info_helper, s1, "MyIngress.egressTunnelCounter",
-                         200)
+            printCounter(p4info_helper, s1, "MyIngress.ingressTunnelCounter", 100)
+            printCounter(p4info_helper, s2, "MyIngress.egressTunnelCounter", 100)
+            printCounter(p4info_helper, s2, "MyIngress.ingressTunnelCounter", 200)
+            printCounter(p4info_helper, s1, "MyIngress.egressTunnelCounter", 200)
 
     except KeyboardInterrupt:
         print(" Shutting down.")
@@ -273,12 +266,10 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.p4info):
         parser.print_help()
-        print("\np4info file not found: %s\nHave you run 'make'?"
-              "" % (args.p4info))
+        print("\np4info file not found: %s\nHave you run 'make'?" % (args.p4info))
         parser.exit(1)
     if not os.path.exists(args.bmv2_json):
         parser.print_help()
-        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?"
-              "" % (args.bmv2_json))
+        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % (args.bmv2_json))
         parser.exit(1)
     main(args.p4info, args.bmv2_json)

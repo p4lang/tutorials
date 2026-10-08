@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 
-from scapy.all import Packet, Ether, IP, ShortField, bind_layers
+from scapy.all import IP, Ether, Packet, ShortField, bind_layers
 
 TYPE_MYTUNNEL = 0x1212
 TYPE_IPV4 = 0x0800

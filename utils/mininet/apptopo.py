@@ -5,7 +5,6 @@ from mininet.topo import Topo
 
 
 class AppTopo(Topo):
-
     def __init__(
         self,
         links,
@@ -14,7 +13,7 @@ class AppTopo(Topo):
         target=None,
         log_dir="/tmp",
         bws={},
-        **opts
+        **opts,
     ):
         Topo.__init__(self, **opts)
 
@@ -41,9 +40,9 @@ class AppTopo(Topo):
             for link in host_links:
                 sw = link[0] if link[0] != host_name else link[1]
                 sw_num = int(sw[1:])
-                assert (
-                    sw[0] == "s"
-                ), "Hosts should be connected to switches, not " + str(sw)
+                assert sw[0] == "s", (
+                    "Hosts should be connected to switches, not " + str(sw)
+                )
                 host_ip = "10.0.%d.%d" % (sw_num, host_num)
                 host_mac = "00:00:00:00:%02x:%02x" % (sw_num, host_num)
                 delay_key = "".join([host_name, sw])

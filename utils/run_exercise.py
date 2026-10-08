@@ -62,8 +62,7 @@ def configureP4Switch(**switch_args):
 class ExerciseTopo(Topo):
     """The mininet topology class for the P4 tutorial exercises."""
 
-    def __init__(self, hosts, switches, links, log_dir, bmv2_exe, pcap_dir,
-                 **opts):
+    def __init__(self, hosts, switches, links, log_dir, bmv2_exe, pcap_dir, **opts):
         Topo.__init__(self, **opts)
         host_links = []
         switch_links = []
@@ -87,8 +86,7 @@ class ExerciseTopo(Topo):
                 # add default switch
                 switchClass = None
 
-            switch_opts = {"log_file": "%s/%s.log" % (log_dir, sw),
-                           "cls": switchClass}
+            switch_opts = {"log_file": "%s/%s.log" % (log_dir, sw), "cls": switchClass}
 
             for key in ("cpu_port", "priority_queues"):
                 if key in params:
@@ -128,8 +126,7 @@ class ExerciseTopo(Topo):
         try:
             sw_port = int(sw_port[1:])
         except:
-            raise Exception("Invalid switch node in"
-                            " topology file: {}".format(node))
+            raise Exception(f"Invalid switch node in topology file: {node}")
         return sw_name, sw_port
 
 
@@ -197,8 +194,7 @@ class ExerciseRunner:
         for dir_name in [log_dir, pcap_dir]:
             if not os.path.isdir(dir_name):
                 if os.path.exists(dir_name):
-                    raise Exception("'%s' exists and is not a directory!"
-                                    "" % (dir_name))
+                    raise Exception("'%s' exists and is not a directory!" % (dir_name))
                 os.mkdir(dir_name)
         self.log_dir = log_dir
         self.pcap_dir = pcap_dir
@@ -245,18 +241,16 @@ class ExerciseRunner:
             if s > t:
                 s, t = t, s
 
-            link_dict = {"node1": s, "node2": t, "latency": "0ms",
-                         "bandwidth": None}
+            link_dict = {"node1": s, "node2": t, "latency": "0ms", "bandwidth": None}
             if len(link) > 2:
                 link_dict["latency"] = self.format_latency(link[2])
             if len(link) > 3:
                 link_dict["bandwidth"] = link[3]
 
             if link_dict["node1"][0] == "h":
-                assert (
-                    link_dict["node2"][0] == "s"
-                ), "Hosts should be connected to switches, not " + str(
-                    link_dict["node2"]
+                assert link_dict["node2"][0] == "s", (
+                    "Hosts should be connected to switches, not "
+                    + str(link_dict["node2"])
                 )
             links.append(link_dict)
         return links
@@ -327,13 +321,15 @@ class ExerciseRunner:
         thrift_port = sw_obj.thrift_port
 
         cli_input_commands = sw_dict["cli_input"]
-        self.logger("Configuring switch %s with file %s"
-                    "" % (sw_name, cli_input_commands))
+        self.logger(
+            "Configuring switch %s with file %s" % (sw_name, cli_input_commands)
+        )
         with open(cli_input_commands, "r") as fin:
             cli_outfile = "%s/%s_cli_output.log" % (self.log_dir, sw_name)
             with open(cli_outfile, "w") as fout:
-                subprocess.Popen([cli, "--thrift-port", str(thrift_port)],
-                                 stdin=fin, stdout=fout)
+                subprocess.Popen(
+                    [cli, "--thrift-port", str(thrift_port)], stdin=fin, stdout=fout
+                )
 
     def program_switches(self):
         """This method will program each switch using the BMv2 CLI and/or
@@ -342,8 +338,9 @@ class ExerciseRunner:
         """
         for sw_name, sw_dict in self.switches.items():
             if "cli_input" not in sw_dict and "runtime_json" not in sw_dict:
-                self.logger("Warning: No control plane file provided"
-                            " for switch %s." % (sw_name))
+                self.logger(
+                    "Warning: No control plane file provided for switch %s." % (sw_name)
+                )
                 continue
             if "cli_input" in sw_dict:
                 self.program_switch_cli(sw_name, sw_dict)
@@ -373,37 +370,36 @@ class ExerciseRunner:
         self.logger("Starting mininet CLI")
         # Generate a message that will be printed by the Mininet CLI to make
         # interacting with the simple switch a little easier.
-        print("")
-        print("========================================"
-              "==============================")
+        print()
+        print("======================================================================")
         print("Welcome to the BMV2 Mininet CLI!")
-        print("========================================"
-              "==============================")
+        print("======================================================================")
         print("Your P4 program is installed into the BMV2 software switch")
         print("and your initial runtime configuration is loaded. You can")
         print("interact with the network using the mininet CLI below.")
-        print("")
+        print()
         if self.switch_json:
             print("To inspect or change the switch configuration, connect to")
             print("its CLI from your host operating system using this")
             print("command:")
             print("  simple_switch_CLI --thrift-port <switch thrift port>")
-            print("")
+            print()
         print("To view a switch log, run this command from your host OS:")
         print("  tail -f %s/<switchname>.log" % self.log_dir)
-        print("")
+        print()
         print(
             "To view the switch output pcap, check the pcap files in %s:"
             % self.pcap_dir
         )
         print(" for example run:  sudo tcpdump -xxx -r s1-eth1.pcap")
-        print("")
+        print()
         if "grpc" in self.bmv2_exe:
             print("To view the P4Runtime requests sent to the switch, check")
             print("the corresponding txt file in %s:" % (self.log_dir))
-            print(" for example run:  cat %s/s1-p4runtime-requests.txt"
-                  "" % (self.log_dir))
-            print("")
+            print(
+                " for example run:  cat %s/s1-p4runtime-requests.txt" % (self.log_dir)
+            )
+            print()
 
         CLI(self.net)
 

@@ -44,14 +44,10 @@ parser.add_argument(
     action="store_true",
 )
 parser.add_argument(
-    "--json",
-    help="Path to JSON config file",
-    type=str, action="store", required=True
+    "--json", help="Path to JSON config file", type=str, action="store", required=True
 )
 parser.add_argument(
-    "--pcap-dump",
-    help="Dump packets on interfaces to pcap files",
-    action="store_true"
+    "--pcap-dump", help="Dump packets on interfaces to pcap files", action="store_true"
 )
 parser.add_argument(
     "--manifest",
@@ -117,12 +113,11 @@ def main():
     conf = manifest["targets"][args.target]
     params = conf["parameters"] if "parameters" in conf else {}
 
-    os.environ.update(dict([(k_v[0], str(k_v[1]))
-                            for k_v in iter(params.items())]))
+    os.environ.update(dict([(k_v[0], str(k_v[1])) for k_v in iter(params.items())]))
 
     def formatParams(s):
         for param in params:
-            s = re.sub("\$" + param + "(\W|$)", str(params[param]) + r"\1", s)
+            s = re.sub(r"\$" + param + r"(\W|$)", str(params[param]) + r"\1", s)
             s = s.replace("${" + param + "}", str(params[param]))
         return s
 
@@ -149,8 +144,7 @@ def main():
     latencies = dict(
         [("".join(sorted(x[:2])), x[2]) for x in conf["links"] if len(x) >= 3]
     )
-    bws = dict([("".join(sorted(x[:2])), x[3])
-                for x in conf["links"] if len(x) >= 4])
+    bws = dict([("".join(sorted(x[:2])), x[3]) for x in conf["links"] if len(x) >= 4])
 
     for host_name in sorted(conf["hosts"].keys()):
         host = conf["hosts"][host_name]
@@ -185,16 +179,18 @@ def main():
         log_console=bmv2_log,
         pcap_dump=pcap_dump,
     )
-    net = Mininet(topo=topo, link=TCLink, host=P4Host, switch=switchClass,
-                  controller=None)
+    net = Mininet(
+        topo=topo, link=TCLink, host=P4Host, switch=switchClass, controller=None
+    )
     net.start()
 
     sleep(1)
 
     controller = None
     if args.auto_control_plane or "controller_module" in conf:
-        controller = AppController(manifest=manifest, target=args.target,
-                                   topo=topo, net=net, links=links)
+        controller = AppController(
+            manifest=manifest, target=args.target, topo=topo, net=net, links=links
+        )
         controller.start()
 
     for h in net.hosts:
@@ -204,7 +200,7 @@ def main():
         with open(args.cli_message, "r") as message_file:
             print(message_file.read())
 
-    if args.cli or ("cli" in conf and conf["cli"]):
+    if args.cli or (conf.get("cli")):
         CLI(net)
 
     stdout_files = dict()
@@ -241,12 +237,11 @@ def main():
         stdout_files[h.name] = open(stdout_filename, "w")
         cmd = formatCmd(host["cmd"])
         print(h.name, cmd)
-        p = h.popen(cmd, stdout=stdout_files[h.name], shell=True,
-                    preexec_fn=os.setpgrp)
+        p = h.popen(cmd, stdout=stdout_files[h.name], shell=True, preexec_fn=os.setpgrp)
         if "startup_sleep" in host:
             sleep(host["startup_sleep"])
 
-        if "wait" in host and host["wait"]:
+        if host.get("wait"):
             _wait_for_exit(p, host_name)
         else:
             host_procs.append((p, host_name))

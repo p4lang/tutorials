@@ -4,29 +4,28 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 import argparse
-import os
-import sys
 import asyncio
-import traceback
-import time
 import ipaddress
+import os
 import pprint
-
+import sys
+import time
+import traceback
 from collections import Counter
 from datetime import datetime, timedelta
-from scapy.all import Ether, IP
 
 import grpc
+from scapy.all import IP, Ether
 
 # Import P4Runtime lib from parent utils dir
 # Probably there's a better way of doing this.
 sys.path.append(
-    os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                 "../../utils/"))
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../utils/")
+)
 import p4runtime_lib.bmv2
 import p4runtime_lib.helper
-from p4runtime_lib.switch import ShutdownAllSwitchConnections
 import p4runtime_sh.p4runtime as shp4rt
+from p4runtime_lib.switch import ShutdownAllSwitchConnections
 
 NSEC_PER_SEC = 1000 * 1000 * 1000
 
@@ -49,21 +48,9 @@ notif_db = {}
 # to solve this problem more effectively.
 
 lookup_table = {
-    "s1": {
-        "10.0.1.1": 1,
-        "10.0.2.2": 2,
-        "10.0.3.3": 3
-    },
-    "s2": {
-        "10.0.2.2": 1,
-        "10.0.1.1": 2,
-        "10.0.3.3": 3
-    },
-    "s3": {
-        "10.0.3.3": 1,
-        "10.0.1.1": 2,
-        "10.0.2.2": 3
-    }
+    "s1": {"10.0.1.1": 1, "10.0.2.2": 2, "10.0.3.3": 3},
+    "s2": {"10.0.2.2": 1, "10.0.1.1": 2, "10.0.3.3": 3},
+    "s3": {"10.0.3.3": 1, "10.0.1.1": 2, "10.0.2.2": 3},
 }
 
 
@@ -95,10 +82,12 @@ def flowCacheEntryToDebugStr(table_entry, include_action=False):
     # TODO: The match fields are hardcoded to specific indices to
     # retrieve specific parameters, such as hdr.ipv4.srcAddr and its
     # value.
-    src_ip = intToIpv4(int.from_bytes(table_entry.match[1].exact.value,
-                                      byteorder="big"))
-    dst_ip = intToIpv4(int.from_bytes(table_entry.match[2].exact.value,
-                                      byteorder="big"))
+    src_ip = intToIpv4(
+        int.from_bytes(table_entry.match[1].exact.value, byteorder="big")
+    )
+    dst_ip = intToIpv4(
+        int.from_bytes(table_entry.match[2].exact.value, byteorder="big")
+    )
     proto = int.from_bytes(table_entry.match[0].exact.value, byteorder="big")
     return "(SA=%s, DA=%s, proto=%d)" % (src_ip, dst_ip, proto)
 
@@ -149,8 +138,14 @@ def controllerPacketMetadataDictKeyId(p4info_obj_map, name):
 def makeP4infoObjMap(p4info_data):
     p4info_obj_map = {}
     suffix_count = Counter()
-    for obj_type in ["tables", "action_profiles", "actions", "counters",
-                     "direct_counters", "controller_packet_metadata"]:
+    for obj_type in [
+        "tables",
+        "action_profiles",
+        "actions",
+        "counters",
+        "direct_counters",
+        "controller_packet_metadata",
+    ]:
         for obj in getattr(p4info_data, obj_type):
             pre = obj.preamble
             suffix = None
@@ -174,8 +169,16 @@ def writeCloneSession(sw, clone_session_id, replicas):
     sw.WritePREEntry(clone_entry)
 
 
-def addFlowRule(ingress_sw, src_ip_addr, dst_ip_addr, protocol, port,
-                new_dscp, decrement_ttl_bool, dst_eth_addr):
+def addFlowRule(
+    ingress_sw,
+    src_ip_addr,
+    dst_ip_addr,
+    protocol,
+    port,
+    new_dscp,
+    decrement_ttl_bool,
+    dst_eth_addr,
+):
     """
     Install flow rule in flow cache table
 
@@ -203,13 +206,13 @@ def addFlowRule(ingress_sw, src_ip_addr, dst_ip_addr, protocol, port,
         },
         action_name="MyIngress.cached_action",
         action_params={
-            "port":           port,
-            "decrement_ttl":  x,
-            "new_dscp":       new_dscp,
+            "port": port,
+            "decrement_ttl": x,
+            "new_dscp": new_dscp,
             "dst_eth_addr": dst_eth_addr,
         },
         # TODO: Add idle timeout
-        )
+    )
     ingress_sw.WriteTableEntry(table_entry)
 
 
@@ -226,12 +229,8 @@ def createFlowRule(notif):
             "hdr.ipv4.protocol": int.from_bytes(
                 te.match[0].exact.value, byteorder="big"
             ),
-            "hdr.ipv4.srcAddr": int(
-                ipaddress.IPv4Address(te.match[1].exact.value)
-            ),
-            "hdr.ipv4.dstAddr": int(
-                ipaddress.IPv4Address(te.match[2].exact.value)
-            ),
+            "hdr.ipv4.srcAddr": int(ipaddress.IPv4Address(te.match[1].exact.value)),
+            "hdr.ipv4.dstAddr": int(ipaddress.IPv4Address(te.match[2].exact.value)),
         },
     )
     return table_entry
@@ -364,8 +363,10 @@ def printCounter(p4info_helper, sw, counter_name, index):
 def processPacket(message):
     payload = message["packet-in"].payload
     packet = message["packet-in"]
-    print("Received PacketIn message of length %d bytes from switch %s"
-          "" % (len(payload), message["sw"].name))
+    print(
+        "Received PacketIn message of length %d bytes from switch %s"
+        "" % (len(payload), message["sw"].name)
+    )
     if len(payload) > 0:
         i = 0
         pkt = Ether(payload)
@@ -374,14 +375,13 @@ def processPacket(message):
         src_ip_addr = ipv4ToInt(ip_sa_str)
         ip_da_str = pkt[IP].dst
         dst_ip_addr = ipv4ToInt(ip_da_str)
-        pktinfo = decodePacketInMetadata(global_data["cpm_packetin_id2data"],
-                                         packet)
+        pktinfo = decodePacketInMetadata(global_data["cpm_packetin_id2data"], packet)
         debug_packetin = False
         if debug_packetin:
             i += 1
-            print("")
+            print()
             print("pktin %d of %d" % (i, len(payload)))
-            print("type(pktin.packet.payload)=%s" "" % (type(payload)))
+            print("type(pktin.packet.payload)=%s" % (type(payload)))
             print(payload)
             print(pktinfo)
             print("Scapy decode:")
@@ -404,20 +404,31 @@ def processPacket(message):
                 dest_port_int,
             )
             sendPacketOut(message["sw"], payload, metadatas)
-            addFlowRule(message["sw"],
-                        src_ip_addr,
-                        dst_ip_addr,
-                        ip_proto,
-                        dest_port_int,
-                        new_dscp_int,
-                        decrement_ttl_bool,
-                        dst_eth_addr)
+            addFlowRule(
+                message["sw"],
+                src_ip_addr,
+                dst_ip_addr,
+                ip_proto,
+                dest_port_int,
+                new_dscp_int,
+                decrement_ttl_bool,
+                dst_eth_addr,
+            )
 
-            print("For switch %s flow (SA=%s, DA=%s, proto=%d)"
-                  " added table entry to send packets"
-                  " to port %d with new DSCP %d"
-                  "" % (message["sw"].name, ip_sa_str, ip_da_str,
-                        ip_proto, dest_port_int, new_dscp_int))
+            print(
+                "For switch %s flow (SA=%s, DA=%s, proto=%d)"
+                " added table entry to send packets"
+                " to port %d with new DSCP %d"
+                ""
+                % (
+                    message["sw"].name,
+                    ip_sa_str,
+                    ip_da_str,
+                    ip_proto,
+                    dest_port_int,
+                    new_dscp_int,
+                )
+            )
 
 
 async def processNotif(notif_queue):
@@ -460,11 +471,12 @@ async def processNotif(notif_queue):
                 addNotification(notif["sw"].name, table_entry)
                 deleteFlowRule(notif["sw"], table_entry)
             else:
-                print("Received idle timeout notification for switch=%s %s"
-                      "  It is duplicate of recently processed notification,"
-                      " so ignoring it."
-                      "" % (notif["sw"].name,
-                            flowCacheEntryToDebugStr(table_entry)))
+                print(
+                    "Received idle timeout notification for switch=%s %s"
+                    "  It is duplicate of recently processed notification,"
+                    " so ignoring it."
+                    "" % (notif["sw"].name, flowCacheEntryToDebugStr(table_entry))
+                )
         notif_queue.task_done()
 
 
@@ -510,8 +522,7 @@ def printGrpcError(e):
 
 async def main(p4info_file_path, bmv2_file_path):
     # Instantiate a P4Runtime helper from the p4info file
-    global_data["p4info_helper"] = \
-        p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
+    global_data["p4info_helper"] = p4runtime_lib.helper.P4InfoHelper(p4info_file_path)
     p4info_helper = global_data["p4info_helper"]
 
     try:
@@ -522,17 +533,20 @@ async def main(p4info_file_path, bmv2_file_path):
             name="s1",
             address="127.0.0.1:50051",
             device_id=0,
-            proto_dump_file="logs/s1-p4runtime-requests.txt")
+            proto_dump_file="logs/s1-p4runtime-requests.txt",
+        )
         s2 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
             name="s2",
             address="127.0.0.1:50052",
             device_id=1,
-            proto_dump_file="logs/s2-p4runtime-requests.txt")
+            proto_dump_file="logs/s2-p4runtime-requests.txt",
+        )
         s3 = p4runtime_lib.bmv2.Bmv2SwitchConnection(
             name="s3",
             address="127.0.0.1:50053",
             device_id=2,
-            proto_dump_file="logs/s3-p4runtime-requests.txt")
+            proto_dump_file="logs/s3-p4runtime-requests.txt",
+        )
 
         # Send master arbitration update message to establish this
         # controller as master (required by P4Runtime before
@@ -542,14 +556,17 @@ async def main(p4info_file_path, bmv2_file_path):
         s3.MasterArbitrationUpdate()
 
         # Install the P4 program on the switches
-        s1.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                       bmv2_json_file_path=bmv2_file_path)
+        s1.SetForwardingPipelineConfig(
+            p4info=p4info_helper.p4info, bmv2_json_file_path=bmv2_file_path
+        )
         print("Installed P4 Program using SetForwardingPipelineConfig on s1")
-        s2.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                       bmv2_json_file_path=bmv2_file_path)
+        s2.SetForwardingPipelineConfig(
+            p4info=p4info_helper.p4info, bmv2_json_file_path=bmv2_file_path
+        )
         print("Installed P4 Program using SetForwardingPipelineConfig on s2")
-        s3.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                       bmv2_json_file_path=bmv2_file_path)
+        s3.SetForwardingPipelineConfig(
+            p4info=p4info_helper.p4info, bmv2_json_file_path=bmv2_file_path
+        )
         print("Installed P4 Program using SetForwardingPipelineConfig on s3")
 
         global_data["p4info_obj_map"] = makeP4infoObjMap(p4info_helper.p4info)
@@ -566,20 +583,18 @@ async def main(p4info_file_path, bmv2_file_path):
         ) = serializableEnumDict(p4info_helper.p4info, "ControllerOpcode_t")
 
         try:
-            replicas = [{"egress_port": global_data["CPU_PORT"],
-                         "instance": 1}]
-            writeCloneSession(s1, global_data["CPU_PORT_CLONE_SESSION_ID"],
-                              replicas)
-            writeCloneSession(s2, global_data["CPU_PORT_CLONE_SESSION_ID"],
-                              replicas)
-            writeCloneSession(s3, global_data["CPU_PORT_CLONE_SESSION_ID"],
-                              replicas)
+            replicas = [{"egress_port": global_data["CPU_PORT"], "instance": 1}]
+            writeCloneSession(s1, global_data["CPU_PORT_CLONE_SESSION_ID"], replicas)
+            writeCloneSession(s2, global_data["CPU_PORT_CLONE_SESSION_ID"], replicas)
+            writeCloneSession(s3, global_data["CPU_PORT_CLONE_SESSION_ID"], replicas)
 
         except shp4rt.P4RuntimeWriteException:
-            print("Got exception trying to configure clone session %d."
-                  "  Assuming it was initialized already in an earlier"
-                  " run of the controller."
-                  "" % (global_data["CPU_PORT_CLONE_SESSION_ID"]))
+            print(
+                "Got exception trying to configure clone session %d."
+                "  Assuming it was initialized already in an earlier"
+                " run of the controller."
+                "" % (global_data["CPU_PORT_CLONE_SESSION_ID"])
+            )
 
         notif_queue = asyncio.Queue()
 
@@ -593,8 +608,15 @@ async def main(p4info_file_path, bmv2_file_path):
 
         proc_notif = asyncio.create_task(processNotif(notif_queue))
 
-        await asyncio.gather(pkt_s1, pkt_s2, pkt_s3, idle_notif_s1,
-                             idle_notif_s2, idle_notif_s3, proc_notif)
+        await asyncio.gather(
+            pkt_s1,
+            pkt_s2,
+            pkt_s3,
+            idle_notif_s1,
+            idle_notif_s2,
+            idle_notif_s3,
+            proc_notif,
+        )
 
     except KeyboardInterrupt:
         print(" Shutting down.")
@@ -629,12 +651,10 @@ if __name__ == "__main__":
 
     if not os.path.exists(args.p4info):
         parser.print_help()
-        print("\np4info file not found: %s\nHave you run 'make'?"
-              "" % (args.p4info))
+        print("\np4info file not found: %s\nHave you run 'make'?" % (args.p4info))
         parser.exit(1)
     if not os.path.exists(args.bmv2_json):
         parser.print_help()
-        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?"
-              "" % (args.bmv2_json))
+        print("\nBMv2 JSON file not found: %s\nHave you run 'make'?" % (args.bmv2_json))
         parser.exit(1)
     asyncio.run(main(args.p4info, args.bmv2_json))

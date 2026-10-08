@@ -1,10 +1,10 @@
 # SPDX-FileCopyrightText: 2017 Open Networking Foundation
 #
 # SPDX-License-Identifier: Apache-2.0
+import threading
 from abc import abstractmethod
 from datetime import datetime
 from queue import Queue
-import threading
 
 import grpc
 from p4.v1 import p4runtime_pb2, p4runtime_pb2_grpc
@@ -52,10 +52,10 @@ class StreamDispatcher:
         self.running = False
 
 
-class SwitchConnection(object):
-
-    def __init__(self, name=None, address="127.0.0.1:50051", device_id=0,
-                 proto_dump_file=None):
+class SwitchConnection:
+    def __init__(
+        self, name=None, address="127.0.0.1:50051", device_id=0, proto_dump_file=None
+    ):
         self.name = name
         self.address = address
         self.device_id = device_id
@@ -75,8 +75,11 @@ class SwitchConnection(object):
 
     @abstractmethod
     def buildDeviceConfig(self, **kwargs):
-        print("switch.py:SwitchConnection:buildDeviceConfig() should be"
-              " overridden, but never called (?)", flush=True,)
+        print(
+            "switch.py:SwitchConnection:buildDeviceConfig() should be"
+            " overridden, but never called (?)",
+            flush=True,
+        )
         assert False
 
     def shutdown(self):
@@ -236,17 +239,14 @@ class GrpcRequestLogger(
             if len(msg) < MSG_LOG_MAX_LEN:
                 f.write(str(body))
             else:
-                f.write("Message too long (%d bytes)! Skipping log...\n"
-                        "" % (len(msg)))
+                f.write("Message too long (%d bytes)! Skipping log...\n" % (len(msg)))
             f.write("---\n")
 
-    def intercept_unary_unary(self, continuation, client_call_details,
-                              request):
+    def intercept_unary_unary(self, continuation, client_call_details, request):
         self.log_message(client_call_details.method, request)
         return continuation(client_call_details, request)
 
-    def intercept_unary_stream(self, continuation, client_call_details,
-                               request):
+    def intercept_unary_stream(self, continuation, client_call_details, request):
         self.log_message(client_call_details.method, request)
         return continuation(client_call_details, request)
 

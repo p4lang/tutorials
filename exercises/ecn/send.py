@@ -19,7 +19,7 @@ def get_if():
             break
     if not iface:
         print("Cannot find eth0 interface")
-        exit(1)
+        sys.exit(1)
     return iface
 
 
@@ -27,7 +27,7 @@ def main():
 
     if len(sys.argv) < 4:
         print('pass 2 arguments: <destination> "<message>" <duration>')
-        exit(1)
+        sys.exit(1)
 
     addr = socket.gethostbyname(sys.argv[1])
     iface = get_if()

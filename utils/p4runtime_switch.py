@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import os
+import sys
 import tempfile
 from time import sleep
 
@@ -33,7 +34,7 @@ class P4RuntimeSwitch(P4Switch):
         device_id=None,
         enable_debugger=False,
         log_file=None,
-        **kwargs
+        **kwargs,
     ):
         Switch.__init__(self, name, **kwargs)
         assert sw_path
@@ -44,8 +45,8 @@ class P4RuntimeSwitch(P4Switch):
         if json_path is not None:
             # make sure that the provided JSON file exists
             if not os.path.isfile(json_path):
-                error("Invalid JSON file: {}\n".format(json_path))
-                exit(1)
+                error(f"Invalid JSON file: {json_path}\n")
+                sys.exit(1)
             self.json_path = json_path
         else:
             self.json_path = None
@@ -63,13 +64,15 @@ class P4RuntimeSwitch(P4Switch):
             P4RuntimeSwitch.next_thrift_port += 1
 
         if check_listening_on_port(self.grpc_port):
-            error("%s cannot bind port %d because it is bound"
-                  " by another process\n"
-                  "" % (self.name, self.grpc_port))
-            exit(1)
+            error(
+                "%s cannot bind port %d because it is bound"
+                " by another process\n"
+                "" % (self.name, self.grpc_port)
+            )
+            sys.exit(1)
 
         self.verbose = verbose
-        logfile = "/tmp/p4s.{}.log".format(self.name)
+        logfile = f"/tmp/p4s.{self.name}.log"
         self.output = open(logfile, "w")
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger
@@ -77,14 +80,14 @@ class P4RuntimeSwitch(P4Switch):
         if log_file is not None:
             self.log_file = log_file
         else:
-            self.log_file = "/tmp/p4s.{}.log".format(self.name)
+            self.log_file = f"/tmp/p4s.{self.name}.log"
         if device_id is not None:
             self.device_id = device_id
             P4Switch.device_id = max(P4Switch.device_id, device_id)
         else:
             self.device_id = P4Switch.device_id
             P4Switch.device_id += 1
-        self.nanomsg = "ipc:///tmp/bm-{}-log.ipc".format(self.device_id)
+        self.nanomsg = f"ipc:///tmp/bm-{self.device_id}-log.ipc"
 
         self.cpu_port = None
         if "cpu_port" in kwargs:
@@ -103,7 +106,7 @@ class P4RuntimeSwitch(P4Switch):
             sleep(0.5)
 
     def start(self, controllers):
-        info("Starting P4 switch {}.\n".format(self.name))
+        info(f"Starting P4 switch {self.name}.\n")
         args = [self.sw_path]
         for port, intf in list(self.intfs.items()):
             if not intf.IP():
@@ -138,8 +141,8 @@ class P4RuntimeSwitch(P4Switch):
         with tempfile.NamedTemporaryFile() as f:
             self.cmd(cmd + " >" + self.log_file + " 2>&1 & echo $! >> " + f.name)
             pid = int(f.read())
-        debug("P4 switch {} PID is {}.\n".format(self.name, pid))
+        debug(f"P4 switch {self.name} PID is {pid}.\n")
         if not self.check_switch_started(pid):
-            error("P4 switch {} did not start correctly.\n".format(self.name))
-            exit(1)
-        info("P4 switch {} has been started.\n".format(self.name))
+            error(f"P4 switch {self.name} did not start correctly.\n")
+            sys.exit(1)
+        info(f"P4 switch {self.name} has been started.\n")

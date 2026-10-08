@@ -63,7 +63,7 @@ class P4Switch(Switch):
         verbose=False,
         device_id=None,
         enable_debugger=False,
-        **kwargs
+        **kwargs,
     ):
         Switch.__init__(self, name, **kwargs)
         assert sw_path
@@ -77,12 +77,14 @@ class P4Switch(Switch):
         self.sw_path = sw_path
         self.json_path = json_path
         self.verbose = verbose
-        logfile = "/tmp/p4s.{}.log".format(self.name)
+        logfile = f"/tmp/p4s.{self.name}.log"
         self.output = open(logfile, "w")
         self.thrift_port = thrift_port
         if check_listening_on_port(self.thrift_port):
-            error("%s cannot bind port %d because it is bound by"
-                  " another process\n" % (self.name, self.grpc_port))
+            error(
+                "%s cannot bind port %d because it is bound by"
+                " another process\n" % (self.name, self.grpc_port)
+            )
             exit(1)
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger
@@ -90,14 +92,14 @@ class P4Switch(Switch):
         if log_file is not None:
             self.log_file = log_file
         else:
-            self.log_file = "/tmp/p4s.{}.log".format(self.name)
+            self.log_file = f"/tmp/p4s.{self.name}.log"
         if device_id is not None:
             self.device_id = device_id
             P4Switch.device_id = max(P4Switch.device_id, device_id)
         else:
             self.device_id = P4Switch.device_id
             P4Switch.device_id += 1
-        self.nanomsg = "ipc:///tmp/bm-{}-log.ipc".format(self.device_id)
+        self.nanomsg = f"ipc:///tmp/bm-{self.device_id}-log.ipc"
 
     @classmethod
     def setup(cls):
@@ -118,7 +120,7 @@ class P4Switch(Switch):
 
     def start(self, controllers):
         "Start up a new P4 switch"
-        info("Starting P4 switch {}.\n".format(self.name))
+        info(f"Starting P4 switch {self.name}.\n")
         args = [self.sw_path]
         for port, intf in list(self.intfs.items()):
             if not intf.IP():
@@ -145,11 +147,11 @@ class P4Switch(Switch):
                 " ".join(args) + " >" + self.log_file + " 2>&1 & echo $! >> " + f.name
             )
             pid = int(f.read())
-        debug("P4 switch {} PID is {}.\n".format(self.name, pid))
+        debug(f"P4 switch {self.name} PID is {pid}.\n")
         if not self.check_switch_started(pid):
-            error("P4 switch {} did not start correctly.\n".format(self.name))
+            error(f"P4 switch {self.name} did not start correctly.\n")
             exit(1)
-        info("P4 switch {} has been started.\n".format(self.name))
+        info(f"P4 switch {self.name} has been started.\n")
 
     def stop(self):
         "Terminate P4 switch."

@@ -17,20 +17,19 @@ def expand(x):
 def handle_pkt(pkt):
     if ProbeData in pkt:
         data_layers = [x for x in expand(pkt) if x.name == "ProbeData"]
-        print("")
+        print()
         for sw in data_layers:
             utilization = (
                 0
                 if sw.cur_time == sw.last_time
                 else 8.0 * sw.byte_cnt / (sw.cur_time - sw.last_time)
             )
-            print("Switch {} - Port {}: {} Mbps".format(
-                sw.swid, sw.port, utilization))
+            print(f"Switch {sw.swid} - Port {sw.port}: {utilization} Mbps")
 
 
 def main():
     iface = "eth0"
-    print("sniffing on {}".format(iface))
+    print(f"sniffing on {iface}")
     sniff(iface=iface, prn=lambda x: handle_pkt(x))
 
 

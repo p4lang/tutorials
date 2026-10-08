@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # Copyright 2026 Andrew Nguyen
 # SPDX-License-Identifier: GPL-2.0-only
 # Reason-GPL: import-scapy
@@ -73,8 +71,7 @@ class BasicTunnelTest(BaseTest):
 
         # Load the P4 Program onto the switch
         self.sw.SetForwardingPipelineConfig(
-            p4info=self.p4info_helper.p4info,
-            bmv2_json_file_path=p4prog_binary_fname
+            p4info=self.p4info_helper.p4info, bmv2_json_file_path=p4prog_binary_fname
         )
 
     def tearDown(self):
@@ -148,8 +145,7 @@ class TunnelForwardTest(BasicTunnelTest):
 
     def runTest(self):
         in_pkt = (
-            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff",
-                  type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=TYPE_IPV4, dst_id=2)
             / IP(src="10.0.1.1", dst="10.0.3.3", ttl=64)
             / TCP(sport=12345, dport=1234)
@@ -166,8 +162,7 @@ class TunnelDropOnMissTest(BasicTunnelTest):
 
     def runTest(self):
         in_pkt = (
-            Ether(src="00:11:22:33:44:66", dst="ff:ff:ff:ff:ff:ff",
-                  type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:66", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=TYPE_IPV4, dst_id=77)
             / IP(src="10.0.1.1", dst="10.0.3.3", ttl=64)
             / TCP(sport=12345, dport=1234)
@@ -208,8 +203,7 @@ class TunnelUnknownProtoTest(BasicTunnelTest):
         self.add_tunnel_entry(dst_id=5, port=2)
 
         pkt = (
-            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff",
-                  type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=0x9999, dst_id=5)
             / "unknown-proto-payload"
         )
@@ -245,8 +239,7 @@ class MixedTrafficTest(BasicTunnelTest):
 
         # test tunnel packet which  should hit myTunnel_exact table
         tunnel_pkt = (
-            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff",
-                  type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=TYPE_IPV4, dst_id=2)
             / IP(src="10.0.1.1", dst="10.0.3.3", ttl=64)
             / TCP(sport=12345, dport=1234)
