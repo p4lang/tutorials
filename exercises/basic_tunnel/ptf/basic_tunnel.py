@@ -35,7 +35,6 @@ import p4runtime_lib.bmv2
 import p4runtime_lib.helper
 from p4runtime_lib.switch import ShutdownAllSwitchConnections
 
-
 # Configure Logging
 logger = logging.getLogger(None)
 handler = logging.StreamHandler()
@@ -60,29 +59,31 @@ class BasicTunnelTest(BaseTest):
 
         # Create P4Info helper for building the table entries
         self.p4info_helper = p4runtime_lib.helper.P4InfoHelper(p4info_txt_fname)
-        
+
         # Connect to the switch via gRPC
         self.sw = p4runtime_lib.bmv2.Bmv2SwitchConnection(
             name="s1",
             address=grpc_addr,
             device_id=0,
-            proto_dump_file="logs/s1-p4runtime-requests.txt")
+            proto_dump_file="logs/s1-p4runtime-requests.txt",
+        )
 
         # Establish as master controller
         self.sw.MasterArbitrationUpdate()
 
         # Load the P4 Program onto the switch
         self.sw.SetForwardingPipelineConfig(
-            p4info=self.p4info_helper.p4info, bmv2_json_file_path=p4prog_binary_fname)
+            p4info=self.p4info_helper.p4info,
+            bmv2_json_file_path=p4prog_binary_fname
+        )
 
     def tearDown(self):
         logging.debug("BasicTunnelTest.tearDown()")
         ShutdownAllSwitchConnections()
 
-
-######################################################################
-# Helper function to add entries to ipv4_lpm table
-######################################################################
+    ######################################################################
+    # Helper function to add entries to ipv4_lpm table
+    ######################################################################
 
     def add_ipv4_lpm_entry(self, ipv4_addr_str, prefix_len, dst_mac_str, port):
         table_entry = self.p4info_helper.buildTableEntry(
@@ -104,7 +105,9 @@ class BasicTunnelTest(BaseTest):
 
 
 class Ipv4DropOnMissTest(BasicTunnelTest):
-    """Verify that a plain IPv4 packet is dropped when no LPM table entry exists."""
+    """Verify that a plain IPv4 packet is dropped when no LPM table
+    entry exists."""
+
     def runTest(self):
         pkt = tu.simple_tcp_packet(
             eth_src="ee:cd:00:7e:70:00",
@@ -117,7 +120,9 @@ class Ipv4DropOnMissTest(BasicTunnelTest):
 
 
 class Ipv4ForwardTest(BasicTunnelTest):
-    """Verify that a plain IPv4 packet is forwarded correctly with one table entry."""
+    """Verify that a plain IPv4 packet is forwarded correctly with one
+    table entry."""
+
     def runTest(self):
         in_dmac = "ee:30:ca:9d:1e:00"
         in_smac = "ee:cd:00:7e:70:00"
@@ -138,10 +143,13 @@ class Ipv4ForwardTest(BasicTunnelTest):
 
 
 class TunnelForwardTest(BasicTunnelTest):
-    """Verify that a tunneled packet is forwarded correctly when a valid table entry exists."""
+    """Verify that a tunneled packet is forwarded correctly when a
+    valid table entry exists."""
+
     def runTest(self):
         in_pkt = (
-            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff",
+                  type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=TYPE_IPV4, dst_id=2)
             / IP(src="10.0.1.1", dst="10.0.3.3", ttl=64)
             / TCP(sport=12345, dport=1234)
@@ -153,10 +161,13 @@ class TunnelForwardTest(BasicTunnelTest):
 
 
 class TunnelDropOnMissTest(BasicTunnelTest):
-    """Verify that a tunneled packet is dropped when no matching table entry exists."""
+    """Verify that a tunneled packet is dropped when no matching table
+    entry exists."""
+
     def runTest(self):
         in_pkt = (
-            Ether(src="00:11:22:33:44:66", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:66", dst="ff:ff:ff:ff:ff:ff",
+                  type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=TYPE_IPV4, dst_id=77)
             / IP(src="10.0.1.1", dst="10.0.3.3", ttl=64)
             / TCP(sport=12345, dport=1234)
@@ -168,6 +179,7 @@ class TunnelDropOnMissTest(BasicTunnelTest):
 
 class TtlBoundaryTest(BasicTunnelTest):
     """Verify IPv4 TTL is decremented to 0 correctly when input TTL is 1."""
+
     def runTest(self):
         in_dmac = "ee:30:ca:9d:1e:00"
         in_smac = "ee:cd:00:7e:70:00"
@@ -179,24 +191,25 @@ class TtlBoundaryTest(BasicTunnelTest):
         self.add_ipv4_lpm_entry(ip_dst, 32, out_dmac, eg_port)
 
         pkt = tu.simple_tcp_packet(
-            eth_src=in_smac, eth_dst=in_dmac,
-            ip_dst=ip_dst, ip_ttl=1
+            eth_src=in_smac, eth_dst=in_dmac, ip_dst=ip_dst, ip_ttl=1
         )
         exp_pkt = tu.simple_tcp_packet(
-            eth_src=in_dmac, eth_dst=out_dmac,
-            ip_dst=ip_dst, ip_ttl=0
+            eth_src=in_dmac, eth_dst=out_dmac, ip_dst=ip_dst, ip_ttl=0
         )
         tu.send_packet(self, ig_port, pkt)
         tu.verify_packets(self, exp_pkt, [eg_port])
 
 
 class TunnelUnknownProtoTest(BasicTunnelTest):
-    """Verify tunnel packet with non-IPv4 proto_id is still forwarded by dst_id."""
+    """Verify tunnel packet with non-IPv4 proto_id is still forwarded
+    by dst_id."""
+
     def runTest(self):
         self.add_tunnel_entry(dst_id=5, port=2)
 
         pkt = (
-            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff",
+                  type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=0x9999, dst_id=5)
             / "unknown-proto-payload"
         )
@@ -205,7 +218,9 @@ class TunnelUnknownProtoTest(BasicTunnelTest):
 
 
 class MixedTrafficTest(BasicTunnelTest):
-    """Verify IPv4 and tunnel traffic are handled independently correctly via separate tables."""
+    """Verify IPv4 and tunnel traffic are handled independently
+    correctly via separate tables."""
+
     def runTest(self):
         in_dmac = "ee:30:ca:9d:1e:00"
         in_smac = "ee:cd:00:7e:70:00"
@@ -220,19 +235,18 @@ class MixedTrafficTest(BasicTunnelTest):
 
         # test plain IPv4 which should hit ipv4_lpm table
         ipv4_pkt = tu.simple_tcp_packet(
-            eth_src=in_smac, eth_dst=in_dmac,
-            ip_dst=ip_dst, ip_ttl=64
+            eth_src=in_smac, eth_dst=in_dmac, ip_dst=ip_dst, ip_ttl=64
         )
         exp_ipv4_pkt = tu.simple_tcp_packet(
-            eth_src=in_dmac, eth_dst=out_dmac,
-            ip_dst=ip_dst, ip_ttl=63
+            eth_src=in_dmac, eth_dst=out_dmac, ip_dst=ip_dst, ip_ttl=63
         )
         tu.send_packet(self, 1, ipv4_pkt)
         tu.verify_packets(self, exp_ipv4_pkt, [ipv4_port])
 
         # test tunnel packet which  should hit myTunnel_exact table
         tunnel_pkt = (
-            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff", type=TYPE_MYTUNNEL)
+            Ether(src="00:11:22:33:44:55", dst="ff:ff:ff:ff:ff:ff",
+                  type=TYPE_MYTUNNEL)
             / MyTunnel(proto_id=TYPE_IPV4, dst_id=2)
             / IP(src="10.0.1.1", dst="10.0.3.3", ttl=64)
             / TCP(sport=12345, dport=1234)

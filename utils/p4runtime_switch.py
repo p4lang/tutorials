@@ -16,21 +16,27 @@ from p4_mininet import SWITCH_START_TIMEOUT, P4Switch
 
 class P4RuntimeSwitch(P4Switch):
     "BMv2 switch with gRPC support"
+
     next_grpc_port = 50051
     next_thrift_port = 9090
 
-    def __init__(self, name, sw_path = None, json_path = None,
-                 grpc_port = None,
-                 thrift_port = None,
-                 pcap_dump = False,
-                 log_console = False,
-                 verbose = False,
-                 device_id = None,
-                 enable_debugger = False,
-                 log_file = None,
-                 **kwargs):
+    def __init__(
+        self,
+        name,
+        sw_path=None,
+        json_path=None,
+        grpc_port=None,
+        thrift_port=None,
+        pcap_dump=False,
+        log_console=False,
+        verbose=False,
+        device_id=None,
+        enable_debugger=False,
+        log_file=None,
+        **kwargs
+    ):
         Switch.__init__(self, name, **kwargs)
-        assert (sw_path)
+        assert sw_path
         self.sw_path = sw_path
         # make sure that the provided sw_path is valid
         pathCheck(sw_path)
@@ -57,12 +63,14 @@ class P4RuntimeSwitch(P4Switch):
             P4RuntimeSwitch.next_thrift_port += 1
 
         if check_listening_on_port(self.grpc_port):
-            error('%s cannot bind port %d because it is bound by another process\n' % (self.name, self.grpc_port))
+            error("%s cannot bind port %d because it is bound"
+                  " by another process\n"
+                  "" % (self.name, self.grpc_port))
             exit(1)
 
         self.verbose = verbose
         logfile = "/tmp/p4s.{}.log".format(self.name)
-        self.output = open(logfile, 'w')
+        self.output = open(logfile, "w")
         self.pcap_dump = pcap_dump
         self.enable_debugger = enable_debugger
         self.log_console = log_console
@@ -86,7 +94,6 @@ class P4RuntimeSwitch(P4Switch):
         if "priority_queues" in kwargs:
             self.priority_queues = kwargs["priority_queues"]
 
-
     def check_switch_started(self, pid):
         for _ in range(SWITCH_START_TIMEOUT * 2):
             if not os.path.exists(os.path.join("/proc", str(pid))):
@@ -100,12 +107,12 @@ class P4RuntimeSwitch(P4Switch):
         args = [self.sw_path]
         for port, intf in list(self.intfs.items()):
             if not intf.IP():
-                args.extend(['-i', str(port) + "@" + intf.name])
+                args.extend(["-i", str(port) + "@" + intf.name])
         if self.pcap_dump:
             args.append("--pcap %s" % self.pcap_dump)
         if self.nanomsg:
-            args.extend(['--nanolog', self.nanomsg])
-        args.extend(['--device-id', str(self.device_id)])
+            args.extend(["--nanolog", self.nanomsg])
+        args.extend(["--device-id", str(self.device_id)])
         P4Switch.device_id += 1
         if self.json_path:
             args.append(self.json_path)
@@ -116,21 +123,20 @@ class P4RuntimeSwitch(P4Switch):
         if self.log_console:
             args.append("--log-console")
         if self.thrift_port:
-            args.append('--thrift-port ' + str(self.thrift_port))
+            args.append("--thrift-port " + str(self.thrift_port))
         if self.grpc_port:
             args.append("-- --grpc-server-addr 0.0.0.0:" + str(self.grpc_port))
         if self.cpu_port:
             args.append("--cpu-port " + str(self.cpu_port))
         if self.priority_queues:
             args.append("--priority-queues " + str(self.priority_queues))
-        cmd = ' '.join(args)
+        cmd = " ".join(args)
         info(cmd + "\n")
         print(cmd + "\n")
 
-
         pid = None
         with tempfile.NamedTemporaryFile() as f:
-            self.cmd(cmd + ' >' + self.log_file + ' 2>&1 & echo $! >> ' + f.name)
+            self.cmd(cmd + " >" + self.log_file + " 2>&1 & echo $! >> " + f.name)
             pid = int(f.read())
         debug("P4 switch {} PID is {}.\n".format(self.name, pid))
         if not self.check_switch_started(pid):

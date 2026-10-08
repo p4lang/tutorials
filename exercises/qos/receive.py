@@ -16,11 +16,11 @@ def handle_pkt(pkt):
 
 
 def main():
-    iface = 'eth0'
+    iface = "eth0"
     print("sniffing on %s" % iface)
     sys.stdout.flush()
     sniff(iface=iface, prn=lambda x: handle_pkt(x))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

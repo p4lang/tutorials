@@ -14,9 +14,11 @@ MSG_LOG_MAX_LEN = 1024
 # List of all active connections
 connections = []
 
+
 def ShutdownAllSwitchConnections():
     for c in connections:
         c.shutdown()
+
 
 class StreamDispatcher:
     def __init__(self, stream):
@@ -48,10 +50,11 @@ class StreamDispatcher:
 
     def stop(self):
         self.running = False
-        
+
+
 class SwitchConnection(object):
 
-    def __init__(self, name=None, address='127.0.0.1:50051', device_id=0,
+    def __init__(self, name=None, address="127.0.0.1:50051", device_id=0,
                  proto_dump_file=None):
         self.name = name
         self.address = address
@@ -63,19 +66,22 @@ class SwitchConnection(object):
             self.channel = grpc.intercept_channel(self.channel, interceptor)
         self.client_stub = p4runtime_pb2_grpc.P4RuntimeStub(self.channel)
         self.requests_stream = IterableQueue()
-        self.stream_msg_resp = self.client_stub.StreamChannel(iter(self.requests_stream))
+        self.stream_msg_resp = self.client_stub.StreamChannel(
+            iter(self.requests_stream)
+        )
         self.dispatcher = StreamDispatcher(self.stream_msg_resp)
         self.proto_dump_file = proto_dump_file
         connections.append(self)
 
     @abstractmethod
     def buildDeviceConfig(self, **kwargs):
-        print("switch.py:SwitchConnection:buildDeviceConfig() should be overridden, but never called (?)", flush=True)
+        print("switch.py:SwitchConnection:buildDeviceConfig() should be"
+              " overridden, but never called (?)", flush=True,)
         assert False
 
     def shutdown(self):
         self.requests_stream.close()
-        self.dispatcher.stop() 
+        self.dispatcher.stop()
 
     def MasterArbitrationUpdate(self, dry_run=False, **kwargs):
         request = p4runtime_pb2.StreamMessageRequest()
@@ -99,7 +105,9 @@ class SwitchConnection(object):
         config.p4info.CopyFrom(p4info)
         config.p4_device_config = device_config
 
-        request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
+        request.action = (
+            p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
+        )
         if dry_run:
             print("P4Runtime SetForwardingPipelineConfig:", request)
         else:
@@ -192,9 +200,9 @@ class SwitchConnection(object):
         for meta in metadatas:
             item = p4runtime_pb2.PacketMetadata()
             item.metadata_id = i
-            item.value = meta["value"].to_bytes(meta["bitwidth"], 'big')
+            item.value = meta["value"].to_bytes(meta["bitwidth"], "big")
             metadata_list.append(item)
-            i +=1
+            i += 1
         packet_out.metadata.extend(metadata_list)
 
         request = p4runtime_pb2.StreamMessageRequest()
@@ -207,34 +215,41 @@ class SwitchConnection(object):
             print("P4 Runtime PacketIn: ", msg)
         else:
             return msg
-class GrpcRequestLogger(grpc.UnaryUnaryClientInterceptor,
-                        grpc.UnaryStreamClientInterceptor):
+
+
+class GrpcRequestLogger(
+    grpc.UnaryUnaryClientInterceptor, grpc.UnaryStreamClientInterceptor
+):
     """Implementation of a gRPC interceptor that logs request to a file"""
 
     def __init__(self, log_file):
         self.log_file = log_file
-        with open(self.log_file, 'w') as f:
+        with open(self.log_file, "w") as f:
             # Clear content if it exists.
             f.write("")
 
     def log_message(self, method_name, body):
-        with open(self.log_file, 'a') as f:
-            ts = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        with open(self.log_file, "a") as f:
+            ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             msg = str(body)
             f.write("\n[%s] %s\n---\n" % (ts, method_name))
             if len(msg) < MSG_LOG_MAX_LEN:
                 f.write(str(body))
             else:
-                f.write("Message too long (%d bytes)! Skipping log...\n" % len(msg))
-            f.write('---\n')
+                f.write("Message too long (%d bytes)! Skipping log...\n"
+                        "" % (len(msg)))
+            f.write("---\n")
 
-    def intercept_unary_unary(self, continuation, client_call_details, request):
+    def intercept_unary_unary(self, continuation, client_call_details,
+                              request):
         self.log_message(client_call_details.method, request)
         return continuation(client_call_details, request)
 
-    def intercept_unary_stream(self, continuation, client_call_details, request):
+    def intercept_unary_stream(self, continuation, client_call_details,
+                               request):
         self.log_message(client_call_details.method, request)
         return continuation(client_call_details, request)
+
 
 class IterableQueue(Queue):
     _sentinel = object()

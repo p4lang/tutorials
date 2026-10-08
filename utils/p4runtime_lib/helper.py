@@ -15,8 +15,9 @@ class P4InfoHelper(object):
         p4info = p4info_pb2.P4Info()
         # Load the p4info file into a skeleton P4Info object
         with open(p4_info_filepath) as p4info_f:
-            google.protobuf.text_format.Merge(p4info_f.read(), p4info,
-                                              allow_unknown_field=True)
+            google.protobuf.text_format.Merge(
+                p4info_f.read(), p4info, allow_unknown_field=True
+            )
         self.p4info = p4info
 
     def get(self, entity_type, name=None, id=None):
@@ -26,16 +27,18 @@ class P4InfoHelper(object):
         for o in getattr(self.p4info, entity_type):
             pre = o.preamble
             if name:
-                if (pre.name == name or pre.alias == name):
+                if pre.name == name or pre.alias == name:
                     return o
             else:
                 if pre.id == id:
                     return o
 
         if name:
-            raise AttributeError("Could not find %r of type %s" % (name, entity_type))
+            raise AttributeError("Could not find %r of type %s"
+                                 "" % (name, entity_type))
         else:
-            raise AttributeError("Could not find id %r of type %s" % (id, entity_type))
+            raise AttributeError("Could not find id %r of type %s"
+                                 "" % (id, entity_type))
 
     def get_id(self, entity_type, name):
         return self.get(entity_type, name=name).preamble.id
@@ -47,8 +50,9 @@ class P4InfoHelper(object):
         return self.get(entity_type, id=id).preamble.alias
 
     def __getattr__(self, attr):
-        # Synthesize convenience functions for name to id lookups for top-level entities
-        # e.g. get_tables_id(name_string) or get_actions_id(name_string)
+        # Synthesize convenience functions for name to id lookups for
+        # top-level entities e.g. get_tables_id(name_string) or
+        # get_actions_id(name_string)
         m = re.search(r"^get_(\w+)_id$", attr)
         if m:
             primitive = m.group(1)
@@ -61,7 +65,8 @@ class P4InfoHelper(object):
             primitive = m.group(1)
             return lambda id: self.get_name(primitive, id)
 
-        raise AttributeError("%r object has no attribute %r" % (self.__class__, attr))
+        raise AttributeError("%r object has no attribute %r"
+                             "" % (self.__class__, attr))
 
     def get_match_field(self, table_name, name=None, id=None):
         for t in self.p4info.tables:
@@ -74,7 +79,9 @@ class P4InfoHelper(object):
                     elif id is not None:
                         if mf.id == id:
                             return mf
-        raise AttributeError("%r has no attribute %r" % (table_name, name if name is not None else id))
+        raise AttributeError("%r has no attribute %r"
+                             "" % (table_name,
+                                   name if name is not None else id))
 
     def get_match_field_id(self, table_name, match_field_name):
         return self.get_match_field(table_name, name=match_field_name).id
@@ -109,15 +116,15 @@ class P4InfoHelper(object):
 
     def get_match_field_value(self, match_field):
         match_type = match_field.WhichOneof("field_match_type")
-        if match_type == 'valid':
+        if match_type == "valid":
             return match_field.valid.value
-        elif match_type == 'exact':
+        elif match_type == "exact":
             return match_field.exact.value
-        elif match_type == 'lpm':
+        elif match_type == "lpm":
             return (match_field.lpm.value, match_field.lpm.prefix_len)
-        elif match_type == 'ternary':
+        elif match_type == "ternary":
             return (match_field.ternary.value, match_field.ternary.mask)
-        elif match_type == 'range':
+        elif match_type == "range":
             return (match_field.range.low, match_field.range.high)
         else:
             raise Exception("Unsupported match type with type %r" % match_type)
@@ -133,7 +140,10 @@ class P4InfoHelper(object):
                     elif id is not None:
                         if p.id == id:
                             return p
-        raise AttributeError("action %r has no param %r, (has: %r)" % (action_name, name if name is not None else id, a.params))
+        raise AttributeError(
+            "action %r has no param %r, (has: %r)"
+            % (action_name, name if name is not None else id, a.params)
+        )
 
     def get_action_param_id(self, action_name, param_name):
         return self.get_action_param(action_name, name=param_name).id
@@ -148,14 +158,16 @@ class P4InfoHelper(object):
         p4runtime_param.value = encode(value, p4info_param.bitwidth)
         return p4runtime_param
 
-    def buildTableEntry(self,
-                        table_name,
-                        match_fields=None,
-                        default_action=False,
-                        action_name=None,
-                        action_params=None,
-                        idle_timeout_ns=None,
-                        priority=None):
+    def buildTableEntry(
+        self,
+        table_name,
+        match_fields=None,
+        default_action=False,
+        action_name=None,
+        action_params=None,
+        idle_timeout_ns=None,
+        priority=None,
+    ):
         table_entry = p4runtime_pb2.TableEntry()
         table_entry.table_id = self.get_tables_id(table_name)
 
@@ -166,10 +178,12 @@ class P4InfoHelper(object):
             table_entry.idle_timeout_ns = idle_timeout_ns
 
         if match_fields:
-            table_entry.match.extend([
-                self.get_match_field_pb(table_name, match_field_name, value)
-                for match_field_name, value in match_fields.items()
-            ])
+            table_entry.match.extend(
+                [
+                    self.get_match_field_pb(table_name, match_field_name, value)
+                    for match_field_name, value in match_fields.items()
+                ]
+            )
 
         if default_action:
             table_entry.is_default_action = True
@@ -178,10 +192,12 @@ class P4InfoHelper(object):
             action = table_entry.action.action
             action.action_id = self.get_actions_id(action_name)
             if action_params:
-                action.params.extend([
-                    self.get_action_param_pb(action_name, field_name, value)
-                    for field_name, value in action_params.items()
-                ])
+                action.params.extend(
+                    [
+                        self.get_action_param_pb(action_name, field_name, value)
+                        for field_name, value in action_params.items()
+                    ]
+                )
         return table_entry
 
     def buildMulticastGroupEntry(self, multicast_group_id, replicas):
@@ -189,20 +205,24 @@ class P4InfoHelper(object):
         mc_entry.multicast_group_entry.multicast_group_id = multicast_group_id
         for replica in replicas:
             r = p4runtime_pb2.Replica()
-            r.egress_port = replica['egress_port']
-            r.instance = replica['instance']
+            r.egress_port = replica["egress_port"]
+            r.instance = replica["instance"]
             mc_entry.multicast_group_entry.replicas.extend([r])
         return mc_entry
 
-    def buildCloneSessionEntry(self, clone_session_id, replicas, packet_length_bytes=0):
+    def buildCloneSessionEntry(self, clone_session_id, replicas,
+                               packet_length_bytes=0):
         clone_entry = p4runtime_pb2.PacketReplicationEngineEntry()
         clone_entry.clone_session_entry.session_id = clone_session_id
-        clone_entry.clone_session_entry.packet_length_bytes = packet_length_bytes
-        clone_entry.clone_session_entry.class_of_service = 0  # PI currently supports only CoS=0 for clone session entry
+        clone_entry.clone_session_entry.packet_length_bytes = (
+            packet_length_bytes
+        )
+        clone_entry.clone_session_entry.class_of_service = (
+            0  # PI currently supports only CoS=0 for clone session entry
+        )
         for replica in replicas:
             r = p4runtime_pb2.Replica()
-            r.egress_port = replica['egress_port']
-            r.instance = replica['instance']
+            r.egress_port = replica["egress_port"]
+            r.instance = replica["instance"]
             clone_entry.clone_session_entry.replicas.extend([r])
         return clone_entry
-
