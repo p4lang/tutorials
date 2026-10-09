@@ -1,17 +1,19 @@
 # SPDX-FileCopyrightText: 2019 Stephen Ibanez
 #
 # SPDX-License-Identifier: GPL-2.0-only
+from typing import Any, ClassVar
+
 from scapy.all import BitField, ByteField, Ether, IntField, Packet, bind_layers
 
 TYPE_PROBE = 0x812
 
 
 class Probe(Packet):
-    fields_desc = [ByteField("hop_cnt", 0)]
+    fields_desc: ClassVar[list[Any]] = [ByteField("hop_cnt", 0)]
 
 
 class ProbeData(Packet):
-    fields_desc = [
+    fields_desc: ClassVar[list[Any]] = [
         BitField("bos", 0, 1),
         BitField("swid", 0, 7),
         ByteField("port", 0),
@@ -22,7 +24,7 @@ class ProbeData(Packet):
 
 
 class ProbeFwd(Packet):
-    fields_desc = [ByteField("egress_spec", 0)]
+    fields_desc: ClassVar[list[Any]] = [ByteField("egress_spec", 0)]
 
 
 bind_layers(Ether, Probe, type=TYPE_PROBE)

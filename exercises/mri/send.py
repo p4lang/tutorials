@@ -7,6 +7,7 @@
 import socket
 import sys
 from time import sleep
+from typing import Any, ClassVar
 
 from scapy.all import (
     IP,
@@ -38,7 +39,7 @@ def get_if():
 
 
 class SwitchTrace(Packet):
-    fields_desc = [IntField("swid", 0), IntField("qdepth", 0)]
+    fields_desc: ClassVar[list[Any]] = [IntField("swid", 0), IntField("qdepth", 0)]
 
     def extract_padding(self, p):
         return "", p
@@ -47,7 +48,7 @@ class SwitchTrace(Packet):
 class IPOption_MRI(IPOption):
     name = "MRI"
     option = 31
-    fields_desc = [
+    fields_desc: ClassVar[list[Any]] = [
         _IPOption_HDR,
         FieldLenField(
             "length",

@@ -125,8 +125,8 @@ def printCounter(p4info_helper, sw, counter_name, index):
         for entity in response.entities:
             counter = entity.counter_entry
             print(f"{sw.name} {counter_name} {index}:"
-                  " {counter.data.packet_count} packets"
-                  " ({counter.data.byte_count} bytes)")
+                  f" {counter.data.packet_count} packets"
+                  f" ({counter.data.byte_count} bytes)")
 
 
 def main(p4info_file_path, bmv2_file_path):

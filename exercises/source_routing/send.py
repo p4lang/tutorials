@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 import socket
 import sys
+from typing import Any, ClassVar
 
 from scapy.all import (
     IP,
@@ -32,7 +33,7 @@ def get_if():
 
 
 class SourceRoute(Packet):
-    fields_desc = [BitField("bos", 0, 1), BitField("port", 0, 15)]
+    fields_desc: ClassVar[list[Any]] = [BitField("bos", 0, 1), BitField("port", 0, 15)]
 
 
 bind_layers(Ether, SourceRoute, type=0x1234)

@@ -5,6 +5,7 @@
 import logging
 import os
 import sys
+from typing import Any, ClassVar
 
 import ptf
 import ptf.testutils as tu
@@ -18,7 +19,7 @@ TYPE_IPV4 = 0x0800
 
 class MyTunnel(Packet):
     name = "MyTunnel"
-    fields_desc = [ShortField("proto_id", TYPE_IPV4), ShortField("dst_id", 0)]
+    fields_desc: ClassVar[list[Any]] = [ShortField("proto_id", TYPE_IPV4), ShortField("dst_id", 0)]
 
 
 bind_layers(Ether, MyTunnel, type=TYPE_MYTUNNEL)
@@ -48,7 +49,7 @@ class BasicTunnelTest(BaseTest):
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
 
-        logging.debug("BasicTunnelTest.setUp()")
+        logger.debug("BasicTunnelTest.setUp()")
 
         # Get test parameters
         grpc_addr = tu.test_param_get("grpcaddr") or "localhost:9559"
@@ -75,7 +76,7 @@ class BasicTunnelTest(BaseTest):
         )
 
     def tearDown(self):
-        logging.debug("BasicTunnelTest.tearDown()")
+        logger.debug("BasicTunnelTest.tearDown()")
         ShutdownAllSwitchConnections()
 
     ######################################################################

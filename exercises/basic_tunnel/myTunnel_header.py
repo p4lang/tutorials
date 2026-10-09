@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 
+from typing import Any, ClassVar
+
 from scapy.all import IP, Ether, Packet, ShortField, bind_layers
 
 TYPE_MYTUNNEL = 0x1212
@@ -11,7 +13,7 @@ TYPE_IPV4 = 0x0800
 
 class MyTunnel(Packet):
     name = "MyTunnel"
-    fields_desc = [ShortField("pid", 0), ShortField("dst_id", 0)]
+    fields_desc: ClassVar[list[Any]] = [ShortField("pid", 0), ShortField("dst_id", 0)]
 
     def mysummary(self):
         return self.sprintf("pid=%pid%, dst_id=%dst_id%")

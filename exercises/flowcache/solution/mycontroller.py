@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 import argparse
 import asyncio
+import datetime
 import ipaddress
 import os
 import pprint
@@ -12,7 +13,6 @@ import sys
 import time
 import traceback
 from collections import Counter
-from datetime import datetime, timedelta
 
 import grpc
 from scapy.all import IP, Ether
@@ -246,7 +246,7 @@ def deleteFlowRule(sw, table_entry):
 def addNotification(sw_name, flow_rule):
     # Add notification to notification DB
     notification = {
-        "timestamp": datetime.now(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc),
         "flow_rule": flow_rule,
     }
     notif_db[sw_name].append(notification)
@@ -266,7 +266,7 @@ def checkFlowRule(sw_name, flow_rule):
 
 
 def isExpired(timestamp, timeout):
-    return datetime.now() - timestamp > timedelta(seconds=timeout)
+    return datetime.datetime.now(datetime.timezone.utc) - timestamp > datetime.timedelta(seconds=timeout)
 
 
 def cleanExpiredNotifiction(sw_name, timeout=5):
@@ -506,7 +506,7 @@ def printGrpcError(e):
     status_code = e.code()
     print(f"({status_code.name})", end=" ")
     traceback = sys.exc_info()[2]
-    print("f[{traceback.tb_frame.f_code.co_filename}:{traceback.tb_lineno}]")
+    print(f"[{traceback.tb_frame.f_code.co_filename}:{traceback.tb_lineno}]")
 
 
 async def main(p4info_file_path, bmv2_file_path):

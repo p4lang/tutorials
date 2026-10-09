@@ -4,6 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 import sys
+from typing import Any, ClassVar
 
 from scapy.all import (
     Ether,
@@ -39,7 +40,7 @@ def get_if():
 class IPOption_MRI(IPOption):
     name = "MRI"
     option = 31
-    fields_desc = [
+    fields_desc: ClassVar[list[Any]] = [
         _IPOption_HDR,
         FieldLenField(
             "length", None, fmt="B", length_of="swids", adjust=lambda pkt, x: x + 4
@@ -59,11 +60,11 @@ def handle_pkt(pkt):
 
 
 class SourceRoute(Packet):
-    fields_desc = [BitField("bos", 0, 1), BitField("port", 0, 15)]
+    fields_desc: ClassVar[list[Any]] = [BitField("bos", 0, 1), BitField("port", 0, 15)]
 
 
 class SourceRoutingTail(Packet):
-    fields_desc = [XShortField("etherType", 0x800)]
+    fields_desc: ClassVar[list[Any]] = [XShortField("etherType", 0x800)]
 
 
 bind_layers(Ether, SourceRoute, type=0x1234)

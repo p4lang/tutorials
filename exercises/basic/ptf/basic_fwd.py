@@ -32,7 +32,7 @@ class BasicFwdTest(BaseTest):
         self.dataplane = ptf.dataplane_instance
         self.dataplane.flush()
 
-        logging.debug("BasicFwdTest.setUp()")
+        logger.debug("BasicFwdTest.setUp()")
 
         # Get test parameters
         grpc_addr = tu.test_param_get("grpcaddr")
@@ -61,7 +61,7 @@ class BasicFwdTest(BaseTest):
         )
 
     def tearDown(self):
-        logging.debug("BasicFwdTest.tearDown()")
+        logger.debug("BasicFwdTest.tearDown()")
         ShutdownAllSwitchConnections()
 
     ######################################################################

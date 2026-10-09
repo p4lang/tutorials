@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 import os
 import sys
+from typing import Any, ClassVar
 
 from scapy.all import (
     TCP,
@@ -34,7 +35,7 @@ def get_if():
 class IPOption_MRI(IPOption):
     name = "MRI"
     option = 31
-    fields_desc = [
+    fields_desc: ClassVar[list[Any]] = [
         _IPOption_HDR,
         FieldLenField(
             "length", None, fmt="B", length_of="swids", adjust=lambda pkt, x: x + 4

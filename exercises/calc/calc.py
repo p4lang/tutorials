@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import re
+from typing import Any, ClassVar
 
 from scapy.all import (
     Ether,
@@ -19,7 +20,7 @@ from scapy.all import (
 class P4calc(Packet):
     name = "P4calc"
     # Define fields for the P4calc packet
-    fields_desc = [
+    fields_desc: ClassVar[list[Any]] = [
         StrFixedLenField("P", "P", length=1),
         StrFixedLenField("Four", "4", length=1),
         XByteField("version", 0x01),
