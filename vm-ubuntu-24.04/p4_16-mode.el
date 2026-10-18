@@ -31,7 +31,7 @@
 ;; Define the keymap (for now it is pretty much default)
 (defvar p4_16-mode-map
   (let ((map (make-keymap)))
-    (define-key map "\C-j" 'newline-and-indent)
+    (define-key map "\C-j"      'newline-and-indent)
     (define-key map "{"         'p4_16-electric-brace)
     (define-key map "}"         'p4_16-electric-brace)
     (define-key map "\C-c\C-c"  'comment-region)
@@ -206,51 +206,51 @@
 (setq p4_16-imenu-generic-expression
       (list
        (list "Controls"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *control +\\([A-Za-z0-9_]*\\)")
-	     2)
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *control +\\([A-Za-z0-9_]*\\)")
+             2)
        (list "Externs"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *extern +\\([A-Za-z0-9_]*\\) *\\([A-Za-z0-9_]*\\)")
-	     3)
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *extern +\\([A-Za-z0-9_]*\\) *\\([A-Za-z0-9_]*\\)")
+             3)
        (list "Tables"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *table +\\([A-Za-z0-9_]*\\)")
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *table +\\([A-Za-z0-9_]*\\)")
              2)
        (list "Actions"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *action +\\([A-Za-z0-9_]*\\)")
-	     2)
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *action +\\([A-Za-z0-9_]*\\)")
+             2)
        (list "Parsers"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *parser +\\([A-Za-z0-9_]*\\)")
-	     2)
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *parser +\\([A-Za-z0-9_]*\\)")
+             2)
        (list "Parser States"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *state +\\([A-Za-z0-9_]*\\)")
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *state +\\([A-Za-z0-9_]*\\)")
              2)
        (list "Headers"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *header +\\([A-Za-z0-9_]*\\)")
-	     2)
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *header +\\([A-Za-z0-9_]*\\)")
+             2)
        (list "Header Unions"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *header_union +\\([A-Za-z0-9_]*\\)")
-	     2)
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *header_union +\\([A-Za-z0-9_]*\\)")
+             2)
        (list "Structs"
-	     (concat "^ *"
-		     opt-name-annotation-regex
-		     " *struct +\\([A-Za-z0-9_]*\\)")
-	     2)
-        ))
+             (concat "^ *"
+                     opt-name-annotation-regex
+                     " *struct +\\([A-Za-z0-9_]*\\)")
+             2)
+       ))
 
 ;;; Cscope Support
 (require 'xcscope)
@@ -265,22 +265,22 @@
 (define-derived-mode p4_16-mode prog-mode "P4_16"
   "Major mode for editing P4_16 programs."
   :syntax-table p4_16-mode-syntax-table
-  
+
   ;; Comments
   (setq-local comment-start "// ")
   (setq-local comment-end "")
-  
+
   ;; Font-lock (Syntax Highlighting)
   (setq font-lock-defaults '(p4_16-font-lock-keywords))
-  
+
   ;; Indentation
   (setq-local indent-line-function #'p4_16-indent-line)
   (setq-local indent-tabs-mode nil)
-  
+
   ;; Imenu
   (setq imenu-generic-expression p4_16-imenu-generic-expression)
   (imenu-add-to-menubar "P4_16")
-  
+
   ;; Cscope minor mode
   (when (fboundp 'cscope-minor-mode)
     (cscope-minor-mode)))
