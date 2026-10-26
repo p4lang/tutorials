@@ -18,6 +18,8 @@
 # pinned in the Dash:
 #     gsettings get org.gnome.shell favorite-apps
 
+set -e
+
 which gnome-shell > /dev/null
 exit_status=$?
 if [ ${exit_status} -ne 0 ]
@@ -60,6 +62,15 @@ case ${GNOME_VERSION_STR} in
 	SETTINGS_NAME="gnome-control-center.desktop"
 	;;
     46.0|47.0)
+	# I have seen GNOME version 46.0 installed on systems running:
+	# Ubuntu 24.04
+	# I have seen GNOME version 47.0 installed on systems running:
+	# Ubuntu 24.10
+	supported_version=1
+	FIREFOX_NAME="firefox_firefox.desktop"
+	SETTINGS_NAME="org.gnome.Settings.desktop"
+	;;
+    50.1)
 	# I have seen GNOME version 46.0 installed on systems running:
 	# Ubuntu 24.04
 	# I have seen GNOME version 47.0 installed on systems running:
