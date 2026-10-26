@@ -71,11 +71,10 @@ case ${GNOME_VERSION_STR} in
 	SETTINGS_NAME="org.gnome.Settings.desktop"
 	;;
     50.1)
-	# I have seen GNOME version 46.0 installed on systems running:
-	# Ubuntu 24.04
-	# I have seen GNOME version 47.0 installed on systems running:
-	# Ubuntu 24.10
+	# I have seen GNOME version 50.1 installed on systems running:
+	# Ubuntu 26.04
 	supported_version=1
+	TERMINAL_NAME="org.gnome.Ptyxis.desktop"
 	FIREFOX_NAME="firefox_firefox.desktop"
 	SETTINGS_NAME="org.gnome.Settings.desktop"
 	;;
