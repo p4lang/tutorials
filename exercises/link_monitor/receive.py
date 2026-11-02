@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: GPL-2.0-only
 
-from probe_hdrs import *
+from probe_hdrs import ProbeData, sniff
 
 
 def expand(x):
@@ -13,19 +13,25 @@ def expand(x):
         x = x.payload
         yield x
 
+
 def handle_pkt(pkt):
     if ProbeData in pkt:
-        data_layers = [l for l in expand(pkt) if l.name=='ProbeData']
-        print("")
+        data_layers = [x for x in expand(pkt) if x.name == "ProbeData"]
+        print()
         for sw in data_layers:
-            utilization = 0 if sw.cur_time == sw.last_time else 8.0*sw.byte_cnt/(sw.cur_time - sw.last_time)
-            print("Switch {} - Port {}: {} Mbps".format(sw.swid, sw.port, utilization))
+            utilization = (
+                0
+                if sw.cur_time == sw.last_time
+                else 8.0 * sw.byte_cnt / (sw.cur_time - sw.last_time)
+            )
+            print(f"Switch {sw.swid} - Port {sw.port}: {utilization} Mbps")
+
 
 def main():
-    iface = 'eth0'
-    print("sniffing on {}".format(iface))
-    sniff(iface = iface,
-          prn = lambda x: handle_pkt(x))
+    iface = "eth0"
+    print(f"sniffing on {iface}")
+    sniff(iface=iface, prn=lambda x: handle_pkt(x))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

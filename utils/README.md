@@ -204,9 +204,9 @@ link_dict = {'node1':s,
 The class *Exercise* is created to help manage all data and manage the execution flow. The code below  describes the *run_exercise()* method. Lines 4 and 5 create the network. Lines 9 and 10 program the network elements. Line 15 launches the user interface.
 
 ```python
-#(... Omitted ...)#
+# (... Omitted ...)#
 def run_exercise(self):
-# Initialize mininet with the topology specified by the config
+    # Initialize mininet with the topology specified by the config
     self.create_network()
     self.net.start()
     sleep(1)
@@ -221,7 +221,9 @@ def run_exercise(self):
     self.do_net_cli()
     # stop right after the CLI is exited
     self.net.stop()
-#(... Omitted ...)#
+
+
+# (... Omitted ...)#
 ```
 
 #### Creating the Mininet Network
@@ -229,17 +231,22 @@ def run_exercise(self):
 It is in this stage that switches, links, and hosts are added to the network. To instantiate the network object, a class, *ExerciseTopo*, is used. This class inherits from the *Topo Class* native to Mininet. The code below shows the initialization process of the *ExerciseTopo* class.
 
 ```python
-#(... Omitted ...)#
-self.topo = ExerciseTopo(self.hosts, self.switches, self.links, self.log_dir, self.bmv2_exe, self.pcap_dir)
+# (... Omitted ...)#
+self.topo = ExerciseTopo(
+    self.hosts, self.switches, self.links, self.log_dir, self.bmv2_exe, self.pcap_dir
+)
+
 
 class ExerciseTopo(Topo):
-    """ The mininet topology class for the P4 tutorial exercises.
-    """
+    """The mininet topology class for the P4 tutorial exercises."""
+
     def __init__(self, hosts, switches, links, log_dir, bmv2_exe, pcap_dir, **opts):
         Topo.__init__(self, **opts)
         host_links = []
         switch_links = []
-  #(... Omitted ...)#
+
+
+# (... Omitted ...)#
 ```
 
 Below is shown how the switches are configured. Using the method *configureP4Switch* ensures the switch is created using the correct architecture, (*simple_switch* or *simple_switch_grpc*).
@@ -247,36 +254,37 @@ Below is shown how the switches are configured. Using the method *configureP4Swi
 If no program is specified, the switch follows the default implementation.
 
 ```python
-#(... Omitted ...)#
+# (... Omitted ...)#
 for sw, params in switches.items():
     if "program" in params:
         switchClass = configureP4Switch(
-                sw_path=bmv2_exe,
-                json_path=params["program"],
-                log_console=True,
-                pcap_dump=pcap_dir)
+            sw_path=bmv2_exe,
+            json_path=params["program"],
+            log_console=True,
+            pcap_dump=pcap_dir,
+        )
     else:
         # add default switch
         switchClass = None
-    self.addSwitch(sw, log_file="%s/%s.log" %(log_dir, sw), cls=switchClass)
-#(... Omitted ...)
+    self.addSwitch(sw, log_file="%s/%s.log" % (log_dir, sw), cls=switchClass)
+# (... Omitted ...)
 ```
 
 The penultimate step is to generate the hosts and the host-to-switch links. Using the information provided in the [topology file](#topology-file) and the methods *addHost* and *addLink*, configurations are directly translated to the Mininet Network.
 
 
 ```python
-#(... Omitted ...)
+# (... Omitted ...)
 for link in host_links:
-    host_name = link['node1']
-    sw_name, sw_port = self.parse_switch_node(link['node2'])
-    host_ip = hosts[host_name]['ip']
-    host_mac = hosts[host_name]['mac']
+    host_name = link["node1"]
+    sw_name, sw_port = self.parse_switch_node(link["node2"])
+    host_ip = hosts[host_name]["ip"]
+    host_mac = hosts[host_name]["mac"]
     self.addHost(host_name, ip=host_ip, mac=host_mac)
-    self.addLink(host_name, sw_name,
-                 delay=link['latency'], bw=link['bandwidth'],
-                 port2=sw_port)
-#(... Omitted ...)
+    self.addLink(
+        host_name, sw_name, delay=link["latency"], bw=link["bandwidth"], port2=sw_port
+    )
+# (... Omitted ...)
 ```
 
 
@@ -284,14 +292,19 @@ Finally, the links between the switches are added. Using the data structure dict
 
 
 ```python
-#(... Omitted ...)
+# (... Omitted ...)
 for link in switch_links:
-    sw1_name, sw1_port = self.parse_switch_node(link['node1'])
-    sw2_name, sw2_port = self.parse_switch_node(link['node2'])
-    self.addLink(sw1_name, sw2_name,
-                port1=sw1_port, port2=sw2_port,
-                delay=link['latency'], bw=link['bandwidth'])
-#(... Omitted ...)
+    sw1_name, sw1_port = self.parse_switch_node(link["node1"])
+    sw2_name, sw2_port = self.parse_switch_node(link["node2"])
+    self.addLink(
+        sw1_name,
+        sw2_name,
+        port1=sw1_port,
+        port2=sw2_port,
+        delay=link["latency"],
+        bw=link["bandwidth"],
+    )
+# (... Omitted ...)
 ```
 
 #### Starting the Mininet Network
@@ -301,14 +314,16 @@ Starting the Mininet network can be achieved by using the *start* method of the 
 After starting the network, runtime commands are executed. Below it is demonstrated how console commands are applied to the hosts created in the network. First, the host is retrieved from the network (using its name as key) and then, using the method ```<host>.cmd(<command>)```, commands are executed.
 
 ```python
-#(... Omitted ...)#
+# (... Omitted ...)#
 def program_hosts(self):
     for host_name, host_info in list(self.hosts.items()):
         h = self.net.get(host_name)
         if "commands" in host_info:
             for cmd in host_info["commands"]:
                 h.cmd(cmd)
-#(... Omitted ...)#
+
+
+# (... Omitted ...)#
 ```
 
 #### Programming the Switches
@@ -319,19 +334,23 @@ def program_switch_p4runtime(self, sw_name, sw_dict):
     sw_obj = self.net.get(sw_name)
     grpc_port = sw_obj.grpc_port
     device_id = sw_obj.device_id
-    runtime_json = sw_dict['runtime_json']
-    self.logger('Configuring switch %s using P4Runtime with file %s' % (sw_name, runtime_json))
-    with open(runtime_json, 'r') as sw_conf_file:
-        outfile = '%s/%s-p4runtime-requests.txt' %(self.log_dir, sw_name)
+    runtime_json = sw_dict["runtime_json"]
+    self.logger(
+        "Configuring switch %s using P4Runtime with file %s" % (sw_name, runtime_json)
+    )
+    with open(runtime_json, "r") as sw_conf_file:
+        outfile = "%s/%s-p4runtime-requests.txt" % (self.log_dir, sw_name)
         p4runtime_lib.simple_controller.program_switch(
-            addr='127.0.0.1:%d' % grpc_port,
+            addr="127.0.0.1:%d" % grpc_port,
             device_id=device_id,
             sw_conf_file=sw_conf_file,
             workdir=os.getcwd(),
             proto_dump_fpath=outfile,
-            runtime_json=runtime_json
+            runtime_json=runtime_json,
         )
-#(... Omitted ...)#
+
+
+# (... Omitted ...)#
 ```
 
 
@@ -340,15 +359,15 @@ The final step of execution is presenting the user with a interface. This tool i
 
 ```python
 def do_net_cli(self):
-    #(... Omitted ...)#
-    print('===============================================')
-    print('Welcome to the BMV2 Mininet CLI!')
-    print('===============================================')
-    print('Your P4 program is installed into the BMV2 software switch')
-    print('and your initial runtime configuration is loaded. You can interact')
-    print('with the network using the mininet CLI below.')
-    print('')
-    #(... Omitted ...)#
+    # (... Omitted ...)#
+    print("===============================================")
+    print("Welcome to the BMV2 Mininet CLI!")
+    print("===============================================")
+    print("Your P4 program is installed into the BMV2 software switch")
+    print("and your initial runtime configuration is loaded. You can interact")
+    print("with the network using the mininet CLI below.")
+    print("")
+    # (... Omitted ...)#
     CLI(self.net)
 ```
 
@@ -372,10 +391,11 @@ As mentioned previously, if no program is provided, the default switch is used i
 
 ```python
 defaultSwitchClass = configureP4Switch(
-                                sw_path=self.bmv2_exe,
-                                json_path=self.switch_json,
-                                log_console=True,
-                                pcap_dump=self.pcap_dir)
+    sw_path=self.bmv2_exe,
+    json_path=self.switch_json,
+    log_console=True,
+    pcap_dump=self.pcap_dir,
+)
 ```
 
 ### Makefile
