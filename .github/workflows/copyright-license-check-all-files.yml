@@ -6,7 +6,7 @@ name: Verify all files have copyright and license annotation
 
 on:
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   verify-licenses:
