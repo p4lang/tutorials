@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2024 Duarte Dias
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # P4 Utils

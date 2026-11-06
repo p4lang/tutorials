@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2018 Nate Foster
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # Load Balancing

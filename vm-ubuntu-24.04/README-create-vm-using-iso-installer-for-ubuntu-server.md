@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2024 Andy Fingerhut
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # Creating a VM using VirtualBox and an ISO disk image with an Ubuntu Server Linux 24.04 installer
