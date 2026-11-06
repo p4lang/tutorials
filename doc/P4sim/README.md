@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2026 Vineet Goel
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # P4sim: P4-Programmable Packet Processing in ns-3

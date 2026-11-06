@@ -1,7 +1,7 @@
 <!--
 SPDX-FileCopyrightText: 2021 Andy Fingerhut
 
-SPDX-License-Identifier: Apache-2.0
+SPDX-License-Identifier: CC-BY-4.0
 -->
 
 # Creating the VM
